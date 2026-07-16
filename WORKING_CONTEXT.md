@@ -59,3 +59,13 @@
 - 수정 후 상태: `Mine` 씬은 Editor Play Mode에서 기동되고 새 Unity Console 오류 없이 종료됐다. 설치된 Unity `6000.5.4f1`에는 Android Playback Engine이 없어 Android 빌드·기기 검증을 실행할 수 없다.
 - 테스트 결과: Editor Play Mode 기동·화면 캡처·종료와 런타임 Console 오류 0건을 확인했다. 수동 채굴·강화·저장 입력, Android 빌드, Android 기기 테스트는 실행하지 않았다.
 - 남은 작업: Android Build Support, SDK/JDK 설치 승인 후 Android 검증; Editor의 수동 입력 검증; 다음 구현 범위 결정이 남아 있다.
+
+## 수정사항 7
+
+- 기록 시각: 2026-07-16 16:44:53
+- 작업 요청 요약: Android Build Support, SDK·NDK Tools, OpenJDK 설치 완료 후 Android 빌드 검증을 재개한다.
+- 수정 전 상태: Unity `6000.5.4f1`에는 Android Playback Engine이 없어 Android 플랫폼 전환 시 Burst 패키지 컴파일 오류가 발생했다.
+- 수정한 내용: Unity Hub로 설치된 AndroidPlayer 경로를 확인했다. `SDK`, `NDK`, `OpenJDK` 폴더가 모두 존재하는 것을 확인했다. Unity Editor 재시작 후 Android 컴파일 로그와 MCP 연결 상태를 확인했다.
+- 수정 후 상태: Android 종속성은 설치됐지만, Unity MCP 브리지가 `127.0.0.1:8080`에서 응답하지 않아 자동 Android 빌드 도구를 사용할 수 없다. 이 상태에서는 Android 빌드 성공 여부를 확인하지 못했다.
+- 테스트 결과: Android 모듈 디렉터리 존재 여부를 확인했다. Editor 로그에는 Android ADB 장치 스캔이 기록됐다. Android APK/AAB 빌드와 기기 테스트는 실행하지 못했다.
+- 남은 작업: Unity Editor를 하나의 인스턴스로 열고 MCP 브리지를 재연결한 뒤 Android 개발용 APK 빌드와 기기 검증을 수행한다. Editor 수동 입력 검증과 다음 구현 범위 결정도 남아 있다.

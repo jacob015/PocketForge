@@ -8,6 +8,7 @@
 | 2026-07-16 | Codex + Unity MCP | 기존 구현 현황 감사 | 현재 아키텍처 문서, 계획·작업 상태 정합화 | `Mine` 씬·스크립트·Unity 씬 검증을 확인하고 EditMode 테스트 3개 통과 | Task 1 완료 |
 | 2026-07-16 | Codex + GitHub CLI | 공개 원격 저장소 연결 | GitHub CLI 설치, 저장소 생성, 초기 커밋·푸시 | GitHub 인증 및 `origin/main` 추적 상태 확인 | 완료 |
 | 2026-07-16 | Codex + Unity MCP | 채굴 수직 슬라이스 Play Mode 기동 확인 | 런타임 화면 캡처, Android 환경 사전 점검 | `Mine` 씬 기동 및 Console 오류 0건 확인; Android Playback Engine 미설치 확인 | 진행 중 |
+| 2026-07-16 | Codex + Unity Hub | Android 개발 종속성 설치 확인 | Android Build Support, SDK·NDK Tools, OpenJDK 설치 | Unity `6000.5.4f1`의 AndroidPlayer 아래 SDK·NDK·OpenJDK 폴더 존재 확인; MCP 브리지 재연결은 미완료 | 진행 중 |
 
 ## 기록 원칙
 

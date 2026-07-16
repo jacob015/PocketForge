@@ -4,9 +4,9 @@
 
 ### Task 2 — 채굴 수직 슬라이스 검증 및 다음 구현 범위 결정
 
-상태: 진행 중 — Android 모듈 설치 대기
+상태: 진행 중 — Android 빌드 검증 대기
 
-현재 프로토타입의 수동·자동 채굴, 강화, 저장 흐름은 소스와 EditMode 경제 테스트로 확인했다. Editor Play Mode에서 `Mine` 씬의 기동과 런타임 오류 0건을 확인했다. Android용 Unity Playback Engine이 설치되지 않아 Android 환경 검증은 보류한다.
+현재 프로토타입의 수동·자동 채굴, 강화, 저장 흐름은 소스와 EditMode 경제 테스트로 확인했다. Editor Play Mode에서 `Mine` 씬의 기동과 런타임 오류 0건을 확인했다. Android Build Support, SDK·NDK Tools, OpenJDK는 설치됐으며 Android 빌드 검증을 남겨 두었다.
 
 이번 작업에 포함하지 않는 항목:
 
@@ -16,7 +16,7 @@
 
 다음 확인 사항:
 
-- Android Build Support, SDK 및 JDK 설치 승인 후 Android 빌드·기기 검증
+- Unity MCP 브리지 재연결 후 Android 빌드·기기 검증
 - Editor에서 수동 입력으로 채굴·강화·저장 흐름 확인
 - 검증 결과를 바탕으로 UGUI 전환·데이터 분리·저장 보강 중 다음 구현 범위 결정
 
