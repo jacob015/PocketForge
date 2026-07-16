@@ -278,7 +278,7 @@ MonoBehaviour:
   oreMaterial: {fileID: 2100000, guid: 2e708dd6fc6ae8d45b44bce1ff3437ed, type: 2}
   oreBillboardMaterial: {fileID: 2100000, guid: 4cb83d1f29ed1c24f89e4bb5596ef36b, type: 2}
   upgradeIconSheet: {fileID: 2800000, guid: 3434db8a8ba511d44a3a659361b36687, type: 3}
-  miningConfig: {fileID: 11400000, guid: 72486378e3b441240933cc01aee2b0fe, type: 2}
+  contentCatalog: {fileID: 11400000, guid: 2cc42578fa320984f8defbc104b4df96, type: 2}
 --- !u!4 &1370660441
 Transform:
   m_ObjectHideFlags: 0

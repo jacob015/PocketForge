@@ -148,3 +148,12 @@
 - 수정 후 상태: 설정창은 `LanguageService.SetLanguage(SupportedLanguage)`만 호출하면 선택값 저장과 현재 화면 갱신을 수행할 수 있다. 실시간 번역 API는 사용하지 않는다.
 - 테스트 결과: Unity 컴파일 오류 0건, EditMode 테스트 11/11 통과. 네 언어의 채굴 버튼 문자열을 테스트로 검증했다.
 - 다음 작업: 설정창 UI를 만들 때 언어 버튼을 `LanguageService.SetLanguage`에 연결하고, Unity Localization String Table 에셋으로 카탈로그를 분리한다.
+## 수정사항 16
+
+- 기록 시각: 2026-07-16 22:32:21
+- 작업 요청 요약: 설정창은 보류하고, 채굴 핵심 루프를 콘텐츠 카탈로그 구조로 확장한다.
+- 수정 전 상태: 광석·강화 수치가 `MiningGameConfig` 하나에 집중되어 있었고, 게임 서비스는 해당 수치를 직접 조회했다.
+- 수정한 내용: `OreDefinition`, `UpgradeDefinition`, `MiningContentCatalog`를 추가하고, 구리/크리스털 광석 및 세 강화 자산을 생성했다. `MiningGameService`는 단계에 맞는 광석 정의와 강화 정의를 카탈로그에서 조회하며, `MineGameController`는 씬에 연결된 카탈로그를 composition root로 사용한다.
+- 수정 후 상태: 10단계부터 크리스털 광석 정의(내구도 55, 보상 배율 3/7, 보라색 시각 색상)가 선택된다. 설정 언어 선택 UI는 만들지 않았고 기존 다국어 기반만 유지했다.
+- 테스트 결과: Unity 컴파일 오류 0건, EditMode 12/12 통과, Editor Play Mode 진입·종료 후 Console 오류/경고 0건, Android 개발 APK 빌드 성공(오류 0건/경고 2건, 142.41초), SM-S938N `adb install -r` 성공 및 앱 프로세스 실행·화면 표시 확인, Unity/AndroidRuntime 오류 logcat 0건.
+- 다음 작업: 자동 채굴·보상 확장 또는 저장 데이터 버전 보강을 별도 Task로 승인받아 진행한다. 설정창은 해당 구현 단계까지 보류한다.

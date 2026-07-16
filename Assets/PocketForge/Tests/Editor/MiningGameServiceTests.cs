@@ -3,6 +3,7 @@ using PocketForge.Content;
 using PocketForge.Economy;
 using PocketForge.Mining;
 using PocketForge.Save;
+using UnityEditor;
 using UnityEngine;
 
 namespace PocketForge.Tests.Editor
@@ -12,8 +13,8 @@ namespace PocketForge.Tests.Editor
         [Test]
         public void MiningOre_GrantsRewardAndCreatesNextStage()
         {
-            var config = MiningGameConfig.CreateRuntimeDefault();
-            var service = new MiningGameService(config);
+            var catalog = MiningContentCatalog.CreateRuntimeDefault();
+            var service = new MiningGameService(catalog);
             var state = service.CreateInitialState(new GameSaveData(), 1f);
 
             var result = service.Mine(state, 1f);
@@ -25,14 +26,14 @@ namespace PocketForge.Tests.Editor
             Assert.IsTrue(result.OreBroken);
             Assert.AreEqual(2, state.Player.stage);
             Assert.AreEqual(2, state.Player.credits);
-            Object.DestroyImmediate(config);
+            Object.DestroyImmediate(catalog);
         }
 
         [Test]
         public void Upgrade_UsesConfiguredCostAndIncreasesLevel()
         {
-            var config = MiningGameConfig.CreateRuntimeDefault();
-            var service = new MiningGameService(config);
+            var catalog = MiningContentCatalog.CreateRuntimeDefault();
+            var service = new MiningGameService(catalog);
             var data = new GameSaveData { credits = 10 };
             var state = service.CreateInitialState(data, 1f);
 
@@ -41,7 +42,18 @@ namespace PocketForge.Tests.Editor
             Assert.IsTrue(result.PurchaseSucceeded);
             Assert.AreEqual(1, state.Player.pickaxeLevel);
             Assert.AreEqual(0, state.Player.credits);
-            Object.DestroyImmediate(config);
+            Object.DestroyImmediate(catalog);
+        }
+
+        [Test]
+        public void ContentCatalog_SelectsCrystalOreAtStageTen()
+        {
+            var catalog = AssetDatabase.LoadAssetAtPath<MiningContentCatalog>(
+                "Assets/PocketForge/Content/MiningContentCatalog.asset");
+
+            Assert.IsNotNull(catalog);
+            Assert.AreEqual("crystal", catalog.GetOreForStage(10).ContentId);
+            Assert.AreEqual(55f, catalog.GetOreForStage(10).GetDurability(10));
         }
 
         [Test]

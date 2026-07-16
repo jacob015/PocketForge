@@ -6,6 +6,17 @@
 
 ## 완료 작업
 
+### Task 6 — 콘텐츠 카탈로그 기반 채굴 루프 확장
+
+상태: 완료
+
+- `OreDefinition`, `UpgradeDefinition`, `MiningContentCatalog` ScriptableObject 구조 추가
+- 구리(1단계~)·크리스털(10단계~) 광석과 곡괭이·드릴·로봇 강화 자산을 카탈로그에 등록
+- `MiningGameService`가 카탈로그에서 내구도·보상·강화 비용·효과를 조회하도록 전환
+- `Mine` 씬의 `MineGameController.contentCatalog`에 카탈로그 자산 연결
+- EditMode 12/12 통과, Editor Play Mode Console 오류 0건, Android 개발 APK 빌드·SM-S938N 설치·실행 및 화면 표시 확인
+- 설정창과 언어 선택 UI는 보류 상태로 유지
+
 ### Task 5 — 다국어 기반과 설정 언어 선택
 
 상태: 완료

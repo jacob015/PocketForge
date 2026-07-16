@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5328352a8ce6d5d4d9028c736a400f76, type: 3}
+  m_Name: MiningContentCatalog
+  m_EditorClassIdentifier: Assembly-CSharp::PocketForge.Content.MiningContentCatalog
+  ores:
+  - {fileID: 11400000, guid: 84db46eda8e02104ca8c31ca5270ee32, type: 2}
+  - {fileID: 11400000, guid: a0790b4101a235e45a80ae51de108fc3, type: 2}
+  upgrades:
+  - {fileID: 11400000, guid: e608e0f596f70c444a324418b8ded2d5, type: 2}
+  - {fileID: 11400000, guid: 20fecb499bd34694ea70f1f5a8c045d6, type: 2}
+  - {fileID: 11400000, guid: 7aa6de0641faebf4fa7cc27dacdcfb2a, type: 2}

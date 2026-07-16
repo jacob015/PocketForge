@@ -1,3 +1,4 @@
+using PocketForge.Content;
 using PocketForge.Save;
 
 namespace PocketForge.Mining
@@ -18,13 +19,15 @@ namespace PocketForge.Mining
 
     public sealed class OreState
     {
-        public OreState(float durability, bool isRare)
+        public OreState(OreDefinition definition, float durability, bool isRare)
         {
+            Definition = definition;
             Durability = durability;
             Health = durability;
             IsRare = isRare;
         }
 
+        public OreDefinition Definition { get; }
         public float Durability { get; }
         public float Health { get; set; }
         public bool IsRare { get; }

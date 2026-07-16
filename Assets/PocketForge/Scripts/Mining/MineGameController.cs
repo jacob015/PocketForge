@@ -10,7 +10,7 @@ namespace PocketForge.Mining
         [SerializeField] private Material oreMaterial;
         [SerializeField] private Material oreBillboardMaterial;
         [SerializeField] private Texture2D upgradeIconSheet;
-        [SerializeField] private MiningGameConfig miningConfig;
+        [SerializeField] private MiningContentCatalog contentCatalog;
 
         private MiningGameState gameState;
         private MineHudPresenter hudPresenter;
@@ -26,8 +26,8 @@ namespace PocketForge.Mining
         {
             Application.targetFrameRate = 60;
             LanguageService.Initialize();
-            var config = miningConfig != null ? miningConfig : MiningGameConfig.CreateRuntimeDefault();
-            var gameService = new MiningGameService(config);
+            var catalog = contentCatalog != null ? contentCatalog : MiningContentCatalog.CreateRuntimeDefault();
+            var gameService = new MiningGameService(catalog);
             gameState = gameService.CreateInitialState(SaveService.Load(), Random.value);
             var view = MineHudView.Create();
             view.SetTheme(upgradeIconSheet);
@@ -96,9 +96,7 @@ namespace PocketForge.Mining
                 return;
             }
 
-            oreVisual.GetComponent<Renderer>().material.color = gameState.Ore.IsRare
-                ? new Color(0.4f, 0.9f, 1f)
-                : new Color(0.85f, 0.4f, 0.12f);
+            oreVisual.GetComponent<Renderer>().material.color = gameState.Ore.Definition.GetVisualColor(gameState.Ore.IsRare);
         }
 
         private void AnimateOreVisual()

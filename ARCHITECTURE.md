@@ -80,3 +80,21 @@ MineGameController (Unity composition root)
 - `Assets/PocketForge/Materials/ForgeOreBillboard.mat`: URP Unlit 머티리얼로 광석 아트를 표시한다.
 - `MineGameController`는 기존 Sphere를 유지하면서 전면 Quad에 광석 아트를 배치한다. 기존 Android primitive 스트리핑 대응은 유지한다.
 - `Assets/PocketForge/Art/Generated/UpgradeIcons.png`은 Pickaxe·Drill·Robot 순서의 가로 아이콘 시트이며, `MineHudView`가 각 1/3 영역을 UGUI `RawImage`로 표시한다.
+## Task 6 콘텐츠 카탈로그
+
+```text
+MineGameController
+  └─ MiningContentCatalog.asset
+      ├─ CopperOre.asset (stage 1+)
+      ├─ CrystalOre.asset (stage 10+)
+      ├─ PickaxeUpgrade.asset
+      ├─ DrillUpgrade.asset
+      └─ RobotUpgrade.asset
+            ↓
+      MiningGameService
+```
+
+- `OreDefinition`은 시작 단계, 내구도 증가, 희귀 확률, 보상 배율과 시각 색상을 소유한다.
+- `UpgradeDefinition`은 타입별 비용 성장과 레벨당 효과를 소유한다.
+- `MiningContentCatalog`은 현재 단계에 가장 가까운 광석 정의와 타입별 강화 정의를 선택한다. 새 콘텐츠는 정의 자산을 만들고 카탈로그에 등록하는 방식으로 확장한다.
+- 기존 `MiningGameConfig`은 이전 밸런스 자산으로 남아 있으나 현재 게임 루프의 런타임 입력은 `MiningContentCatalog`이다.

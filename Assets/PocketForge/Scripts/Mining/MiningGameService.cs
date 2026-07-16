@@ -21,11 +21,11 @@ namespace PocketForge.Mining
 
     public sealed class MiningGameService
     {
-        private readonly MiningGameConfig config;
+        private readonly MiningContentCatalog catalog;
 
-        public MiningGameService(MiningGameConfig config)
+        public MiningGameService(MiningContentCatalog catalog)
         {
-            this.config = config;
+            this.catalog = catalog;
         }
 
         public MiningGameState CreateInitialState(GameSaveData saveData, float rareRoll)
@@ -62,18 +62,20 @@ namespace PocketForge.Mining
 
         public int GetUpgradeCost(UpgradeType type, int currentLevel)
         {
-            return Mathf.CeilToInt(config.GetUpgradeBaseCost(type) * Mathf.Pow(config.UpgradeCostGrowth, currentLevel));
+            return catalog.GetUpgrade(type).GetCost(currentLevel);
         }
 
-        public float GetTapPower(int pickaxeLevel) => 1f + pickaxeLevel;
+        public float GetTapPower(int pickaxeLevel) =>
+            1f + pickaxeLevel * catalog.GetUpgrade(UpgradeType.Pickaxe).EffectPerLevel;
 
-        public float GetAutoPowerPerSecond(int drillLevel) => drillLevel * config.DrillPowerPerLevel;
+        public float GetAutoPowerPerSecond(int drillLevel) => drillLevel * catalog.GetUpgrade(UpgradeType.Drill).EffectPerLevel;
 
-        public float GetRewardMultiplier(int robotLevel) => 1f + robotLevel * config.RobotRewardBonusPerLevel;
+        public float GetRewardMultiplier(int robotLevel) => 1f + robotLevel * catalog.GetUpgrade(UpgradeType.Robot).EffectPerLevel;
 
         public int GetOreReward(int stage, bool isRare, int robotLevel)
         {
-            var multiplier = isRare ? config.RareOreRewardMultiplier : config.NormalOreRewardMultiplier;
+            var definition = catalog.GetOreForStage(stage);
+            var multiplier = isRare ? definition.RareRewardMultiplier : definition.NormalRewardMultiplier;
             return Mathf.CeilToInt(stage * multiplier * GetRewardMultiplier(robotLevel));
         }
 
@@ -98,8 +100,9 @@ namespace PocketForge.Mining
 
         private OreState CreateOre(int stage, float rareRoll)
         {
-            var durability = config.BaseOreDurability + (stage - 1) * config.DurabilityPerStage;
-            return new OreState(durability, rareRoll < config.RareOreChance);
+            var definition = catalog.GetOreForStage(stage);
+            var durability = definition.GetDurability(stage);
+            return new OreState(definition, durability, rareRoll < definition.RareChance);
         }
 
         private static int GetLevel(GameSaveData data, UpgradeType type)
