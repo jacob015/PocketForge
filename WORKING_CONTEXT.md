@@ -89,3 +89,13 @@
 - 수정 후 상태: Editor 수동 채굴·강화·저장 흐름이 확인됐고, Android 실기기 설치·기동 검증만 남아 있다. 다음 구현 우선순위는 `OnGUI` 프로토타입을 UGUI와 게임 상태 책임으로 분리하는 작업으로 제안한다.
 - 테스트 결과: 사용자가 Editor Play Mode에서 Credits 확보, Pickaxe 강화 1회, 재기동 후 Credits와 Pickaxe 레벨 유지 여부를 확인했다고 보고했다. Play Mode 진입 직후 Unity Console 오류·경고 0건을 확인했다. Android 기기는 연결되지 않아 실기기 테스트는 실행하지 않았다.
 - 남은 작업: Android 기기를 연결해 APK 설치·기동·기본 플레이 흐름을 검증한다. 완료 후 UGUI 전환·게임 상태 분리 작업의 범위와 승인 여부를 결정한다.
+
+## 수정사항 10
+
+- 기록 시각: 2026-07-16 17:59:49
+- 작업 요청 요약: Android 실기기에 개발용 APK를 설치·기동해 기본 플레이 화면과 런타임 로그를 검증한다.
+- 수정 전 상태: 개발용 APK는 생성됐지만, 연결된 Android 기기가 없어 설치·기동 검증을 수행하지 못했다.
+- 수정한 내용: Samsung SM-S938N 기기를 ADB로 인증한 뒤 개발용 APK를 설치하고 UnityPlayerGameActivity를 기동했다. 기기 화면 캡처와 logcat을 수집했다. 게임 코드·Unity 프로젝트 설정은 변경하지 않았다.
+- 수정 후 상태: APK 설치와 앱 기동, 세로 화면 UI 표시는 성공했다. 그러나 `MineGameController.CreateOreVisual()`의 `GameObject.CreatePrimitive(PrimitiveType.Sphere)`가 Android에서 `SphereCollider` 클래스를 찾지 못해 오류를 기록한다. 앱 프로세스는 오류 후에도 실행 중이지만, 광석 시각화 경로는 정상으로 볼 수 없다.
+- 테스트 결과: `adb install -r` 성공, UnityPlayerGameActivity 포그라운드·프로세스 유지 확인, 기기 화면에서 Credits·Depth·MINE·강화 버튼 표시 확인. logcat에서 `Can't add component because class 'SphereCollider' doesn't exist!`와 `GameObject.CreatePrimitive` → `MineGameController.CreateOreVisual` 호출 경로를 확인했다.
+- 남은 작업: Android에서 필요한 primitive 의존 컴포넌트가 보존되도록 광석 시각화 생성 코드를 수정하고, APK 재빌드·재설치·실기기 재검증을 수행한다. 이 코드 변경은 현재 검증 범위 밖이므로 사용자 승인을 받은 뒤 진행한다.

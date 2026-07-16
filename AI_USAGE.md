@@ -11,6 +11,7 @@
 | 2026-07-16 | Codex + Unity Hub | Android 개발 종속성 설치 확인 | Android Build Support, SDK·NDK Tools, OpenJDK 설치 | Unity `6000.5.4f1`의 AndroidPlayer 아래 SDK·NDK·OpenJDK 폴더 존재 확인; MCP 브리지 재연결은 미완료 | 진행 중 |
 | 2026-07-16 | Codex + Unity MCP | Android 개발용 APK 빌드 검증 | `PocketForge-dev.apk` 생성 및 빌드 상태 기록 | Android 대상·빌드 씬·Console을 확인하고 APK 빌드 성공, 파일 존재 확인; 연결 기기가 없어 실기기 검증은 미수행 | 진행 중 |
 | 2026-07-16 | Codex + Unity MCP | Editor 수동 채굴·강화·저장 흐름 검증 | Play Mode 기동, UI 노출·검증 기록 | 사용자가 `MINE`·`PICKAXE` 입력 및 재기동 후 저장 상태 유지를 직접 확인; 실기기 검증은 미수행 | 진행 중 |
+| 2026-07-16 | Codex + ADB | Android 실기기 APK 설치·기동 검증 | APK 설치, Activity·프로세스·화면·logcat 확인 | SM-S938N에서 앱 기동과 UI 표시 확인; `SphereCollider` 누락 런타임 오류를 발견해 코드 수정 전 보류 | 결함 발견 |
 
 ## 기록 원칙
 

@@ -4,9 +4,9 @@
 
 ### Task 2 — 채굴 수직 슬라이스 검증 및 다음 구현 범위 결정
 
-상태: 진행 중 — Android 기기 검증 대기
+상태: 진행 중 — Android 런타임 오류 수정 대기
 
-현재 프로토타입의 수동·자동 채굴, 강화, 저장 흐름은 소스와 EditMode 경제 테스트로 확인했다. Editor Play Mode에서 `Mine` 씬의 기동과 런타임 오류 0건을 확인했고, 수동 입력으로 채굴·강화·저장 후 재기동 시 저장 상태 유지를 확인했다. Android Build Support, SDK·NDK Tools, OpenJDK 설치 후 개발용 APK 빌드에 성공했다. 연결된 Android 기기는 없어 설치·실기기 검증은 남아 있다.
+현재 프로토타입의 수동·자동 채굴, 강화, 저장 흐름은 소스와 EditMode 경제 테스트로 확인했다. Editor Play Mode에서 `Mine` 씬의 기동과 런타임 오류 0건을 확인했고, 수동 입력으로 채굴·강화·저장 후 재기동 시 저장 상태 유지를 확인했다. Android 개발용 APK는 실기기에 설치·기동됐고 UI가 표시됐다. 다만 `MineGameController.CreateOreVisual()`의 `GameObject.CreatePrimitive(PrimitiveType.Sphere)` 호출이 Android에서 `SphereCollider` 누락 오류를 내므로 수정·재검증이 필요하다.
 
 이번 작업에 포함하지 않는 항목:
 
@@ -16,7 +16,7 @@
 
 다음 확인 사항:
 
-- Android 기기 연결 후 APK 설치·기동·기본 플레이 흐름 검증
+- Android의 `SphereCollider` 누락 런타임 오류 수정 후 APK 재빌드·실기기 재검증
 - 검증 결과를 바탕으로 UGUI 전환·데이터 분리·저장 보강 중 다음 구현 범위 결정
 
 ## 완료 작업
@@ -52,4 +52,4 @@
 2. ScriptableObject 기반 광석·강화 데이터 도입
 3. 저장 데이터 버전 보강과 자동 채굴·희귀 광석 확장
 
-다음 구현 우선순위 제안: 현재 `OnGUI` 기반 프로토타입의 표시·입력 책임을 UGUI와 게임 상태로 분리한다. 실기기 검증이 끝난 뒤 별도 Task로 승인받아 착수한다.
+다음 구현 우선순위 제안: Android 런타임 오류를 해결한 뒤, 현재 `OnGUI` 기반 프로토타입의 표시·입력 책임을 UGUI와 게임 상태로 분리한다. 별도 Task로 승인받아 착수한다.
