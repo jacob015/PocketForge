@@ -7,6 +7,7 @@
 | 2026-07-16 | Codex + Unity MCP | 기존 Unity 프로젝트 기반 설정 정비 | 제품명·세로 화면 설정, Git ignore, 작업 상태 갱신 | Unity Editor에서 `PocketForge`·Portrait·시작 씬·Console 오류를 확인; Android SDK/JDK와 실제 빌드는 미검증 | Task 0 완료 |
 | 2026-07-16 | Codex + Unity MCP | 기존 구현 현황 감사 | 현재 아키텍처 문서, 계획·작업 상태 정합화 | `Mine` 씬·스크립트·Unity 씬 검증을 확인하고 EditMode 테스트 3개 통과 | Task 1 완료 |
 | 2026-07-16 | Codex + GitHub CLI | 공개 원격 저장소 연결 | GitHub CLI 설치, 저장소 생성, 초기 커밋·푸시 | GitHub 인증 및 `origin/main` 추적 상태 확인 | 완료 |
+| 2026-07-16 | Codex + Unity MCP | 채굴 수직 슬라이스 Play Mode 기동 확인 | 런타임 화면 캡처, Android 환경 사전 점검 | `Mine` 씬 기동 및 Console 오류 0건 확인; Android Playback Engine 미설치 확인 | 진행 중 |
 
 ## 기록 원칙
 

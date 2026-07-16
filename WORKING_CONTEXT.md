@@ -49,3 +49,13 @@
 - 수정 후 상태: 로컬 `main`은 `origin/main`을 추적하며, 프로젝트는 `https://github.com/jacob015/PocketForge`에 공개되어 있다.
 - 테스트 결과: GitHub CLI 인증과 `git push -u origin main` 성공을 확인했다. Unity·Android 테스트는 이 작업에서 실행하지 않았다.
 - 남은 작업: Task 2의 Editor Play Mode·Android 플레이 흐름 검증과 다음 구현 범위 결정이 남아 있다.
+
+## 수정사항 6
+
+- 기록 시각: 2026-07-16 16:19:04
+- 작업 요청 요약: 원래 Task 2로 돌아가 채굴 수직 슬라이스의 Editor Play Mode와 Android 환경을 검증한다.
+- 수정 전 상태: `Mine` 씬은 EditMode 검증과 경제 계산 테스트만 완료된 상태였고, Editor Play Mode와 Android 모듈 설치 여부는 미확인이었다.
+- 수정한 내용: Unity Editor에서 `Mine` 씬을 Play Mode로 실행하고 Main Camera 화면 캡처를 확인한 뒤 Play Mode를 종료했다. Unity 설치 경로에서 Android Playback Engine 존재 여부를 확인했다. `TASKS.md`와 `AI_USAGE.md`에 진행 상태를 반영했다.
+- 수정 후 상태: `Mine` 씬은 Editor Play Mode에서 기동되고 새 Unity Console 오류 없이 종료됐다. 설치된 Unity `6000.5.4f1`에는 Android Playback Engine이 없어 Android 빌드·기기 검증을 실행할 수 없다.
+- 테스트 결과: Editor Play Mode 기동·화면 캡처·종료와 런타임 Console 오류 0건을 확인했다. 수동 채굴·강화·저장 입력, Android 빌드, Android 기기 테스트는 실행하지 않았다.
+- 남은 작업: Android Build Support, SDK/JDK 설치 승인 후 Android 검증; Editor의 수동 입력 검증; 다음 구현 범위 결정이 남아 있다.
