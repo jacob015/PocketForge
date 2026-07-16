@@ -12,6 +12,7 @@
 | 2026-07-16 | Codex + Unity MCP | Android 개발용 APK 빌드 검증 | `PocketForge-dev.apk` 생성 및 빌드 상태 기록 | Android 대상·빌드 씬·Console을 확인하고 APK 빌드 성공, 파일 존재 확인; 연결 기기가 없어 실기기 검증은 미수행 | 진행 중 |
 | 2026-07-16 | Codex + Unity MCP | Editor 수동 채굴·강화·저장 흐름 검증 | Play Mode 기동, UI 노출·검증 기록 | 사용자가 `MINE`·`PICKAXE` 입력 및 재기동 후 저장 상태 유지를 직접 확인; 실기기 검증은 미수행 | 진행 중 |
 | 2026-07-16 | Codex + ADB | Android 실기기 APK 설치·기동 검증 | APK 설치, Activity·프로세스·화면·logcat 확인 | SM-S938N에서 앱 기동과 UI 표시 확인; `SphereCollider` 누락 런타임 오류를 발견해 코드 수정 전 보류 | 결함 발견 |
+| 2026-07-16 | Codex + Unity MCP + ADB | Android 광석 생성·표시 오류 수정 및 재검증 | primitive 의존 타입 참조, URP Lit 광석 Material, APK 재빌드·실기기 재검증 | Unity 공식 `CreatePrimitive` 문서의 스트리핑 요구 사항을 적용; Editor·SM-S938N 화면과 새 앱 프로세스 logcat으로 오류 부재·주황색 광석을 확인; EditMode 3개 통과 | 완료 |
 
 ## 기록 원칙
 

@@ -99,3 +99,13 @@
 - 수정 후 상태: APK 설치와 앱 기동, 세로 화면 UI 표시는 성공했다. 그러나 `MineGameController.CreateOreVisual()`의 `GameObject.CreatePrimitive(PrimitiveType.Sphere)`가 Android에서 `SphereCollider` 클래스를 찾지 못해 오류를 기록한다. 앱 프로세스는 오류 후에도 실행 중이지만, 광석 시각화 경로는 정상으로 볼 수 없다.
 - 테스트 결과: `adb install -r` 성공, UnityPlayerGameActivity 포그라운드·프로세스 유지 확인, 기기 화면에서 Credits·Depth·MINE·강화 버튼 표시 확인. logcat에서 `Can't add component because class 'SphereCollider' doesn't exist!`와 `GameObject.CreatePrimitive` → `MineGameController.CreateOreVisual` 호출 경로를 확인했다.
 - 남은 작업: Android에서 필요한 primitive 의존 컴포넌트가 보존되도록 광석 시각화 생성 코드를 수정하고, APK 재빌드·재설치·실기기 재검증을 수행한다. 이 코드 변경은 현재 검증 범위 밖이므로 사용자 승인을 받은 뒤 진행한다.
+
+## 수정사항 11
+
+- 기록 시각: 2026-07-16 18:13:45
+- 작업 요청 요약: Android 실기기에서 발견한 광석 생성·표시 오류를 수정하고 재검증한다.
+- 수정 전 상태: Android에서 `GameObject.CreatePrimitive(PrimitiveType.Sphere)`가 `SphereCollider` 누락 오류를 내고, Default-Material 누락으로 광석이 분홍색으로 표시됐다.
+- 수정한 내용: `MineGameController`에 Unity 공식 문서가 요구하는 primitive 의존 컴포넌트 private 속성 4개를 추가했다. `Assets/PocketForge/Materials/MineOre.mat` URP Lit Material을 생성하고 `MineGameController.oreMaterial`에 연결해 런타임 광석에 할당했다. `Mine.unity` 씬을 저장했다.
+- 수정 후 상태: Android 개발용 APK는 명시적 광석 Material과 primitive 의존 컴포넌트를 포함한다. 광석은 Editor와 실기기에서 주황색으로 표시되며, 기존 채굴·강화·저장 계산 로직은 변경하지 않았다.
+- 테스트 결과: Unity 스크립트 컴파일 성공, Editor Play Mode 화면 및 Console 오류 0건 확인, Android APK 2회 재빌드 성공(마지막 빌드 오류 0건), SM-S938N에 재설치·기동 성공. 새 앱 프로세스 logcat에 `SphereCollider`, `CreatePrimitive`, `AndroidRuntime`, `FATAL EXCEPTION` 오류 0건을 확인했고 기기 화면에서 주황색 광석을 확인했다. EditMode `MiningBalanceTests` 3/3 통과했다.
+- 남은 작업: 현재 검증 Task 2는 완료됐다. 다음 구현 후보인 UGUI 전환·게임 상태와 표시 책임 분리는 별도 Task 승인 후 진행한다.

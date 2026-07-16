@@ -2,24 +2,20 @@
 
 ## 현재 작업
 
-### Task 2 — 채굴 수직 슬라이스 검증 및 다음 구현 범위 결정
-
-상태: 진행 중 — Android 런타임 오류 수정 대기
-
-현재 프로토타입의 수동·자동 채굴, 강화, 저장 흐름은 소스와 EditMode 경제 테스트로 확인했다. Editor Play Mode에서 `Mine` 씬의 기동과 런타임 오류 0건을 확인했고, 수동 입력으로 채굴·강화·저장 후 재기동 시 저장 상태 유지를 확인했다. Android 개발용 APK는 실기기에 설치·기동됐고 UI가 표시됐다. 다만 `MineGameController.CreateOreVisual()`의 `GameObject.CreatePrimitive(PrimitiveType.Sphere)` 호출이 Android에서 `SphereCollider` 누락 오류를 내므로 수정·재검증이 필요하다.
-
-이번 작업에 포함하지 않는 항목:
-
-- 게임플레이 로직 변경 또는 리팩터링
-- 외부 패키지·SDK 추가 또는 제거
-- Android·배포·계정 설정 변경
-
-다음 확인 사항:
-
-- Android의 `SphereCollider` 누락 런타임 오류 수정 후 APK 재빌드·실기기 재검증
-- 검증 결과를 바탕으로 UGUI 전환·데이터 분리·저장 보강 중 다음 구현 범위 결정
+현재 작업: 없음 — 다음 구현 Task 승인 대기
 
 ## 완료 작업
+
+### Task 2 — 채굴 수직 슬라이스 검증 및 다음 구현 범위 결정
+
+상태: 완료
+
+- Editor Play Mode에서 수동 채굴·강화·저장 후 재기동 시 저장 상태 유지 확인
+- Android 개발용 APK 빌드·SM-S938N 설치·기동·세로 화면 UI 표시 확인
+- `CreatePrimitive` 코드 스트리핑으로 발생한 `SphereCollider` 누락 오류 수정 및 재검증
+- 명시적 URP Lit 광석 Material을 추가·연결해 Android의 분홍색 광석 표시 수정
+- 수정 후 새 Android 앱 프로세스에서 `SphereCollider`·`CreatePrimitive`·크래시 오류 0건 확인
+- EditMode `MiningBalanceTests` 3/3 통과
 
 ### Task 1 — 기존 구현 현황 감사
 

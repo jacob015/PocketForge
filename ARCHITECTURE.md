@@ -14,6 +14,7 @@
 | 경로 | 책임 |
 |---|---|
 | `Assets/PocketForge/Scenes/Mine.unity` | 현재 단일 플레이 씬. 카메라, Directional Light, Ground, `MineGameController`를 포함한다. |
+| `Assets/PocketForge/Materials/MineOre.mat` | 런타임 광석에 명시적으로 할당하는 URP Lit Material이다. Android 빌드에서 Default-Material 누락으로 인한 분홍색 표시를 방지한다. |
 | `Assets/PocketForge/Scripts/Mining/MineGameController.cs` | 게임 루프 조정, 광석 표시 생성, 자동 채굴, IMGUI 표시와 입력, 강화 요청을 처리한다. |
 | `Assets/PocketForge/Scripts/Economy/MiningBalance.cs` | 강화 비용·채굴력·광석 내구도·보상 계산을 제공하는 순수 계산 모듈이다. |
 | `Assets/PocketForge/Scripts/Save/GameSaveData.cs` | 저장 데이터의 직렬화 가능한 필드를 정의한다. |
@@ -28,7 +29,7 @@
 MineGameController.Awake
   → SaveService.Load
   → SpawnOre (현재 stage 기반 내구도·희귀 여부 결정)
-  → 임시 Sphere 광석 생성
+  → `MineOre.mat`을 할당한 임시 Sphere 광석 생성
 
 매 프레임
   → Drill 레벨의 자동 채굴력 계산
@@ -47,11 +48,11 @@ MINE 버튼 / 자동 채굴
 
 `GameSaveData`는 `version`, `credits`, `stage`, `pickaxeLevel`, `drillLevel`, `robotLevel`을 저장한다. 저장 키는 `PocketForge.Save.v1`이다.
 
-경제 계산은 `MiningBalance`에 분리되어 테스트 가능하지만, 화면 표시·입력·게임 상태 전환은 현재 `MineGameController`에 함께 있다. UI는 UGUI가 아니라 `OnGUI` 기반 임시 UI이며, 광석도 런타임 Primitive로 생성된다.
+경제 계산은 `MiningBalance`에 분리되어 테스트 가능하지만, 화면 표시·입력·게임 상태 전환은 현재 `MineGameController`에 함께 있다. UI는 UGUI가 아니라 `OnGUI` 기반 임시 UI이며, 광석도 런타임 Primitive로 생성된다. `CreatePrimitive`가 Android 코드 스트리핑에서 실패하지 않도록 `MineGameController`는 필요한 primitive 컴포넌트 타입을 private 속성으로 참조하고, 광석 Material은 씬 직렬화 참조로 포함한다.
 
 ## 확인된 차이와 다음 설계 과제
 
 - 기획의 UGUI·ScriptableObject 기반 데이터는 아직 도입되지 않았다.
 - 현재는 단일 씬·단일 컨트롤러 프로토타입이며, 저장 데이터의 버전 마이그레이션·오류 복구는 없다.
 - 광석 프리팹, 자원 풀, 스테이지 구성, 자동 채굴 연출, 기기 성능 측정은 구현·검증되지 않았다.
-- 배포용 Android 애플리케이션 식별자와 Android 빌드는 아직 확정·검증되지 않았다.
+- 개발용 Android APK는 SM-S938N에서 설치·기동·화면 표시까지 검증했다. 배포용 Android 애플리케이션 식별자는 여전히 기본 템플릿 값이므로 출시 전 소유 도메인 기준으로 결정해야 한다.

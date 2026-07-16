@@ -6,6 +6,8 @@ namespace PocketForge.Mining
 {
     public sealed class MineGameController : MonoBehaviour
     {
+        [SerializeField] private Material oreMaterial;
+
         private GameSaveData saveData;
         private float oreDurability;
         private float oreHealth;
@@ -14,6 +16,12 @@ namespace PocketForge.Mining
         private GUIStyle titleStyle;
         private GUIStyle bodyStyle;
         private GUIStyle buttonStyle;
+
+        // Keep CreatePrimitive dependencies in stripped player builds.
+        private MeshFilter PrimitiveMeshFilterReference { get; set; }
+        private MeshRenderer PrimitiveMeshRendererReference { get; set; }
+        private BoxCollider PrimitiveBoxColliderReference { get; set; }
+        private SphereCollider PrimitiveSphereColliderReference { get; set; }
 
         private void Awake()
         {
@@ -138,6 +146,11 @@ namespace PocketForge.Mining
             ore.name = "MineOre";
             ore.transform.position = new Vector3(0f, 0f, 2.8f);
             ore.transform.localScale = Vector3.one * 1.6f;
+            if (oreMaterial != null)
+            {
+                ore.GetComponent<Renderer>().sharedMaterial = oreMaterial;
+            }
+
             oreVisual = ore.transform;
             UpdateOreVisual();
         }
