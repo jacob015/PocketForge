@@ -39,3 +39,13 @@
 - 수정 후 상태: 현재 구현 사실은 `ARCHITECTURE.md`, 제품 목표는 `PROJECT_PLAN.md`, 다음 작업 범위는 `TASKS.md`로 구분된다. 게임플레이 코드와 Unity 씬 오브젝트는 변경하지 않았다.
 - 테스트 결과: Unity MCP에서 `Mine` 씬의 누락 스크립트·깨진 Prefab 0건을 확인했다. `MiningBalanceTests` EditMode 테스트는 3/3 통과했다. 테스트 후 Unity Console에는 `TestResults.xml` 저장 경로를 알리는 Exception 형식 로그 1건이 남았으며 stack trace는 없었다. Play Mode, Android 빌드, Android 기기 테스트는 실행하지 않았다.
 - 남은 작업: Editor Play Mode와 Android 환경의 실제 플레이 흐름 검증, UGUI 전환·데이터 분리·저장 보강 중 다음 구현 범위 결정이 남아 있다.
+
+## 수정사항 5
+
+- 기록 시각: 2026-07-16 16:15:08
+- 작업 요청 요약: GitHub 계정을 연동하고 PocketForge 프로젝트의 공개 원격 저장소를 생성한다.
+- 수정 전 상태: 로컬 Git 저장소는 `main` 브랜치만 존재했고, 원격 저장소·커밋·GitHub CLI 인증이 없었다.
+- 수정한 내용: GitHub CLI를 설치하고 `jacob015` 계정으로 인증했다. 공개 저장소 `jacob015/PocketForge`를 생성하고, 프로젝트 전체를 `Initial PocketForge project` 초기 커밋으로 `origin/main`에 푸시했다.
+- 수정 후 상태: 로컬 `main`은 `origin/main`을 추적하며, 프로젝트는 `https://github.com/jacob015/PocketForge`에 공개되어 있다.
+- 테스트 결과: GitHub CLI 인증과 `git push -u origin main` 성공을 확인했다. Unity·Android 테스트는 이 작업에서 실행하지 않았다.
+- 남은 작업: Task 2의 Editor Play Mode·Android 플레이 흐름 검증과 다음 구현 범위 결정이 남아 있다.
