@@ -1,5 +1,6 @@
 using System;
 using PocketForge.Economy;
+using PocketForge.Localization;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
@@ -19,6 +20,12 @@ namespace PocketForge.Mining
         private RawImage pickaxeIcon;
         private RawImage drillIcon;
         private RawImage robotIcon;
+        private MiningGameState lastState;
+        private MiningGameService lastService;
+
+        private void OnEnable() => LanguageService.Changed += RefreshLocalization;
+
+        private void OnDisable() => LanguageService.Changed -= RefreshLocalization;
 
         public static MineHudView Create()
         {
@@ -58,16 +65,26 @@ namespace PocketForge.Mining
 
         public void Render(MiningGameState state, MiningGameService service)
         {
+            lastState = state;
+            lastService = service;
             var player = state.Player;
             var ore = state.Ore;
-            headerText.text = $"POCKET FORGE\n<size=32>Credits  {player.credits:N0}     Depth  {player.stage}</size>";
-            oreText.text = $"{(ore.IsRare ? "RARE " : string.Empty)}ORE  {Mathf.CeilToInt(ore.Health)} / {Mathf.CeilToInt(ore.Durability)}";
+            headerText.text = $"POCKET FORGE\n<size=32>{LanguageService.Get("credits")}  {player.credits:N0}     {LanguageService.Get("depth")}  {player.stage}</size>";
+            oreText.text = $"{(ore.IsRare ? "RARE " : string.Empty)}{LanguageService.Get("ore").ToUpper()}  {Mathf.CeilToInt(ore.Health)} / {Mathf.CeilToInt(ore.Durability)}";
             oreProgress.fillAmount = Mathf.Clamp01(ore.Health / ore.Durability);
             oreProgress.color = ore.IsRare ? new Color(0.4f, 0.9f, 1f) : new Color(0.95f, 0.45f, 0.12f);
-            mineButton.GetComponentInChildren<Text>().text = $"MINE  +{service.GetTapPower(player.pickaxeLevel):0}";
-            SetUpgradeText(pickaxeButton, $"PICKAXE  Lv.{player.pickaxeLevel}  Tap +1", service.GetUpgradeCost(UpgradeType.Pickaxe, player.pickaxeLevel));
-            SetUpgradeText(drillButton, $"DRILL  Lv.{player.drillLevel}  Auto +{service.GetAutoPowerPerSecond(player.drillLevel + 1) - service.GetAutoPowerPerSecond(player.drillLevel):0.0}/s", service.GetUpgradeCost(UpgradeType.Drill, player.drillLevel));
-            SetUpgradeText(robotButton, $"ROBOT  Lv.{player.robotLevel}  Reward +10%", service.GetUpgradeCost(UpgradeType.Robot, player.robotLevel));
+            mineButton.GetComponentInChildren<Text>().text = $"{LanguageService.Get("mine").ToUpper()}  +{service.GetTapPower(player.pickaxeLevel):0}";
+            SetUpgradeText(pickaxeButton, $"{LanguageService.Get("pickaxe").ToUpper()}  Lv.{player.pickaxeLevel}  {LanguageService.Get("tap")} +1", service.GetUpgradeCost(UpgradeType.Pickaxe, player.pickaxeLevel));
+            SetUpgradeText(drillButton, $"{LanguageService.Get("drill").ToUpper()}  Lv.{player.drillLevel}  {LanguageService.Get("auto")} +{service.GetAutoPowerPerSecond(player.drillLevel + 1) - service.GetAutoPowerPerSecond(player.drillLevel):0.0}/s", service.GetUpgradeCost(UpgradeType.Drill, player.drillLevel));
+            SetUpgradeText(robotButton, $"{LanguageService.Get("robot").ToUpper()}  Lv.{player.robotLevel}  {LanguageService.Get("reward")} +10%", service.GetUpgradeCost(UpgradeType.Robot, player.robotLevel));
+        }
+
+        private void RefreshLocalization()
+        {
+            if (lastState != null && lastService != null)
+            {
+                Render(lastState, lastService);
+            }
         }
 
         private void Build()

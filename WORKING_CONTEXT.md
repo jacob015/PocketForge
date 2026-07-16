@@ -139,3 +139,12 @@
 - 수정 후 상태: 기기에서 생성 광석 아트와 Pickaxe·Drill·Robot 아이콘이 표시된다.
 - 테스트 결과: `adb install -r` 성공, `UnityPlayerGameActivity` 전면 실행, 기기 스크린샷으로 비주얼 표시 확인. 앱 프로세스에서 치명 예외·종료는 없었으나, Unity 서비스 연결 실패(Curl error 7)와 선택적 Play Asset Pack 클래스 부재 로그가 기록됐다.
 - 다음 작업: 필요하면 Unity Diagnostics/Cloud 연결과 Play Asset Delivery 사용 여부를 배포 설정 단계에서 검토한다.
+
+## 수정사항 15
+
+- 기록 시각: 2026-07-16 19:20:00
+- 작업 요청 요약: 향후 설정창에서 한국어·영어·일본어·중국어 간체를 선택해 전체 UI를 전환할 수 있는 기반을 만든다.
+- 수정한 내용: `com.unity.localization` 1.5.12를 추가하고, `LanguageService`에 네 언어의 UI 문자열 테이블·기기 언어 기본값·PlayerPrefs 저장·변경 이벤트를 구현했다. `MineHudView`는 키를 사용하며 변경 이벤트 때 즉시 다시 렌더링한다.
+- 수정 후 상태: 설정창은 `LanguageService.SetLanguage(SupportedLanguage)`만 호출하면 선택값 저장과 현재 화면 갱신을 수행할 수 있다. 실시간 번역 API는 사용하지 않는다.
+- 테스트 결과: Unity 컴파일 오류 0건, EditMode 테스트 11/11 통과. 네 언어의 채굴 버튼 문자열을 테스트로 검증했다.
+- 다음 작업: 설정창 UI를 만들 때 언어 버튼을 `LanguageService.SetLanguage`에 연결하고, Unity Localization String Table 에셋으로 카탈로그를 분리한다.

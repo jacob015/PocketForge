@@ -1,4 +1,5 @@
 using PocketForge.Content;
+using PocketForge.Localization;
 using PocketForge.Save;
 using UnityEngine;
 
@@ -24,6 +25,7 @@ namespace PocketForge.Mining
         private void Awake()
         {
             Application.targetFrameRate = 60;
+            LanguageService.Initialize();
             var config = miningConfig != null ? miningConfig : MiningGameConfig.CreateRuntimeDefault();
             var gameService = new MiningGameService(config);
             gameState = gameService.CreateInitialState(SaveService.Load(), Random.value);
