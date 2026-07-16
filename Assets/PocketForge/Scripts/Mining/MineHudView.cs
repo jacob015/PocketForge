@@ -21,6 +21,7 @@ namespace PocketForge.Mining
         private RawImage drillIcon;
         private RawImage robotIcon;
         private Text offlineRewardText;
+        private Image offlineRewardSurface;
         private MiningGameState lastState;
         private MiningGameService lastService;
 
@@ -82,6 +83,7 @@ namespace PocketForge.Mining
 
         public void ShowOfflineReward(int credits)
         {
+            offlineRewardSurface.gameObject.SetActive(true);
             offlineRewardText.gameObject.SetActive(true);
             offlineRewardText.text = $"{LanguageService.Get("reward").ToUpper()}  +{credits:N0} C";
         }
@@ -96,11 +98,17 @@ namespace PocketForge.Mining
 
         private void Build()
         {
-            headerText = CreateText("Header", transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -150f), new Vector2(960f, 150f), 46, TextAnchor.MiddleCenter);
-            offlineRewardText = CreateText("OfflineReward", transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -265f), new Vector2(720f, 64f), 28, TextAnchor.MiddleCenter);
+            CreatePanel("TopSurface", transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -142f), new Vector2(1000f, 230f), new Color(0.035f, 0.07f, 0.13f, 0.94f));
+            CreatePanel("UpgradeSurface", transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 230f), new Vector2(1000f, 480f), new Color(0.025f, 0.045f, 0.085f, 0.9f));
+            CreatePanel("MineSurface", transform, new Vector2(0.5f, 0.41f), new Vector2(0.5f, 0.41f), new Vector2(0f, 0f), new Vector2(970f, 176f), new Color(0.05f, 0.07f, 0.1f, 0.82f));
+
+            headerText = CreateText("Header", transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -126f), new Vector2(920f, 142f), 48, TextAnchor.MiddleCenter);
+            offlineRewardSurface = CreatePanel("OfflineRewardSurface", transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -258f), new Vector2(790f, 76f), new Color(0.04f, 0.2f, 0.16f, 0.96f));
+            offlineRewardText = CreateText("OfflineReward", transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -258f), new Vector2(760f, 64f), 28, TextAnchor.MiddleCenter);
             offlineRewardText.color = new Color(0.45f, 0.95f, 0.7f);
+            offlineRewardSurface.gameObject.SetActive(false);
             offlineRewardText.gameObject.SetActive(false);
-            oreText = CreateText("OreLabel", transform, new Vector2(0.5f, 0.53f), new Vector2(0.5f, 0.53f), new Vector2(0f, 75f), new Vector2(920f, 56f), 30, TextAnchor.MiddleCenter);
+            oreText = CreateText("OreLabel", transform, new Vector2(0.5f, 0.53f), new Vector2(0.5f, 0.53f), new Vector2(0f, 88f), new Vector2(920f, 56f), 30, TextAnchor.MiddleCenter);
 
             CreatePanel("ProgressBackground", transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 20f), new Vector2(920f, 36f), new Color(0.06f, 0.08f, 0.11f, 0.9f));
             oreProgress = CreatePanel("ProgressFill", transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 20f), new Vector2(900f, 22f), new Color(0.95f, 0.45f, 0.12f));
@@ -108,7 +116,7 @@ namespace PocketForge.Mining
             oreProgress.fillMethod = Image.FillMethod.Horizontal;
             oreProgress.fillOrigin = (int)Image.OriginHorizontal.Left;
 
-            mineButton = CreateButton("MineButton", transform, new Vector2(0.5f, 0.41f), new Vector2(0.5f, 0.41f), new Vector2(0f, 0f), new Vector2(920f, 126f), new Color(0.86f, 0.28f, 0.08f));
+            mineButton = CreateButton("MineButton", transform, new Vector2(0.5f, 0.41f), new Vector2(0.5f, 0.41f), new Vector2(0f, 0f), new Vector2(920f, 126f), new Color(0.94f, 0.31f, 0.06f));
             pickaxeButton = CreateButton("PickaxeButton", transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 310f), new Vector2(920f, 86f), new Color(0.15f, 0.22f, 0.32f));
             drillButton = CreateButton("DrillButton", transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 210f), new Vector2(920f, 86f), new Color(0.15f, 0.22f, 0.32f));
             robotButton = CreateButton("RobotButton", transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 110f), new Vector2(920f, 86f), new Color(0.15f, 0.22f, 0.32f));
@@ -138,6 +146,9 @@ namespace PocketForge.Mining
             rect.sizeDelta = size;
             var image = panel.GetComponent<Image>();
             image.color = color;
+            var shadow = panel.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.35f);
+            shadow.effectDistance = new Vector2(0f, -6f);
             return image;
         }
 
@@ -146,6 +157,9 @@ namespace PocketForge.Mining
             var image = CreatePanel(name, parent, anchorMin, anchorMax, position, size, color);
             var button = image.gameObject.AddComponent<Button>();
             button.targetGraphic = image;
+            var outline = image.gameObject.AddComponent<Outline>();
+            outline.effectColor = new Color(1f, 1f, 1f, 0.18f);
+            outline.effectDistance = new Vector2(2f, -2f);
             CreateText("Label", image.transform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero, 27, TextAnchor.MiddleCenter);
             return button;
         }
