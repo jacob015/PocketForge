@@ -27,6 +27,7 @@ namespace PocketForge.Mining
         private Text settingsTitle;
         private Text languageLabel;
         private Button closeSettingsButton;
+        private Text feedbackText;
         private MiningGameState lastState;
         private MiningGameService lastService;
 
@@ -93,6 +94,17 @@ namespace PocketForge.Mining
             offlineRewardText.text = $"{LanguageService.Get("reward").ToUpper()}  +{credits:N0} C";
         }
 
+        public void ShowFeedback(string message, Color color)
+        {
+            feedbackText.text = message;
+            feedbackText.color = color;
+            feedbackText.gameObject.SetActive(true);
+            CancelInvoke(nameof(HideFeedback));
+            Invoke(nameof(HideFeedback), 1.2f);
+        }
+
+        private void HideFeedback() => feedbackText.gameObject.SetActive(false);
+
         private void RefreshLocalization()
         {
             if (lastState != null && lastService != null)
@@ -118,6 +130,8 @@ namespace PocketForge.Mining
             offlineRewardSurface.gameObject.SetActive(false);
             offlineRewardText.gameObject.SetActive(false);
             oreText = CreateText("OreLabel", transform, new Vector2(0.5f, 0.53f), new Vector2(0.5f, 0.53f), new Vector2(0f, 88f), new Vector2(920f, 56f), 30, TextAnchor.MiddleCenter);
+            feedbackText = CreateText("ActionFeedback", transform, new Vector2(0.5f, 0.53f), new Vector2(0.5f, 0.53f), new Vector2(0f, 146f), new Vector2(760f, 54f), 34, TextAnchor.MiddleCenter);
+            feedbackText.gameObject.SetActive(false);
 
             CreatePanel("ProgressBackground", transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 20f), new Vector2(920f, 36f), new Color(0.06f, 0.08f, 0.11f, 0.9f));
             oreProgress = CreatePanel("ProgressFill", transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 20f), new Vector2(900f, 22f), new Color(0.95f, 0.45f, 0.12f));

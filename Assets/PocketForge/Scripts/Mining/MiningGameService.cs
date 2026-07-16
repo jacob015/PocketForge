@@ -7,16 +7,20 @@ namespace PocketForge.Mining
 {
     public readonly struct MiningGameResult
     {
-        public MiningGameResult(bool stateChanged, bool oreBroken, bool purchaseSucceeded)
+        public MiningGameResult(bool stateChanged, bool oreBroken, bool purchaseSucceeded, int rewardCredits = 0, bool purchaseFailed = false)
         {
             StateChanged = stateChanged;
             OreBroken = oreBroken;
             PurchaseSucceeded = purchaseSucceeded;
+            RewardCredits = rewardCredits;
+            PurchaseFailed = purchaseFailed;
         }
 
         public bool StateChanged { get; }
         public bool OreBroken { get; }
         public bool PurchaseSucceeded { get; }
+        public int RewardCredits { get; }
+        public bool PurchaseFailed { get; }
     }
 
     public sealed class MiningGameService
@@ -52,7 +56,7 @@ namespace PocketForge.Mining
             var cost = GetUpgradeCost(type, level);
             if (state.Player.credits < cost)
             {
-                return new MiningGameResult(false, false, false);
+                return new MiningGameResult(false, false, false, purchaseFailed: true);
             }
 
             state.Player.credits -= cost;
@@ -108,10 +112,11 @@ namespace PocketForge.Mining
                 return new MiningGameResult(true, false, false);
             }
 
-            state.Player.credits += GetOreReward(state.Player.stage, state.Ore.IsRare, state.Player.robotLevel);
+            var reward = GetOreReward(state.Player.stage, state.Ore.IsRare, state.Player.robotLevel);
+            state.Player.credits += reward;
             state.Player.stage++;
             state.ReplaceOre(CreateOre(state.Player.stage, rareRoll));
-            return new MiningGameResult(true, true, false);
+            return new MiningGameResult(true, true, false, reward);
         }
 
         private OreState CreateOre(int stage, float rareRoll)

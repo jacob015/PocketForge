@@ -48,6 +48,12 @@ namespace PocketForge.Mining
 
         private void Apply(MiningGameResult result)
         {
+            if (result.PurchaseFailed)
+            {
+                view.ShowFeedback("NOT ENOUGH CREDITS", new Color(1f, 0.45f, 0.35f));
+                return;
+            }
+
             if (!result.StateChanged)
             {
                 return;
@@ -55,6 +61,14 @@ namespace PocketForge.Mining
 
             Render();
             StateChanged?.Invoke();
+            if (result.RewardCredits > 0)
+            {
+                view.ShowFeedback($"+{result.RewardCredits:N0} C", new Color(1f, 0.82f, 0.3f));
+            }
+            else if (result.PurchaseSucceeded)
+            {
+                view.ShowFeedback("UPGRADE COMPLETE", new Color(0.45f, 0.95f, 0.7f));
+            }
             if (result.OreBroken || result.PurchaseSucceeded)
             {
                 SaveRequested?.Invoke();
