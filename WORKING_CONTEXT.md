@@ -1,5 +1,10 @@
 # WORKING_CONTEXT.md
 
+## Task 11 completion note
+
+- 2026-07-16: Added Iron (stage 4) and Gold (stage 7) ore definitions to the existing content catalog, preserving Copper (stage 1) and Crystal (stage 10).
+- Verification: Unity EditMode 18/18 passed, including the catalog milestone selection test, before the Task 12 visual redesign begins.
+
 ## 수정사항 20
 
 - 기록 시각: 2026-07-16 23:30:00

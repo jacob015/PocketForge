@@ -57,6 +57,19 @@ namespace PocketForge.Tests.Editor
         }
 
         [Test]
+        public void ContentCatalog_SelectsIronAndGoldAtTheirMilestones()
+        {
+            var catalog = AssetDatabase.LoadAssetAtPath<MiningContentCatalog>(
+                "Assets/PocketForge/Content/MiningContentCatalog.asset");
+
+            Assert.IsNotNull(catalog);
+            Assert.AreEqual("copper", catalog.GetOreForStage(3).ContentId);
+            Assert.AreEqual("iron", catalog.GetOreForStage(4).ContentId);
+            Assert.AreEqual("gold", catalog.GetOreForStage(7).ContentId);
+            Assert.AreEqual("crystal", catalog.GetOreForStage(10).ContentId);
+        }
+
+        [Test]
         public void OfflineReward_UsesDrillPowerAndCapsElapsedTime()
         {
             var catalog = AssetDatabase.LoadAssetAtPath<MiningContentCatalog>(

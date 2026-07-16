@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 603a6c72f0c5c834592134644a9d7870, type: 3}
+  m_Name: GoldOre
+  m_EditorClassIdentifier: Assembly-CSharp::PocketForge.Content.OreDefinition
+  contentId: gold
+  startStage: 7
+  baseDurability: 44
+  durabilityPerStage: 7
+  rareChance: 0.12
+  normalRewardMultiplier: 3
+  rareRewardMultiplier: 7
+  normalVisualColor: {r: 0.95, g: 0.68, b: 0.12, a: 1}
+  rareVisualColor: {r: 1, g: 0.92, b: 0.48, a: 1}

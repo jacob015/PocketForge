@@ -137,3 +137,4 @@
 3. 저장 데이터 버전 보강과 자동 채굴·희귀 광석 확장
 
 다음 구현 우선순위 제안: Android 런타임 오류를 해결한 뒤, 현재 `OnGUI` 기반 프로토타입의 표시·입력 책임을 UGUI와 게임 상태로 분리한다. 별도 Task로 승인받아 착수한다.
+<!-- 2026-07-16: Task 11 content expansion verified. Task 12 visual redesign is now active. -->

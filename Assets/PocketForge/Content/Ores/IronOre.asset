@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 603a6c72f0c5c834592134644a9d7870, type: 3}
+  m_Name: IronOre
+  m_EditorClassIdentifier: Assembly-CSharp::PocketForge.Content.OreDefinition
+  contentId: iron
+  startStage: 4
+  baseDurability: 28
+  durabilityPerStage: 6
+  rareChance: 0.1
+  normalRewardMultiplier: 2
+  rareRewardMultiplier: 6
+  normalVisualColor: {r: 0.38, g: 0.48, b: 0.58, a: 1}
+  rareVisualColor: {r: 0.5, g: 0.9, b: 1, a: 1}
