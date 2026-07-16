@@ -4,9 +4,9 @@
 
 ### Task 2 — 채굴 수직 슬라이스 검증 및 다음 구현 범위 결정
 
-상태: 진행 중 — Android 빌드 검증 대기
+상태: 진행 중 — Android 기기·수동 입력 검증 대기
 
-현재 프로토타입의 수동·자동 채굴, 강화, 저장 흐름은 소스와 EditMode 경제 테스트로 확인했다. Editor Play Mode에서 `Mine` 씬의 기동과 런타임 오류 0건을 확인했다. Android Build Support, SDK·NDK Tools, OpenJDK는 설치됐으며 Android 빌드 검증을 남겨 두었다.
+현재 프로토타입의 수동·자동 채굴, 강화, 저장 흐름은 소스와 EditMode 경제 테스트로 확인했다. Editor Play Mode에서 `Mine` 씬의 기동과 런타임 오류 0건을 확인했다. Android Build Support, SDK·NDK Tools, OpenJDK 설치 후 개발용 APK 빌드에 성공했다. 연결된 Android 기기는 없어 설치·실기기 검증은 남아 있다.
 
 이번 작업에 포함하지 않는 항목:
 
@@ -16,7 +16,7 @@
 
 다음 확인 사항:
 
-- Unity MCP 브리지 재연결 후 Android 빌드·기기 검증
+- Android 기기 연결 후 APK 설치·기동·기본 플레이 흐름 검증
 - Editor에서 수동 입력으로 채굴·강화·저장 흐름 확인
 - 검증 결과를 바탕으로 UGUI 전환·데이터 분리·저장 보강 중 다음 구현 범위 결정
 
@@ -33,7 +33,7 @@
 
 ### Task 0 — 개발 기반 및 운영 문서 정비
 
-상태: 완료 (Android SDK/JDK 설치 여부는 미확인)
+상태: 완료
 
 - 루트 운영·기획 문서의 역할과 참조 관계 정리
 - Codex와 Claude Code 공통 작업 규칙·기록 흐름 정리
@@ -44,7 +44,7 @@
 
 미결 사항:
 
-- Android SDK/JDK 설치 경로와 Android 실제 빌드는 아직 확인하지 않았다.
+- Android SDK·NDK·OpenJDK 설치 경로와 개발용 APK 빌드는 Task 2에서 확인했다.
 - Android 애플리케이션 식별자는 기본 템플릿 값이며, 배포 전 소유 도메인 기준으로 결정해야 한다.
 
 ## 다음 작업 후보

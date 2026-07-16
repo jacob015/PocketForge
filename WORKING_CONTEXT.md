@@ -69,3 +69,13 @@
 - 수정 후 상태: Android 종속성은 설치됐지만, Unity MCP 브리지가 `127.0.0.1:8080`에서 응답하지 않아 자동 Android 빌드 도구를 사용할 수 없다. 이 상태에서는 Android 빌드 성공 여부를 확인하지 못했다.
 - 테스트 결과: Android 모듈 디렉터리 존재 여부를 확인했다. Editor 로그에는 Android ADB 장치 스캔이 기록됐다. Android APK/AAB 빌드와 기기 테스트는 실행하지 못했다.
 - 남은 작업: Unity Editor를 하나의 인스턴스로 열고 MCP 브리지를 재연결한 뒤 Android 개발용 APK 빌드와 기기 검증을 수행한다. Editor 수동 입력 검증과 다음 구현 범위 결정도 남아 있다.
+
+## 수정사항 8
+
+- 기록 시각: 2026-07-16 17:09:34
+- 작업 요청 요약: Codex 앱 재시작으로 Unity MCP 연결을 복구한 뒤 Android 개발용 APK 빌드를 검증한다.
+- 수정 전 상태: Android SDK·NDK·OpenJDK는 설치됐지만 Unity MCP 연결 실패로 실제 APK 빌드를 실행하지 못했고, Android 기기 연결 여부도 미확인이었다.
+- 수정한 내용: Unity MCP 연결을 복구해 Android 대상, `Mine` 빌드 씬, 빌드 전 Console 상태를 확인하고 개발용 APK를 `Builds/Android/PocketForge-dev.apk`로 생성했다. 게임 코드·Unity 프로젝트 설정·배포 설정은 변경하지 않았다.
+- 수정 후 상태: Android 개발용 APK가 생성됐으며, 빌드 도구 결과는 성공(오류 0건, 경고 1건), Unity 로그는 `Build Successful`이다. Unity Console에는 URP 관련 경고와 Diagnostics Data의 디버그 심볼 안내가 남았으나 빌드를 중단시키지 않았다.
+- 테스트 결과: Android APK 빌드 성공(192.15초), APK 파일 존재 및 크기 44,837,960바이트 확인, `adb devices`에서 연결된 기기 0대를 확인했다. 따라서 APK 설치·기동·실기기 플레이 검증은 실행하지 않았다.
+- 남은 작업: Android 기기를 연결해 APK 설치·기동·기본 플레이 흐름을 검증하고, Editor 수동 입력 검증 결과를 바탕으로 다음 구현 범위를 결정한다.
