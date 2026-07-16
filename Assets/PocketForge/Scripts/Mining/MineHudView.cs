@@ -16,6 +16,9 @@ namespace PocketForge.Mining
         private Button pickaxeButton;
         private Button drillButton;
         private Button robotButton;
+        private RawImage pickaxeIcon;
+        private RawImage drillIcon;
+        private RawImage robotIcon;
 
         public static MineHudView Create()
         {
@@ -39,6 +42,18 @@ namespace PocketForge.Mining
             pickaxeButton.onClick.AddListener(() => upgradeAction(UpgradeType.Pickaxe));
             drillButton.onClick.AddListener(() => upgradeAction(UpgradeType.Drill));
             robotButton.onClick.AddListener(() => upgradeAction(UpgradeType.Robot));
+        }
+
+        public void SetTheme(Texture upgradeIcons)
+        {
+            if (upgradeIcons == null)
+            {
+                return;
+            }
+
+            SetIcon(pickaxeIcon, upgradeIcons, 0);
+            SetIcon(drillIcon, upgradeIcons, 1);
+            SetIcon(robotIcon, upgradeIcons, 2);
         }
 
         public void Render(MiningGameState state, MiningGameService service)
@@ -70,6 +85,9 @@ namespace PocketForge.Mining
             pickaxeButton = CreateButton("PickaxeButton", transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 310f), new Vector2(920f, 86f), new Color(0.15f, 0.22f, 0.32f));
             drillButton = CreateButton("DrillButton", transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 210f), new Vector2(920f, 86f), new Color(0.15f, 0.22f, 0.32f));
             robotButton = CreateButton("RobotButton", transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 110f), new Vector2(920f, 86f), new Color(0.15f, 0.22f, 0.32f));
+            pickaxeIcon = CreateIcon("PickaxeIcon", pickaxeButton.transform);
+            drillIcon = CreateIcon("DrillIcon", drillButton.transform);
+            robotIcon = CreateIcon("RobotIcon", robotButton.transform);
         }
 
         private static void EnsureEventSystem()
@@ -103,6 +121,26 @@ namespace PocketForge.Mining
             button.targetGraphic = image;
             CreateText("Label", image.transform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero, 27, TextAnchor.MiddleCenter);
             return button;
+        }
+
+        private static RawImage CreateIcon(string name, Transform parent)
+        {
+            var iconObject = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(RawImage));
+            iconObject.transform.SetParent(parent, false);
+            var rect = iconObject.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0f, 0.5f);
+            rect.anchorMax = new Vector2(0f, 0.5f);
+            rect.anchoredPosition = new Vector2(62f, 0f);
+            rect.sizeDelta = new Vector2(88f, 88f);
+            var image = iconObject.GetComponent<RawImage>();
+            image.raycastTarget = false;
+            return image;
+        }
+
+        private static void SetIcon(RawImage icon, Texture texture, int index)
+        {
+            icon.texture = texture;
+            icon.uvRect = new Rect(index / 3f, 0f, 1f / 3f, 1f);
         }
 
         private static Text CreateText(string name, Transform parent, Vector2 anchorMin, Vector2 anchorMax, Vector2 position, Vector2 size, int fontSize, TextAnchor alignment)

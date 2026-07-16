@@ -73,3 +73,10 @@ MineGameController (Unity composition root)
 - `MiningGameConfig.asset`은 광석 내구도·희귀 확률·보상·강화 비용의 단일 조정 지점이다. 후속 광석/강화 정의 에셋으로 확장할 수 있다.
 - `MineHudView`는 UGUI 요소 생성·렌더링·입력 전달만 담당하고, `MineHudPresenter`가 서비스 결과를 뷰와 저장 요청으로 연결한다.
 - 저장 데이터는 `GameSaveMigrator.CurrentVersion`을 통해 로드 시 정규화된다. 다음 저장 형식 변경은 이 진입점에 단계별 변환을 추가한다.
+
+## 비주얼 리소스
+
+- `Assets/PocketForge/Art/Generated/ForgeOre.png`: 생성 후 크로마키를 제거한 투명 광석 아트다.
+- `Assets/PocketForge/Materials/ForgeOreBillboard.mat`: URP Unlit 머티리얼로 광석 아트를 표시한다.
+- `MineGameController`는 기존 Sphere를 유지하면서 전면 Quad에 광석 아트를 배치한다. 기존 Android primitive 스트리핑 대응은 유지한다.
+- `Assets/PocketForge/Art/Generated/UpgradeIcons.png`은 Pickaxe·Drill·Robot 순서의 가로 아이콘 시트이며, `MineHudView`가 각 1/3 영역을 UGUI `RawImage`로 표시한다.

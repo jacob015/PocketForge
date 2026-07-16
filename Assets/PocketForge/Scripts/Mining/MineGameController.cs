@@ -7,6 +7,8 @@ namespace PocketForge.Mining
     public sealed class MineGameController : MonoBehaviour
     {
         [SerializeField] private Material oreMaterial;
+        [SerializeField] private Material oreBillboardMaterial;
+        [SerializeField] private Texture2D upgradeIconSheet;
         [SerializeField] private MiningGameConfig miningConfig;
 
         private MiningGameState gameState;
@@ -26,6 +28,7 @@ namespace PocketForge.Mining
             var gameService = new MiningGameService(config);
             gameState = gameService.CreateInitialState(SaveService.Load(), Random.value);
             var view = MineHudView.Create();
+            view.SetTheme(upgradeIconSheet);
             hudPresenter = new MineHudPresenter(view, gameService, gameState);
             hudPresenter.StateChanged += UpdateOreVisual;
             hudPresenter.SaveRequested += SaveGame;
@@ -62,11 +65,22 @@ namespace PocketForge.Mining
         {
             var ore = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             ore.name = "MineOre";
-            ore.transform.position = new Vector3(0f, 0f, 2.8f);
+            ore.transform.position = new Vector3(0f, 0.55f, 2.8f);
             ore.transform.localScale = Vector3.one * 1.6f;
             if (oreMaterial != null)
             {
                 ore.GetComponent<Renderer>().sharedMaterial = oreMaterial;
+            }
+
+            if (oreBillboardMaterial != null)
+            {
+                var billboard = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                billboard.name = "ForgeOreArt";
+                billboard.transform.SetParent(ore.transform, false);
+                billboard.transform.localPosition = new Vector3(0f, 0f, -0.9f);
+                billboard.transform.localScale = Vector3.one * 2.6f;
+                billboard.GetComponent<Renderer>().sharedMaterial = oreBillboardMaterial;
+                Destroy(billboard.GetComponent<Collider>());
             }
 
             oreVisual = ore.transform;
