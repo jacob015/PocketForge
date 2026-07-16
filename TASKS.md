@@ -4,6 +4,18 @@
 
 현재 작업: 없음 — 다음 구현 Task 승인 대기
 
+### Task 9 — 설정 언어 선택 UI
+상태: 완료
+
+- 상단 설정 버튼과 런타임 UGUI 설정 모달을 추가
+- `한국어`, `English`, `日本語`, `简体中文` 선택을 `LanguageService.SetLanguage`에 연결
+- 선택 즉시 HUD와 설정 UI를 재렌더링하고 PlayerPrefs에 선택 언어 저장
+- EditMode 17/17 통과, Android APK 빌드 및 SM-S938N에서 영어 전환 확인
+
+## 현재 작업
+
+현재 작업: 없음 — 다음 구현 Task 승인 대기
+
 ### Task 8 — 모바일 HUD UI 폴리싱
 
 상태: 진행 중

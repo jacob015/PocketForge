@@ -14,5 +14,15 @@ namespace PocketForge.Tests.Editor
             LanguageService.SetLanguage(language);
             Assert.AreEqual(expected, LanguageService.Get("mine"));
         }
+
+        [TestCase(SupportedLanguage.Korean, "\uC124\uC815")]
+        [TestCase(SupportedLanguage.English, "Settings")]
+        [TestCase(SupportedLanguage.Japanese, "\u8A2D\u5B9A")]
+        [TestCase(SupportedLanguage.ChineseSimplified, "\u8BBE\u7F6E")]
+        public void SelectedLanguage_ResolvesSettingsLabel(SupportedLanguage language, string expected)
+        {
+            LanguageService.SetLanguage(language);
+            Assert.AreEqual(expected, LanguageService.Get("settings"));
+        }
     }
 }

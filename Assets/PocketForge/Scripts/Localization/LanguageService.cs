@@ -41,7 +41,43 @@ namespace PocketForge.Localization
             Changed?.Invoke();
         }
 
-        public static string Get(string key) => Tables[Current].TryGetValue(key, out var value) ? value : key;
+        public static string Get(string key)
+        {
+            if (key == "settings")
+            {
+                return Current switch
+                {
+                    SupportedLanguage.Korean => "\uC124\uC815",
+                    SupportedLanguage.Japanese => "\u8A2D\u5B9A",
+                    SupportedLanguage.ChineseSimplified => "\u8BBE\u7F6E",
+                    _ => "Settings"
+                };
+            }
+
+            if (key == "language")
+            {
+                return Current switch
+                {
+                    SupportedLanguage.Korean => "\uC5B8\uC5B4",
+                    SupportedLanguage.Japanese => "\u8A00\u8A9E",
+                    SupportedLanguage.ChineseSimplified => "\u8BED\u8A00",
+                    _ => "Language"
+                };
+            }
+
+            if (key == "close")
+            {
+                return Current switch
+                {
+                    SupportedLanguage.Korean => "\uB2EB\uAE30",
+                    SupportedLanguage.Japanese => "\u9589\u3058\u308B",
+                    SupportedLanguage.ChineseSimplified => "\u5173\u95ED",
+                    _ => "Close"
+                };
+            }
+
+            return Tables[Current].TryGetValue(key, out var value) ? value : key;
+        }
 
         private static SupportedLanguage FromSystemLanguage(SystemLanguage language)
         {

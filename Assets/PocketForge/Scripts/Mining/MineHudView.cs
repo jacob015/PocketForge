@@ -22,6 +22,11 @@ namespace PocketForge.Mining
         private RawImage robotIcon;
         private Text offlineRewardText;
         private Image offlineRewardSurface;
+        private Button settingsButton;
+        private GameObject settingsPanel;
+        private Text settingsTitle;
+        private Text languageLabel;
+        private Button closeSettingsButton;
         private MiningGameState lastState;
         private MiningGameService lastService;
 
@@ -94,6 +99,8 @@ namespace PocketForge.Mining
             {
                 Render(lastState, lastService);
             }
+
+            RenderSettings();
         }
 
         private void Build()
@@ -102,7 +109,9 @@ namespace PocketForge.Mining
             CreatePanel("UpgradeSurface", transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 230f), new Vector2(1000f, 480f), new Color(0.025f, 0.045f, 0.085f, 0.9f));
             CreatePanel("MineSurface", transform, new Vector2(0.5f, 0.41f), new Vector2(0.5f, 0.41f), new Vector2(0f, 0f), new Vector2(970f, 176f), new Color(0.05f, 0.07f, 0.1f, 0.82f));
 
-            headerText = CreateText("Header", transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -126f), new Vector2(920f, 142f), 48, TextAnchor.MiddleCenter);
+            headerText = CreateText("Header", transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-76f, -126f), new Vector2(760f, 142f), 48, TextAnchor.MiddleCenter);
+            settingsButton = CreateButton("SettingsButton", transform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-142f, -50f), new Vector2(190f, 54f), new Color(0.12f, 0.2f, 0.3f));
+            settingsButton.onClick.AddListener(() => settingsPanel.SetActive(true));
             offlineRewardSurface = CreatePanel("OfflineRewardSurface", transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -258f), new Vector2(790f, 76f), new Color(0.04f, 0.2f, 0.16f, 0.96f));
             offlineRewardText = CreateText("OfflineReward", transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -258f), new Vector2(760f, 64f), 28, TextAnchor.MiddleCenter);
             offlineRewardText.color = new Color(0.45f, 0.95f, 0.7f);
@@ -123,6 +132,45 @@ namespace PocketForge.Mining
             pickaxeIcon = CreateIcon("PickaxeIcon", pickaxeButton.transform);
             drillIcon = CreateIcon("DrillIcon", drillButton.transform);
             robotIcon = CreateIcon("RobotIcon", robotButton.transform);
+            CreateSettingsPanel();
+            RenderSettings();
+        }
+
+        private void CreateSettingsPanel()
+        {
+            var backdrop = CreatePanel("SettingsBackdrop", transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1080f, 1920f), new Color(0f, 0f, 0f, 0.72f));
+            settingsPanel = backdrop.gameObject;
+            var card = CreatePanel("SettingsCard", settingsPanel.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(820f, 780f), new Color(0.04f, 0.08f, 0.14f, 0.99f));
+            settingsTitle = CreateText("SettingsTitle", card.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -92f), new Vector2(680f, 76f), 48, TextAnchor.MiddleCenter);
+            languageLabel = CreateText("LanguageLabel", card.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -172f), new Vector2(640f, 54f), 28, TextAnchor.MiddleCenter);
+
+            CreateLanguageButton(card.transform, "KoreanLanguageButton", "\uD55C\uAD6D\uC5B4", SupportedLanguage.Korean, 82f);
+            CreateLanguageButton(card.transform, "EnglishLanguageButton", "English", SupportedLanguage.English, -28f);
+            CreateLanguageButton(card.transform, "JapaneseLanguageButton", "\u65E5\u672C\u8A9E", SupportedLanguage.Japanese, -138f);
+            CreateLanguageButton(card.transform, "ChineseLanguageButton", "\u7B80\u4F53\u4E2D\u6587", SupportedLanguage.ChineseSimplified, -248f);
+            closeSettingsButton = CreateButton("CloseSettingsButton", card.transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 74f), new Vector2(360f, 74f), new Color(0.2f, 0.28f, 0.38f));
+            closeSettingsButton.onClick.AddListener(() => settingsPanel.SetActive(false));
+            settingsPanel.SetActive(false);
+        }
+
+        private void CreateLanguageButton(Transform parent, string name, string label, SupportedLanguage language, float positionY)
+        {
+            var button = CreateButton(name, parent, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, positionY), new Vector2(620f, 86f), new Color(0.12f, 0.2f, 0.32f));
+            button.GetComponentInChildren<Text>().text = label;
+            button.onClick.AddListener(() => LanguageService.SetLanguage(language));
+        }
+
+        private void RenderSettings()
+        {
+            if (settingsButton == null)
+            {
+                return;
+            }
+
+            settingsButton.GetComponentInChildren<Text>().text = LanguageService.Get("settings").ToUpper();
+            settingsTitle.text = LanguageService.Get("settings").ToUpper();
+            languageLabel.text = LanguageService.Get("language").ToUpper();
+            closeSettingsButton.GetComponentInChildren<Text>().text = LanguageService.Get("close").ToUpper();
         }
 
         private static void EnsureEventSystem()
