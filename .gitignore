@@ -1,0 +1,40 @@
+# Unity-generated directories
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+
+# Unity-generated files and crash reports
+/MemoryCaptures/
+/Recordings/
+/sysinfo.txt
+/crashlytics-build.properties
+
+# IDE and generated project files
+/.idea/
+/.vs/
+*.csproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# Unity Addressables and asset-store tooling cache
+/Assets/AssetStoreTools*
+
+# Android and Gradle build artefacts
+*.apk
+*.aab
+*.aar
+*.gradle
+/ExportedObj/
