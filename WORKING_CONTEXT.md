@@ -109,3 +109,13 @@
 - 수정 후 상태: Android 개발용 APK는 명시적 광석 Material과 primitive 의존 컴포넌트를 포함한다. 광석은 Editor와 실기기에서 주황색으로 표시되며, 기존 채굴·강화·저장 계산 로직은 변경하지 않았다.
 - 테스트 결과: Unity 스크립트 컴파일 성공, Editor Play Mode 화면 및 Console 오류 0건 확인, Android APK 2회 재빌드 성공(마지막 빌드 오류 0건), SM-S938N에 재설치·기동 성공. 새 앱 프로세스 logcat에 `SphereCollider`, `CreatePrimitive`, `AndroidRuntime`, `FATAL EXCEPTION` 오류 0건을 확인했고 기기 화면에서 주황색 광석을 확인했다. EditMode `MiningBalanceTests` 3/3 통과했다.
 - 남은 작업: 현재 검증 Task 2는 완료됐다. 다음 구현 후보인 UGUI 전환·게임 상태와 표시 책임 분리는 별도 Task 승인 후 진행한다.
+-
+## 수정사항 12
+
+- 기록 시각: 2026-07-16
+- 작업 요청 요약: 작은 프로젝트에도 확장성을 보여 줄 수 있도록 채굴 규칙, 콘텐츠 수치, 저장 마이그레이션, UGUI 표시 책임을 분리한다.
+- 수정 전 상태: `MineGameController`가 `OnGUI`, 채굴 규칙, 런타임 상태, 저장 호출을 함께 담당했고, 밸런스는 정적 계산 클래스에 고정되어 있었다.
+- 수정한 내용: `MiningGameState`, `MiningGameService`, `MineHudPresenter`, `MineHudView`, `MiningGameConfig`, `GameSaveMigrator`를 추가했다. `MiningGameConfig.asset`을 생성해 씬의 `MineGameController`에 연결했고, UGUI 입력은 프로젝트의 새 Input System에 맞춰 `InputSystemUIInputModule`을 사용한다.
+- 수정 후 상태: 컨트롤러는 Unity 조립·광석 시각화·저장 연결만 맡고, 순수 서비스는 채굴과 강화 규칙을 맡는다. 저장 로드는 버전 2 정규화 진입점을 거치며, 화면은 UGUI 뷰와 프레젠터로 표시된다.
+- 테스트 결과: Unity 컴파일 오류 0건, EditMode 테스트 6/6 통과, Editor Play Mode 콘솔 오류 0건, Android 개발 APK 빌드 성공(오류 0건·경고 1건), SM-S938N에 설치 후 `UnityPlayerGameActivity` 전면 실행 및 관련 치명 로그 없음.
+- 다음 작업: ScriptableObject를 광석·강화 개별 콘텐츠 정의로 세분화하거나, 오프라인 보상·자동 채굴 확장 전에 저장 마이그레이션 단계를 추가한다.

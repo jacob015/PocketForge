@@ -6,6 +6,17 @@
 
 ## 완료 작업
 
+### Task 3 — 확장 가능한 채굴 구조와 UGUI 전환
+
+상태: 완료
+
+- 순수 C# `MiningGameState`·`MiningGameService`로 채굴 규칙과 MonoBehaviour 수명주기를 분리
+- `MiningGameConfig.asset` ScriptableObject로 광석·강화 수치의 조정 지점을 제공하고 씬에 연결
+- `GameSaveMigrator`로 저장값 정규화와 현재 버전(`2`) 마이그레이션 진입점 추가
+- `MineHudView`·`MineHudPresenter`로 IMGUI `OnGUI`를 UGUI 화면으로 전환
+- 새 Input System용 `InputSystemUIInputModule`을 사용해 모바일 UI 입력 경로 구성
+- EditMode 테스트 6/6 통과, Editor Play Mode 오류 0건, Android 개발 빌드 및 SM-S938N 설치·실행 확인
+
 ### Task 2 — 채굴 수직 슬라이스 검증 및 다음 구현 범위 결정
 
 상태: 완료

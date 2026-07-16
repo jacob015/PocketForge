@@ -10,17 +10,17 @@ namespace PocketForge.Save
         {
             if (!PlayerPrefs.HasKey(SaveKey))
             {
-                return new GameSaveData();
+                return GameSaveMigrator.Normalize(new GameSaveData());
             }
 
             var json = PlayerPrefs.GetString(SaveKey);
             var data = JsonUtility.FromJson<GameSaveData>(json);
-            return data ?? new GameSaveData();
+            return GameSaveMigrator.Normalize(data);
         }
 
         public static void Save(GameSaveData data)
         {
-            PlayerPrefs.SetString(SaveKey, JsonUtility.ToJson(data));
+            PlayerPrefs.SetString(SaveKey, JsonUtility.ToJson(GameSaveMigrator.Normalize(data)));
             PlayerPrefs.Save();
         }
     }

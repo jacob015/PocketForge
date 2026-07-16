@@ -19,3 +19,5 @@
 - AI가 제안한 내용과 실제 적용한 내용을 구분한다.
 - 공식 문서, 컴파일, Unity Console, 기기 테스트 중 무엇으로 검증했는지 남긴다.
 - 검증하지 못한 제안은 적용 완료로 기록하지 않는다.
+-
+| 2026-07-16 | Codex + Unity MCP + ADB | 확장 가능한 채굴 구조와 UGUI 전환 | 순수 상태·서비스, ScriptableObject 설정, 저장 정규화, UGUI 뷰·프레젠터 | Unity 컴파일 오류 0건, EditMode 6/6 통과, Editor Play Mode 콘솔 오류 0건, Android APK 빌드 성공 및 SM-S938N 설치·전면 실행 확인 | 완료 |

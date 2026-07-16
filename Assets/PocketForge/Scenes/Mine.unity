@@ -276,6 +276,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PocketForge.Mining.MineGameController
   oreMaterial: {fileID: 2100000, guid: 2e708dd6fc6ae8d45b44bce1ff3437ed, type: 2}
+  miningConfig: {fileID: 11400000, guid: 72486378e3b441240933cc01aee2b0fe, type: 2}
 --- !u!4 &1370660441
 Transform:
   m_ObjectHideFlags: 0

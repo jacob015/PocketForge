@@ -53,6 +53,23 @@ MINE 버튼 / 자동 채굴
 ## 확인된 차이와 다음 설계 과제
 
 - 기획의 UGUI·ScriptableObject 기반 데이터는 아직 도입되지 않았다.
-- 현재는 단일 씬·단일 컨트롤러 프로토타입이며, 저장 데이터의 버전 마이그레이션·오류 복구는 없다.
+- 현재는 단일 씬 프로토타입이며, 저장 데이터는 `GameSaveMigrator`를 통해 버전 2로 정규화된다. 단계별 과거 버전 변환은 다음 저장 형식 변경 시 추가한다.
 - 광석 프리팹, 자원 풀, 스테이지 구성, 자동 채굴 연출, 기기 성능 측정은 구현·검증되지 않았다.
 - 개발용 Android APK는 SM-S938N에서 설치·기동·화면 표시까지 검증했다. 배포용 Android 애플리케이션 식별자는 여전히 기본 템플릿 값이므로 출시 전 소유 도메인 기준으로 결정해야 한다.
+## Task 3 이후 구조
+
+```text
+MineGameController (Unity composition root)
+  ├─ SaveService.Load → GameSaveMigrator.Normalize → GameSaveData
+  ├─ MiningGameConfig.asset (ScriptableObject)
+  ├─ MiningGameService (순수 게임 규칙)
+  │    └─ MiningGameState / OreState (런타임 상태)
+  └─ MineHudPresenter
+       └─ MineHudView (UGUI 표시와 버튼 이벤트)
+```
+
+- `MineGameController`는 Unity 생명주기, 광석 시각화, 저장 요청 연결만 담당한다.
+- `MiningGameService`는 채굴 피해, 자동 채굴, 보상, 강화 구매와 다음 광석 생성을 처리한다. EditMode 테스트에서 Unity 씬 없이 검증할 수 있다.
+- `MiningGameConfig.asset`은 광석 내구도·희귀 확률·보상·강화 비용의 단일 조정 지점이다. 후속 광석/강화 정의 에셋으로 확장할 수 있다.
+- `MineHudView`는 UGUI 요소 생성·렌더링·입력 전달만 담당하고, `MineHudPresenter`가 서비스 결과를 뷰와 저장 요청으로 연결한다.
+- 저장 데이터는 `GameSaveMigrator.CurrentVersion`을 통해 로드 시 정규화된다. 다음 저장 형식 변경은 이 진입점에 단계별 변환을 추가한다.
