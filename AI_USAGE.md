@@ -21,4 +21,4 @@
 - 검증하지 못한 제안은 적용 완료로 기록하지 않는다.
 -
 | 2026-07-16 | Codex + Unity MCP + ADB | 확장 가능한 채굴 구조와 UGUI 전환 | 순수 상태·서비스, ScriptableObject 설정, 저장 정규화, UGUI 뷰·프레젠터 | Unity 컴파일 오류 0건, EditMode 6/6 통과, Editor Play Mode 콘솔 오류 0건, Android APK 빌드 성공 및 SM-S938N 설치·전면 실행 확인 | 완료 |
-| 2026-07-16 | Codex + imagegen + Unity MCP | 생성 리소스 기반 비주얼 개선 | 광석 아트, 강화 아이콘 시트, 투명 PNG, URP Unlit 머티리얼, UGUI 아이콘 | 크로마키 제거 결과를 Unity 에셋으로 적용; Editor Play Mode 오류 0건, EditMode 6/6 통과, Android 빌드 성공. 최신 APK 기기 설치는 연결 기기 없음으로 미실행 | 완료 |
+| 2026-07-16 | Codex + imagegen + Unity MCP + ADB | 생성 리소스 기반 비주얼 개선 | 광석 아트, 강화 아이콘 시트, 투명 PNG, URP Unlit 머티리얼, UGUI 아이콘 | 크로마키 제거 결과를 Unity 에셋으로 적용; Editor Play Mode 오류 0건, EditMode 6/6 통과, Android 빌드·SM-S938N 설치·실행 성공 및 화면 표시 확인. Unity 서비스 연결과 선택적 Play Asset Pack 관련 로그는 남음 | 완료 |

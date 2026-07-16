@@ -129,3 +129,13 @@
 - 수정 후 상태: 기존 3D Sphere와 Android 스트리핑 대응은 유지하면서 전면 광석 아트가 표시되고, 세 강화 버튼은 각 역할을 구분하는 아이콘을 표시한다.
 - 테스트 결과: Unity 컴파일 오류 0건, Editor Play Mode 콘솔 오류 0건, EditMode 테스트 6/6 통과, Android 개발 APK 빌드 성공(오류 0건·경고 1건). 최신 APK 기기 설치는 ADB에서 연결 기기 없음으로 실행하지 못했다.
 - 다음 작업: 테스트 기기 연결 후 최신 APK의 비주얼 표시를 재확인하거나, 다음 단계로 광석·스테이지별 아트 변형을 추가한다.
+
+## 수정사항 14
+
+- 기록 시각: 2026-07-16 19:10:00
+- 작업 요청 요약: 연결된 Android 기기에서 생성 비주얼이 포함된 최신 APK를 테스트한다.
+- 수정 전 상태: Android 개발 빌드는 성공했지만 Task 4의 최신 APK는 기기 미연결로 설치·실행하지 못했다.
+- 수정한 내용: 프로젝트 코드·Unity 설정은 변경하지 않았다. 최신 `PocketForge-dev.apk`를 SM-S938N에 설치하고 실행 화면·전면 Activity·프로세스 로그를 확인했다.
+- 수정 후 상태: 기기에서 생성 광석 아트와 Pickaxe·Drill·Robot 아이콘이 표시된다.
+- 테스트 결과: `adb install -r` 성공, `UnityPlayerGameActivity` 전면 실행, 기기 스크린샷으로 비주얼 표시 확인. 앱 프로세스에서 치명 예외·종료는 없었으나, Unity 서비스 연결 실패(Curl error 7)와 선택적 Play Asset Pack 클래스 부재 로그가 기록됐다.
+- 다음 작업: 필요하면 Unity Diagnostics/Cloud 연결과 Play Asset Delivery 사용 여부를 배포 설정 단계에서 검토한다.

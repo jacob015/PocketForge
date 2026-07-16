@@ -14,7 +14,7 @@
 - URP Unlit 머티리얼과 광석 빌보드로 3D 채굴 오브젝트에 광석 아트 적용
 - Pickaxe·Drill·Robot 강화 버튼에 아이콘 시트의 각 영역을 UGUI `RawImage`로 연결
 - Editor Play Mode 콘솔 오류 0건, EditMode 테스트 6/6 통과, Android 개발 빌드 성공(오류 0건·경고 1건)
-- 최신 APK의 실제 기기 설치·실행은 테스트 기기 미연결로 보류
+- 최신 APK를 SM-S938N에 설치·실행하고 생성 광석 아트·강화 아이콘 표시를 확인
 
 ### Task 3 — 확장 가능한 채굴 구조와 UGUI 전환
 
