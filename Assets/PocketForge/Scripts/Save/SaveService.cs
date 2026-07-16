@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace PocketForge.Save
@@ -20,6 +21,12 @@ namespace PocketForge.Save
 
         public static void Save(GameSaveData data)
         {
+            Save(data, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+        }
+
+        public static void Save(GameSaveData data, long savedAtUnixSeconds)
+        {
+            data.lastSavedUnixSeconds = Math.Max(0, savedAtUnixSeconds);
             PlayerPrefs.SetString(SaveKey, JsonUtility.ToJson(GameSaveMigrator.Normalize(data)));
             PlayerPrefs.Save();
         }

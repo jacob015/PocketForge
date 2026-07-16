@@ -10,6 +10,9 @@ namespace PocketForge.Content
     {
         [SerializeField] private OreDefinition[] ores = Array.Empty<OreDefinition>();
         [SerializeField] private UpgradeDefinition[] upgrades = Array.Empty<UpgradeDefinition>();
+        [SerializeField, Min(60)] private int maxOfflineRewardSeconds = 14400;
+
+        public int MaxOfflineRewardSeconds => maxOfflineRewardSeconds;
 
         public OreDefinition GetOreForStage(int stage)
         {

@@ -23,6 +23,14 @@ namespace PocketForge.Mining
 
         public void Render() => view.Render(state, gameService);
 
+        public void ShowOfflineReward(int credits)
+        {
+            if (credits > 0)
+            {
+                view.ShowOfflineReward(credits);
+            }
+        }
+
         public void Tick(float deltaTime)
         {
             Apply(gameService.Tick(state, deltaTime, UnityEngine.Random.value));

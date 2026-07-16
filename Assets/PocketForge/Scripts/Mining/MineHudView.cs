@@ -20,6 +20,7 @@ namespace PocketForge.Mining
         private RawImage pickaxeIcon;
         private RawImage drillIcon;
         private RawImage robotIcon;
+        private Text offlineRewardText;
         private MiningGameState lastState;
         private MiningGameService lastService;
 
@@ -79,6 +80,12 @@ namespace PocketForge.Mining
             SetUpgradeText(robotButton, $"{LanguageService.Get("robot").ToUpper()}  Lv.{player.robotLevel}  {LanguageService.Get("reward")} +10%", service.GetUpgradeCost(UpgradeType.Robot, player.robotLevel));
         }
 
+        public void ShowOfflineReward(int credits)
+        {
+            offlineRewardText.gameObject.SetActive(true);
+            offlineRewardText.text = $"{LanguageService.Get("reward").ToUpper()}  +{credits:N0} C";
+        }
+
         private void RefreshLocalization()
         {
             if (lastState != null && lastService != null)
@@ -90,6 +97,9 @@ namespace PocketForge.Mining
         private void Build()
         {
             headerText = CreateText("Header", transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -150f), new Vector2(960f, 150f), 46, TextAnchor.MiddleCenter);
+            offlineRewardText = CreateText("OfflineReward", transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -265f), new Vector2(720f, 64f), 28, TextAnchor.MiddleCenter);
+            offlineRewardText.color = new Color(0.45f, 0.95f, 0.7f);
+            offlineRewardText.gameObject.SetActive(false);
             oreText = CreateText("OreLabel", transform, new Vector2(0.5f, 0.53f), new Vector2(0.5f, 0.53f), new Vector2(0f, 75f), new Vector2(920f, 56f), 30, TextAnchor.MiddleCenter);
 
             CreatePanel("ProgressBackground", transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 20f), new Vector2(920f, 36f), new Color(0.06f, 0.08f, 0.11f, 0.9f));

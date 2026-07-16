@@ -98,3 +98,17 @@ MineGameController
 - `UpgradeDefinition`은 타입별 비용 성장과 레벨당 효과를 소유한다.
 - `MiningContentCatalog`은 현재 단계에 가장 가까운 광석 정의와 타입별 강화 정의를 선택한다. 새 콘텐츠는 정의 자산을 만들고 카탈로그에 등록하는 방식으로 확장한다.
 - 기존 `MiningGameConfig`은 이전 밸런스 자산으로 남아 있으나 현재 게임 루프의 런타임 입력은 `MiningContentCatalog`이다.
+## Task 7 오프라인 보상
+
+```text
+SaveService.Save
+  └─ lastSavedUnixSeconds
+        ↓
+MineGameController.Awake
+  └─ MiningGameService.ApplyOfflineReward
+        └─ MineHudView.ShowOfflineReward
+```
+
+- 저장 데이터 버전 3은 마지막 저장 Unix 시각을 포함한다.
+- 오프라인 보상은 `drill power × 경과 시간 × (현재 광석 Credits / 내구도)`로 산정하고, 카탈로그의 4시간 상한을 적용한다.
+- 오프라인 보상은 Credits만 추가한다. 단계·현재 광석 체력은 앱이 실행 중인 자동 채굴 처리와 구분해 변경하지 않는다.

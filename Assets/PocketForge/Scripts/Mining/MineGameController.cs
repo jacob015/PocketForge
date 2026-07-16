@@ -1,3 +1,4 @@
+using System;
 using PocketForge.Content;
 using PocketForge.Localization;
 using PocketForge.Save;
@@ -28,7 +29,8 @@ namespace PocketForge.Mining
             LanguageService.Initialize();
             var catalog = contentCatalog != null ? contentCatalog : MiningContentCatalog.CreateRuntimeDefault();
             var gameService = new MiningGameService(catalog);
-            gameState = gameService.CreateInitialState(SaveService.Load(), Random.value);
+            var saveData = SaveService.Load();
+            gameState = gameService.CreateInitialState(saveData, UnityEngine.Random.value);
             var view = MineHudView.Create();
             view.SetTheme(upgradeIconSheet);
             hudPresenter = new MineHudPresenter(view, gameService, gameState);
@@ -37,6 +39,12 @@ namespace PocketForge.Mining
 
             CreateOreVisual();
             hudPresenter.Render();
+            var offlineReward = gameService.ApplyOfflineReward(gameState, DateTimeOffset.UtcNow.ToUnixTimeSeconds() - saveData.lastSavedUnixSeconds);
+            hudPresenter.ShowOfflineReward(offlineReward);
+            if (offlineReward > 0)
+            {
+                SaveGame();
+            }
         }
 
         private void Update()

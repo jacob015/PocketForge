@@ -57,6 +57,20 @@ namespace PocketForge.Tests.Editor
         }
 
         [Test]
+        public void OfflineReward_UsesDrillPowerAndCapsElapsedTime()
+        {
+            var catalog = AssetDatabase.LoadAssetAtPath<MiningContentCatalog>(
+                "Assets/PocketForge/Content/MiningContentCatalog.asset");
+            var service = new MiningGameService(catalog);
+            var state = service.CreateInitialState(new GameSaveData { drillLevel = 1 }, 1f);
+
+            var reward = service.ApplyOfflineReward(state, catalog.MaxOfflineRewardSeconds * 2L);
+
+            Assert.AreEqual(1440, reward);
+            Assert.AreEqual(reward, state.Player.credits);
+        }
+
+        [Test]
         public void SaveMigrator_NormalizesLegacyInvalidValues()
         {
             var data = GameSaveMigrator.Normalize(new GameSaveData
@@ -65,12 +79,14 @@ namespace PocketForge.Tests.Editor
                 credits = -1,
                 stage = 0,
                 pickaxeLevel = -2
+                , lastSavedUnixSeconds = -1
             });
 
             Assert.AreEqual(GameSaveMigrator.CurrentVersion, data.version);
             Assert.AreEqual(0, data.credits);
             Assert.AreEqual(1, data.stage);
             Assert.AreEqual(0, data.pickaxeLevel);
+            Assert.AreEqual(0, data.lastSavedUnixSeconds);
         }
     }
 }

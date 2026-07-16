@@ -79,6 +79,22 @@ namespace PocketForge.Mining
             return Mathf.CeilToInt(stage * multiplier * GetRewardMultiplier(robotLevel));
         }
 
+        public int ApplyOfflineReward(MiningGameState state, long elapsedSeconds)
+        {
+            if (elapsedSeconds <= 0 || state.Player.drillLevel <= 0)
+            {
+                return 0;
+            }
+
+            var cappedSeconds = Mathf.Min(elapsedSeconds, catalog.MaxOfflineRewardSeconds);
+            var damage = GetAutoPowerPerSecond(state.Player.drillLevel) * cappedSeconds;
+            var ore = catalog.GetOreForStage(state.Player.stage);
+            var creditsPerDamage = GetOreReward(state.Player.stage, false, state.Player.robotLevel) / ore.GetDurability(state.Player.stage);
+            var reward = Mathf.FloorToInt(damage * creditsPerDamage);
+            state.Player.credits += reward;
+            return reward;
+        }
+
         private MiningGameResult DamageOre(MiningGameState state, float amount, float rareRoll)
         {
             if (amount <= 0f)

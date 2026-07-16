@@ -24,3 +24,4 @@
 | 2026-07-16 | Codex + imagegen + Unity MCP + ADB | 생성 리소스 기반 비주얼 개선 | 광석 아트, 강화 아이콘 시트, 투명 PNG, URP Unlit 머티리얼, UGUI 아이콘 | 크로마키 제거 결과를 Unity 에셋으로 적용; Editor Play Mode 오류 0건, EditMode 6/6 통과, Android 빌드·SM-S938N 설치·실행 성공 및 화면 표시 확인. Unity 서비스 연결과 선택적 Play Asset Pack 관련 로그는 남음 | 완료 |
 | 2026-07-16 | Codex + Unity MCP | 다국어 기반 | Unity Localization 패키지, 네 언어 코드 문자열 테이블, 기기 언어 기본값, 저장·즉시 갱신 서비스 | Unity 컴파일 오류 0건, EditMode 11/11 통과. String Table 에셋과 설정창은 후속 작업에서 서비스 API에 연결 | 완료 |
 | 2026-07-16 | Codex + Unity MCP + ADB | 콘텐츠 카탈로그 기반 채굴 루프 확장 | 광석·강화 ScriptableObject 정의, 카탈로그 자산, 서비스 조회 로직, 10단계 크리스털 콘텐츠 | Unity 컴파일 오류 0건, EditMode 12/12 통과, Editor Play Mode Console 오류 0건, Android APK 빌드·SM-S938N 설치/실행/화면 확인 및 Unity·AndroidRuntime 오류 logcat 0건 | 완료 |
+| 2026-07-16 | Codex + Unity MCP + ADB | 자동 채굴 오프라인 보상 | 저장 시각 마이그레이션, 4시간 상한 보상 계산, UGUI 재접속 보상 안내 | Unity 컴파일 오류 0건, EditMode 13/13 통과, Android APK 빌드·SM-S938N 설치/실행 및 Unity·AndroidRuntime 오류 logcat 0건 | 완료 |
