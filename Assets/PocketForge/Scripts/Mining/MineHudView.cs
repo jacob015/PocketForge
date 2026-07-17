@@ -36,12 +36,16 @@ namespace PocketForge.Mining
         private Button closeSettingsButton;
         private Image settingsCard;
         private readonly List<Image> languageButtonSurfaces = new();
+        private readonly List<Image> upgradeActionSurfaces = new();
         private Image[] pickaxePips;
         private Image[] drillPips;
         private Image[] robotPips;
         private Text feedbackText;
         private MiningGameState lastState;
         private MiningGameService lastService;
+        private RectTransform safeAreaRoot;
+        private Rect appliedSafeArea = new(-1f, -1f, -1f, -1f);
+        private Vector2Int appliedScreenSize = new(-1, -1);
 
         private void OnEnable() => LanguageService.Changed += RefreshLocalization;
 
@@ -71,7 +75,7 @@ namespace PocketForge.Mining
             robotButton.onClick.AddListener(() => upgradeAction(UpgradeType.Robot));
         }
 
-        public void SetTheme(Texture upgradeIcons, Texture2D uiKit)
+        public void SetTheme(Texture upgradeIcons, Texture2D uiKit, Texture2D upgradeButton)
         {
             if (upgradeIcons != null)
             {
@@ -85,6 +89,11 @@ namespace PocketForge.Mining
             {
                 ApplyUiKit(uiKit);
             }
+
+            if (upgradeButton != null)
+            {
+                ApplyUpgradeButton(upgradeButton);
+            }
         }
 
         public void Render(MiningGameState state, MiningGameService service)
@@ -97,7 +106,6 @@ namespace PocketForge.Mining
             oreText.text = $"<b>{(ore.IsRare ? "RARE " : string.Empty)}{LanguageService.Get("ore").ToUpper()}</b>  <color=#D9E4FF>{Mathf.CeilToInt(ore.Health)} / {Mathf.CeilToInt(ore.Durability)}</color>";
             oreProgress.fillAmount = Mathf.Clamp01(ore.Health / ore.Durability);
             oreProgress.color = ore.IsRare ? new Color(0.48f, 0.92f, 1f) : new Color(1f, 0.72f, 0.2f);
-            mineButton.GetComponentInChildren<Text>().text = $"<b>{LanguageService.Get("mine").ToUpper()}</b>  +{service.GetTapPower(player.pickaxeLevel):0}";
             SetUpgradeText(pickaxeButton, LanguageService.Get("pickaxe"), player.pickaxeLevel, $"{LanguageService.Get("tap")} +1", service.GetUpgradeCost(UpgradeType.Pickaxe, player.pickaxeLevel));
             SetUpgradeText(drillButton, LanguageService.Get("drill"), player.drillLevel, $"{LanguageService.Get("auto")} +{service.GetAutoPowerPerSecond(player.drillLevel + 1) - service.GetAutoPowerPerSecond(player.drillLevel):0.0}/s", service.GetUpgradeCost(UpgradeType.Drill, player.drillLevel));
             SetUpgradeText(robotButton, LanguageService.Get("robot"), player.robotLevel, $"{LanguageService.Get("reward")} +10%", service.GetUpgradeCost(UpgradeType.Robot, player.robotLevel));
@@ -124,6 +132,8 @@ namespace PocketForge.Mining
 
         private void HideFeedback() => feedbackText.gameObject.SetActive(false);
 
+        private void LateUpdate() => ApplySafeArea();
+
         private void RefreshLocalization()
         {
             if (lastState != null && lastService != null)
@@ -136,37 +146,43 @@ namespace PocketForge.Mining
 
         private void Build()
         {
-            topSurface = CreatePanel("TopSurface", transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -112f), new Vector2(1000f, 164f), new Color(0.06f, 0.1f, 0.24f, 0.94f));
-            upgradeSurface = CreatePanel("UpgradeSurface", transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 245f), new Vector2(1060f, 500f), new Color(0.025f, 0.045f, 0.12f, 0.28f));
-            actionSurface = CreatePanel("ActionSurface", transform, new Vector2(0.5f, 0.32f), new Vector2(0.5f, 0.32f), Vector2.zero, new Vector2(900f, 170f), Color.clear);
+            safeAreaRoot = CreateSafeAreaRoot(transform);
+            ApplySafeArea(true);
+            var hudRoot = safeAreaRoot.transform;
+
+            topSurface = CreatePanel("TopSurface", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-62f, -104f), new Vector2(856f, 148f), new Color(0.06f, 0.1f, 0.24f, 0.94f));
+            upgradeSurface = CreatePanel("UpgradeSurface", hudRoot, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 228f), new Vector2(970f, 456f), Color.clear);
+            actionSurface = CreatePanel("ActionSurface", hudRoot, new Vector2(0.5f, 0.315f), new Vector2(0.5f, 0.315f), Vector2.zero, new Vector2(600f, 250f), Color.clear);
             upgradeSurface.raycastTarget = false;
             actionSurface.raycastTarget = false;
 
-            headerCoin = CreatePanel("HeaderCoin", transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-420f, -112f), new Vector2(88f, 88f), Color.white);
+            headerCoin = CreatePanel("HeaderCoin", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-424f, -104f), new Vector2(82f, 82f), Color.white);
             headerCoin.GetComponent<Shadow>().enabled = false;
-            headerText = CreateText("Header", transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -112f), new Vector2(760f, 90f), 34, TextAnchor.MiddleCenter);
-            settingsButton = CreateButton("SettingsButton", transform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-78f, -82f), new Vector2(104f, 104f), new Color(0.12f, 0.2f, 0.3f));
+            headerText = CreateText("Header", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-54f, -104f), new Vector2(650f, 82f), 32, TextAnchor.MiddleCenter);
+            settingsButton = CreateButton("SettingsButton", hudRoot, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-62f, -104f), new Vector2(104f, 104f), new Color(0.12f, 0.2f, 0.3f));
             settingsButton.onClick.AddListener(() => settingsPanel.SetActive(true));
-            offlineRewardSurface = CreatePanel("OfflineRewardSurface", transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -224f), new Vector2(620f, 64f), new Color(0.04f, 0.2f, 0.16f, 0.88f));
-            offlineRewardText = CreateText("OfflineReward", transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -224f), new Vector2(600f, 52f), 25, TextAnchor.MiddleCenter);
+            offlineRewardSurface = CreatePanel("OfflineRewardSurface", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -204f), new Vector2(600f, 58f), new Color(0.04f, 0.2f, 0.16f, 0.88f));
+            offlineRewardText = CreateText("OfflineReward", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -204f), new Vector2(580f, 48f), 24, TextAnchor.MiddleCenter);
             offlineRewardText.color = new Color(0.45f, 0.95f, 0.7f);
             offlineRewardSurface.gameObject.SetActive(false);
             offlineRewardText.gameObject.SetActive(false);
-            oreText = CreateText("OreLabel", transform, new Vector2(0.5f, 0.445f), new Vector2(0.5f, 0.445f), new Vector2(0f, 62f), new Vector2(560f, 50f), 30, TextAnchor.MiddleCenter);
-            feedbackText = CreateText("ActionFeedback", transform, new Vector2(0.5f, 0.51f), new Vector2(0.5f, 0.51f), Vector2.zero, new Vector2(600f, 48f), 30, TextAnchor.MiddleCenter);
+            oreText = CreateText("OreLabel", hudRoot, new Vector2(0.5f, 0.405f), new Vector2(0.5f, 0.405f), new Vector2(0f, 56f), new Vector2(560f, 50f), 30, TextAnchor.MiddleCenter);
+            feedbackText = CreateText("ActionFeedback", hudRoot, new Vector2(0.5f, 0.51f), new Vector2(0.5f, 0.51f), Vector2.zero, new Vector2(600f, 48f), 30, TextAnchor.MiddleCenter);
             feedbackText.gameObject.SetActive(false);
 
-            progressBackground = CreatePanel("ProgressBackground", transform, new Vector2(0.5f, 0.41f), new Vector2(0.5f, 0.41f), Vector2.zero, new Vector2(690f, 92f), Color.white);
-            oreProgress = CreatePanel("ProgressFill", transform, new Vector2(0.5f, 0.41f), new Vector2(0.5f, 0.41f), new Vector2(54f, 0f), new Vector2(520f, 24f), new Color(0.95f, 0.45f, 0.12f));
+            progressBackground = CreatePanel("ProgressBackground", hudRoot, new Vector2(0.5f, 0.405f), new Vector2(0.5f, 0.405f), Vector2.zero, new Vector2(620f, 54f), new Color(0.05f, 0.1f, 0.24f, 0.96f));
+            oreProgress = CreatePanel("ProgressFill", progressBackground.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(582f, 22f), new Color(0.95f, 0.45f, 0.12f));
+            oreProgress.GetComponent<Shadow>().enabled = false;
             oreProgress.type = Image.Type.Filled;
             oreProgress.fillMethod = Image.FillMethod.Horizontal;
             oreProgress.fillOrigin = (int)Image.OriginHorizontal.Left;
 
-            mineButton = CreateButton("MineButton", transform, new Vector2(0.5f, 0.325f), new Vector2(0.5f, 0.325f), Vector2.zero, new Vector2(760f, 142f), new Color(1f, 0.48f, 0.12f));
-            mineIcon = CreateIcon("MineIcon", mineButton.transform, new Vector2(0.18f, 0.5f), new Vector2(0f, 0f), new Vector2(92f, 92f));
-            pickaxeButton = CreateButton("PickaxeButton", transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(-340f, 245f), new Vector2(300f, 430f), new Color(0.14f, 0.3f, 0.52f));
-            drillButton = CreateButton("DrillButton", transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 245f), new Vector2(300f, 430f), new Color(0.14f, 0.3f, 0.52f));
-            robotButton = CreateButton("RobotButton", transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(340f, 245f), new Vector2(300f, 430f), new Color(0.14f, 0.3f, 0.52f));
+            mineButton = CreateButton("MineButton", hudRoot, new Vector2(0.5f, 0.315f), new Vector2(0.5f, 0.315f), Vector2.zero, new Vector2(520f, 220f), new Color(1f, 0.48f, 0.12f));
+            mineButton.GetComponentInChildren<Text>().gameObject.SetActive(false);
+            mineIcon = CreateIcon("MineIcon", mineButton.transform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(168f, 168f));
+            pickaxeButton = CreateButton("PickaxeButton", hudRoot, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(-324f, 228f), new Vector2(286f, 404f), new Color(0.14f, 0.3f, 0.52f));
+            drillButton = CreateButton("DrillButton", hudRoot, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 228f), new Vector2(286f, 404f), new Color(0.14f, 0.3f, 0.52f));
+            robotButton = CreateButton("RobotButton", hudRoot, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(324f, 228f), new Vector2(286f, 404f), new Color(0.14f, 0.3f, 0.52f));
             pickaxeIcon = CreateIcon("PickaxeIcon", pickaxeButton.transform);
             drillIcon = CreateIcon("DrillIcon", drillButton.transform);
             robotIcon = CreateIcon("RobotIcon", robotButton.transform);
@@ -185,16 +201,13 @@ namespace PocketForge.Mining
             var panelSprite = CreateAtlasSprite(atlas, new Rect(0.035f, 0.748f, 0.448f, 0.158f), new Vector4(0.08f, 0.24f, 0.08f, 0.24f));
             var buttonSprite = CreateAtlasSprite(atlas, new Rect(0.518f, 0.735f, 0.447f, 0.177f), new Vector4(0.08f, 0.25f, 0.08f, 0.25f));
             var cardSprite = CreateAtlasSprite(atlas, new Rect(0.124f, 0.312f, 0.264f, 0.359f), new Vector4(0.16f, 0.10f, 0.16f, 0.10f));
-            var progressSprite = CreateAtlasSprite(atlas, new Rect(0.493f, 0.436f, 0.469f, 0.11f), Vector4.zero);
             var coinSprite = CreateAtlasSprite(atlas, new Rect(0.159f, 0.061f, 0.185f, 0.205f), Vector4.zero);
 
             ApplySlicedSprite(topSurface, panelSprite, Color.white);
             upgradeSurface.sprite = null;
             upgradeSurface.color = Color.clear;
             actionSurface.color = Color.clear;
-            progressBackground.sprite = progressSprite;
-            progressBackground.type = Image.Type.Simple;
-            progressBackground.color = Color.white;
+            ApplySlicedSprite(progressBackground, panelSprite, new Color(0.72f, 0.82f, 1f, 0.96f));
             headerCoin.sprite = coinSprite;
             headerCoin.type = Image.Type.Simple;
             ApplySlicedSprite(mineButton.image, buttonSprite, Color.white);
@@ -214,6 +227,18 @@ namespace PocketForge.Mining
             }
 
             ApplySlicedSprite(closeSettingsButton.image, buttonSprite, Color.white);
+        }
+
+        private void ApplyUpgradeButton(Texture2D texture)
+        {
+            var sprite = Sprite.Create(texture, new Rect(0f, 0f, texture.width, texture.height), new Vector2(0.5f, 0.5f), 100f);
+            foreach (var surface in upgradeActionSurfaces)
+            {
+                surface.sprite = sprite;
+                surface.type = Image.Type.Simple;
+                surface.color = Color.white;
+                surface.GetComponent<Shadow>().enabled = false;
+            }
         }
 
         private static Sprite CreateAtlasSprite(Texture2D atlas, Rect normalizedRect, Vector4 normalizedBorder)
@@ -288,6 +313,40 @@ namespace PocketForge.Mining
             new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
         }
 
+        private static RectTransform CreateSafeAreaRoot(Transform parent)
+        {
+            var root = new GameObject("SafeArea", typeof(RectTransform));
+            root.transform.SetParent(parent, false);
+            var rect = root.GetComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+            return rect;
+        }
+
+        private void ApplySafeArea(bool force = false)
+        {
+            if (safeAreaRoot == null || Screen.width <= 0 || Screen.height <= 0)
+            {
+                return;
+            }
+
+            var safeArea = Screen.safeArea;
+            var screenSize = new Vector2Int(Screen.width, Screen.height);
+            if (!force && safeArea == appliedSafeArea && screenSize == appliedScreenSize)
+            {
+                return;
+            }
+
+            safeAreaRoot.anchorMin = new Vector2(safeArea.xMin / Screen.width, safeArea.yMin / Screen.height);
+            safeAreaRoot.anchorMax = new Vector2(safeArea.xMax / Screen.width, safeArea.yMax / Screen.height);
+            safeAreaRoot.offsetMin = Vector2.zero;
+            safeAreaRoot.offsetMax = Vector2.zero;
+            appliedSafeArea = safeArea;
+            appliedScreenSize = screenSize;
+        }
+
         private static Image CreatePanel(string name, Transform parent, Vector2 anchorMin, Vector2 anchorMax, Vector2 position, Vector2 size, Color color)
         {
             var panel = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -319,7 +378,7 @@ namespace PocketForge.Mining
 
         private static RawImage CreateIcon(string name, Transform parent)
         {
-            return CreateIcon(name, parent, new Vector2(0.5f, 0.69f), Vector2.zero, new Vector2(230f, 210f));
+            return CreateIcon(name, parent, new Vector2(0.5f, 0.69f), Vector2.zero, new Vector2(214f, 190f));
         }
 
         private static RawImage CreateIcon(string name, Transform parent, Vector2 anchor, Vector2 position, Vector2 size)
@@ -364,8 +423,8 @@ namespace PocketForge.Mining
         {
             var label = button.GetComponentInChildren<Text>();
             var rect = label.rectTransform;
-            rect.anchorMin = new Vector2(0.04f, 0.20f);
-            rect.anchorMax = new Vector2(0.96f, 0.49f);
+            rect.anchorMin = new Vector2(0.04f, 0.22f);
+            rect.anchorMax = new Vector2(0.96f, 0.50f);
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = Vector2.zero;
             label.fontSize = 22;
@@ -377,22 +436,17 @@ namespace PocketForge.Mining
             button.GetComponentInChildren<Text>().text = $"<b>{name.ToUpper()}</b>  Lv.{level}\n<size=18>{bonus}</size>\n<color=#FFD75A>{cost:N0} C</color>";
         }
 
-        private static Image[] CreateUpgradeDetails(Transform parent, Color activeColor)
+        private Image[] CreateUpgradeDetails(Transform parent, Color activeColor)
         {
             var pips = new Image[5];
             for (var index = 0; index < pips.Length; index++)
             {
-                pips[index] = CreatePanel($"LevelPip{index + 1}", parent, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(-92f + index * 46f, 82f), new Vector2(38f, 20f), new Color(0.04f, 0.09f, 0.2f, 0.95f));
+                pips[index] = CreatePanel($"LevelPip{index + 1}", parent, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(-84f + index * 42f, 82f), new Vector2(34f, 18f), new Color(0.04f, 0.09f, 0.2f, 0.95f));
                 pips[index].GetComponent<Shadow>().enabled = false;
             }
 
-            var action = CreatePanel("UpgradeAction", parent, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 38f), new Vector2(236f, 62f), new Color(0.38f, 0.76f, 0.16f));
-            var outline = action.gameObject.AddComponent<Outline>();
-            outline.effectColor = new Color(0.78f, 1f, 0.48f, 0.8f);
-            outline.effectDistance = new Vector2(2f, -2f);
-            var arrow = CreateText("Arrow", action.transform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero, 42, TextAnchor.MiddleCenter);
-            arrow.text = "↑";
-            arrow.color = Color.white;
+            var action = CreatePanel("UpgradeAction", parent, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 42f), new Vector2(232f, 74f), new Color(0.38f, 0.76f, 0.16f));
+            upgradeActionSurfaces.Add(action);
             UpdatePips(pips, 0, activeColor);
             return pips;
         }
