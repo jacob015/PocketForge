@@ -15,6 +15,8 @@ namespace PocketForge.Mining
         [SerializeField] private Texture2D uiKitTexture;
         [SerializeField] private GameObject generatedOrePrefab;
         [SerializeField, Min(0.01f)] private float generatedOreScale = 1.25f;
+        [SerializeField, Min(0.1f)] private float orePresentationScale = 1.5f;
+        [SerializeField] private Vector3 orePresentationPosition = new(0f, 2.8f, 2.8f);
         [SerializeField] private MiningContentCatalog contentCatalog;
 
         private MiningGameState gameState;
@@ -24,6 +26,10 @@ namespace PocketForge.Mining
         private Vector3 oreBaseScale = Vector3.one;
         private bool usesGeneratedOreModel;
         private GameObject activeOrePrefab;
+        private Material backdropMaterial;
+        private Mesh backdropMesh;
+        private Transform backdropVisual;
+        private float backdropAspect = -1f;
 
         // Keep CreatePrimitive dependencies in stripped player builds.
         private MeshFilter PrimitiveMeshFilterReference { get; set; }
@@ -39,8 +45,9 @@ namespace PocketForge.Mining
             var gameService = new MiningGameService(catalog);
             var saveData = SaveService.Load();
             gameState = gameService.CreateInitialState(saveData, UnityEngine.Random.value);
+            CreateQuarryBackdrop();
             var view = MineHudView.Create();
-            view.SetTheme(upgradeIconSheet, quarryBackdrop, uiKitTexture);
+            view.SetTheme(upgradeIconSheet, uiKitTexture);
             hudPresenter = new MineHudPresenter(view, gameService, gameState);
             hudPresenter.StateChanged += UpdateOreVisual;
             hudPresenter.SaveRequested += SaveGame;
@@ -59,6 +66,7 @@ namespace PocketForge.Mining
         {
             hudPresenter.Tick(Time.deltaTime);
             AnimateOreVisual();
+            ResizeQuarryBackdrop();
         }
 
         private void OnApplicationPause(bool paused)
@@ -70,6 +78,19 @@ namespace PocketForge.Mining
         }
 
         private void OnApplicationQuit() => SaveGame();
+
+        private void OnDestroy()
+        {
+            if (backdropMaterial != null)
+            {
+                Destroy(backdropMaterial);
+            }
+
+            if (backdropMesh != null)
+            {
+                Destroy(backdropMesh);
+            }
+        }
 
         private void SaveGame()
         {
@@ -88,11 +109,11 @@ namespace PocketForge.Mining
                 ? Instantiate(orePrefab)
                 : new GameObject("MineOre");
             ore.name = "MineOre";
-            ore.transform.position = new Vector3(0f, 2.15f, 2.8f);
+            ore.transform.position = orePresentationPosition;
             if (usesGeneratedOreModel)
             {
                 ore.transform.rotation = Quaternion.Euler(0f, 25f, 0f);
-                oreBaseScale = Vector3.one * ResolveOreScale();
+                oreBaseScale = Vector3.one * ResolveOreScale() * orePresentationScale;
                 ore.transform.localScale = oreBaseScale;
             }
             else
@@ -136,6 +157,74 @@ namespace PocketForge.Mining
             }
 
             Destroy(chunk.GetComponent<Collider>());
+        }
+
+        private void CreateQuarryBackdrop()
+        {
+            if (quarryBackdrop == null || Camera.main == null)
+            {
+                return;
+            }
+
+            var shader = Shader.Find("Universal Render Pipeline/Unlit");
+            if (shader == null)
+            {
+                return;
+            }
+
+            var camera = Camera.main;
+            const float distance = 14.5f;
+            var backdrop = new GameObject("QuarryBackdrop", typeof(MeshFilter), typeof(MeshRenderer));
+            backdrop.transform.position = camera.transform.position + camera.transform.forward * distance;
+            backdrop.transform.rotation = camera.transform.rotation;
+            backdropVisual = backdrop.transform;
+
+            backdropMesh = new Mesh
+            {
+                name = "QuarryBackdropQuad",
+                vertices = new[]
+                {
+                    new Vector3(-0.5f, -0.5f, 0f),
+                    new Vector3(0.5f, -0.5f, 0f),
+                    new Vector3(-0.5f, 0.5f, 0f),
+                    new Vector3(0.5f, 0.5f, 0f)
+                },
+                uv = new[]
+                {
+                    new Vector2(0f, 0f),
+                    new Vector2(1f, 0f),
+                    new Vector2(0f, 1f),
+                    new Vector2(1f, 1f)
+                },
+                triangles = new[] { 0, 2, 1, 2, 3, 1 }
+            };
+            backdropMesh.RecalculateBounds();
+            backdrop.GetComponent<MeshFilter>().sharedMesh = backdropMesh;
+
+            backdropMaterial = new Material(shader)
+            {
+                name = "QuarryBackdropRuntime"
+            };
+            backdropMaterial.SetTexture("_BaseMap", quarryBackdrop);
+            backdropMaterial.SetColor("_BaseColor", Color.white);
+            backdrop.GetComponent<MeshRenderer>().sharedMaterial = backdropMaterial;
+            ResizeQuarryBackdrop(true);
+        }
+
+        private void ResizeQuarryBackdrop(bool force = false)
+        {
+            var camera = Camera.main;
+            if (backdropVisual == null || camera == null || (!force && Mathf.Approximately(backdropAspect, camera.aspect)))
+            {
+                return;
+            }
+
+            const float distance = 14.5f;
+            var height = 2f * distance * Mathf.Tan(camera.fieldOfView * 0.5f * Mathf.Deg2Rad) * 1.04f;
+            backdropAspect = camera.aspect;
+            backdropVisual.position = camera.transform.position + camera.transform.forward * distance;
+            backdropVisual.rotation = camera.transform.rotation;
+            backdropVisual.localScale = new Vector3(height * backdropAspect, height, 1f);
         }
 
         private void UpdateOreVisual()

@@ -282,6 +282,8 @@ MonoBehaviour:
   uiKitTexture: {fileID: 2800000, guid: 643bac96741cd2d439f11cacd02032ab, type: 3}
   generatedOrePrefab: {fileID: 0}
   generatedOreScale: 1.25
+  orePresentationScale: 1.5
+  orePresentationPosition: {x: 0, y: 2.8, z: 2.8}
   contentCatalog: {fileID: 11400000, guid: 2cc42578fa320984f8defbc104b4df96, type: 2}
 --- !u!4 &1370660441
 Transform:
@@ -316,7 +318,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!23 &1580760367
 MeshRenderer:
   m_ObjectHideFlags: 0
