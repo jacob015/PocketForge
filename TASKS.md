@@ -139,3 +139,4 @@
 다음 구현 우선순위 제안: Android 런타임 오류를 해결한 뒤, 현재 `OnGUI` 기반 프로토타입의 표시·입력 책임을 UGUI와 게임 상태로 분리한다. 별도 Task로 승인받아 착수한다.
 <!-- 2026-07-16: Task 11 content expansion verified. Task 12 visual redesign is now active. -->
 <!-- 2026-07-17: Task 12 checkpoint: a Meshy image-to-3D turquoise crystal ore GLB is imported through glTFast, assigned in Mine.unity, and verified in an Android development APK on SM-S938N. UI polish remains active. -->
+<!-- 2026-07-17: Task 12 checkpoint: Copper, Iron, Gold, and Crystal now resolve their own Meshy-generated GLB through OreDefinition; the HUD was reorganized into compact header, visible mine stage, bottom mine action, and horizontal upgrades. EditMode 18/18 and an SM-S938N Android development APK launch passed; release-size optimization remains pending. -->

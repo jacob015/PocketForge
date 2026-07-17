@@ -21,3 +21,5 @@ MonoBehaviour:
   rareRewardMultiplier: 7
   normalVisualColor: {r: 0.45, g: 0.25, b: 0.9, a: 1}
   rareVisualColor: {r: 0.9, g: 0.5, b: 1, a: 1}
+  visualPrefab: {fileID: -8098169881513260187, guid: b00b705c174c46046ae786446b9905f6, type: 3}
+  visualScale: 1.25

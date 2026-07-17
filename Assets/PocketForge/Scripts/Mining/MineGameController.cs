@@ -22,6 +22,7 @@ namespace PocketForge.Mining
         private Renderer[] oreRenderers;
         private Vector3 oreBaseScale = Vector3.one;
         private bool usesGeneratedOreModel;
+        private GameObject activeOrePrefab;
 
         // Keep CreatePrimitive dependencies in stripped player builds.
         private MeshFilter PrimitiveMeshFilterReference { get; set; }
@@ -79,16 +80,18 @@ namespace PocketForge.Mining
 
         private void CreateOreVisual()
         {
-            usesGeneratedOreModel = generatedOrePrefab != null;
+            var orePrefab = ResolveOrePrefab();
+            usesGeneratedOreModel = orePrefab != null;
+            activeOrePrefab = orePrefab;
             var ore = usesGeneratedOreModel
-                ? Instantiate(generatedOrePrefab)
+                ? Instantiate(orePrefab)
                 : new GameObject("MineOre");
             ore.name = "MineOre";
             ore.transform.position = new Vector3(0f, 2.15f, 2.8f);
             if (usesGeneratedOreModel)
             {
                 ore.transform.rotation = Quaternion.Euler(0f, 25f, 0f);
-                oreBaseScale = Vector3.one * generatedOreScale;
+                oreBaseScale = Vector3.one * ResolveOreScale();
                 ore.transform.localScale = oreBaseScale;
             }
             else
@@ -136,7 +139,21 @@ namespace PocketForge.Mining
 
         private void UpdateOreVisual()
         {
-            if (oreVisual == null || gameState == null || usesGeneratedOreModel)
+            if (oreVisual == null || gameState == null)
+            {
+                return;
+            }
+
+            var desiredPrefab = ResolveOrePrefab();
+            if (desiredPrefab != activeOrePrefab)
+            {
+                Destroy(oreVisual.gameObject);
+                oreVisual = null;
+                CreateOreVisual();
+                return;
+            }
+
+            if (usesGeneratedOreModel)
             {
                 return;
             }
@@ -158,6 +175,20 @@ namespace PocketForge.Mining
             var pulse = 1f + Mathf.Sin(Time.time * 2f) * 0.03f;
             oreVisual.localScale = oreBaseScale * pulse;
             oreVisual.Rotate(0f, 12f * Time.deltaTime, 0f, Space.World);
+        }
+
+        private GameObject ResolveOrePrefab()
+        {
+            return gameState?.Ore?.Definition?.VisualPrefab != null
+                ? gameState.Ore.Definition.VisualPrefab
+                : generatedOrePrefab;
+        }
+
+        private float ResolveOreScale()
+        {
+            return gameState?.Ore?.Definition?.VisualPrefab != null
+                ? gameState.Ore.Definition.VisualScale
+                : generatedOreScale;
         }
     }
 }

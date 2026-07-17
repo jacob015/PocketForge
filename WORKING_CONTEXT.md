@@ -13,6 +13,14 @@
 - Verification: Unity console errors 0, EditMode 18/18 passed, Android development build succeeded (errors 0, warnings 2), and the refreshed APK installed and displayed the colored 3D crystal ore on SM-S938N. No Unity, AndroidRuntime, or glTF runtime error was found in the captured log.
 - Next: Continue Task 12 UI readability and visual polish; keep the generated model's mobile memory footprint under review before release builds.
 
+## Change item 22
+
+- Recorded at: 2026-07-17 23:10:00
+- Request: Add several genuine ore-model variations while preserving the existing turquoise-crystal ore silhouette, and reduce the prototype feel of the mining HUD layout.
+- Applied: Generated original copper, iron, and gold ore concepts, created textured Meshy GLB models, imported them through glTFast, and attached the model reference and scale to each `OreDefinition`. `MineGameController` now resolves the visual from the active ore definition and replaces the model only when the ore stage changes; the scene-level crystal reference remains a fallback. The HUD now uses a compact header, a clearer central mine stage, a broad bottom mine action, and three horizontal upgrade cards to leave the quarry backdrop readable.
+- Verification: All four ScriptableObject visual references were validated through Unity serialization; the copper model was reviewed in Scene View; Unity console errors 0; EditMode 18/18 passed. Android development build succeeded (1059.92 MB, errors 0, warnings 2), installed on SM-S938N, launched successfully, and produced no Unity, AndroidRuntime, glTF, or exception log entries in the captured application log.
+- Next: Continue Task 12 refinement with the portrait device layout; adjust scale or contrast only if a manual visual review requires it. The large development build size must be optimized before release.
+
 ## 수정사항 20
 
 - 기록 시각: 2026-07-16 23:30:00

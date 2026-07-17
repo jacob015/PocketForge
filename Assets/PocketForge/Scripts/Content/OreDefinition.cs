@@ -14,12 +14,16 @@ namespace PocketForge.Content
         [SerializeField, Min(1)] private int rareRewardMultiplier = 5;
         [SerializeField] private Color normalVisualColor = new(0.85f, 0.4f, 0.12f);
         [SerializeField] private Color rareVisualColor = new(0.4f, 0.9f, 1f);
+        [SerializeField] private GameObject visualPrefab;
+        [SerializeField, Min(0.01f)] private float visualScale = 1.25f;
 
         public string ContentId => contentId;
         public int StartStage => startStage;
         public float RareChance => rareChance;
         public int NormalRewardMultiplier => normalRewardMultiplier;
         public int RareRewardMultiplier => rareRewardMultiplier;
+        public GameObject VisualPrefab => visualPrefab;
+        public float VisualScale => visualScale;
 
         public float GetDurability(int stage) => baseDurability + Mathf.Max(0, stage - startStage) * durabilityPerStage;
 
