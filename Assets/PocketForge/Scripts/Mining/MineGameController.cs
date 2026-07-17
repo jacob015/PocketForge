@@ -11,11 +11,17 @@ namespace PocketForge.Mining
         [SerializeField] private Material oreMaterial;
         [SerializeField] private Material oreBillboardMaterial;
         [SerializeField] private Texture2D upgradeIconSheet;
+        [SerializeField] private Texture2D quarryBackdrop;
+        [SerializeField] private GameObject generatedOrePrefab;
+        [SerializeField, Min(0.01f)] private float generatedOreScale = 1.25f;
         [SerializeField] private MiningContentCatalog contentCatalog;
 
         private MiningGameState gameState;
         private MineHudPresenter hudPresenter;
         private Transform oreVisual;
+        private Renderer[] oreRenderers;
+        private Vector3 oreBaseScale = Vector3.one;
+        private bool usesGeneratedOreModel;
 
         // Keep CreatePrimitive dependencies in stripped player builds.
         private MeshFilter PrimitiveMeshFilterReference { get; set; }
@@ -32,7 +38,7 @@ namespace PocketForge.Mining
             var saveData = SaveService.Load();
             gameState = gameService.CreateInitialState(saveData, UnityEngine.Random.value);
             var view = MineHudView.Create();
-            view.SetTheme(upgradeIconSheet);
+            view.SetTheme(upgradeIconSheet, quarryBackdrop);
             hudPresenter = new MineHudPresenter(view, gameService, gameState);
             hudPresenter.StateChanged += UpdateOreVisual;
             hudPresenter.SaveRequested += SaveGame;
@@ -73,38 +79,73 @@ namespace PocketForge.Mining
 
         private void CreateOreVisual()
         {
-            var ore = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            usesGeneratedOreModel = generatedOrePrefab != null;
+            var ore = usesGeneratedOreModel
+                ? Instantiate(generatedOrePrefab)
+                : new GameObject("MineOre");
             ore.name = "MineOre";
-            ore.transform.position = new Vector3(0f, 0.55f, 2.8f);
-            ore.transform.localScale = Vector3.one * 1.6f;
-            if (oreMaterial != null)
+            ore.transform.position = new Vector3(0f, 2.15f, 2.8f);
+            if (usesGeneratedOreModel)
             {
-                ore.GetComponent<Renderer>().sharedMaterial = oreMaterial;
+                ore.transform.rotation = Quaternion.Euler(0f, 25f, 0f);
+                oreBaseScale = Vector3.one * generatedOreScale;
+                ore.transform.localScale = oreBaseScale;
             }
-
-            if (oreBillboardMaterial != null)
+            else
             {
-                var billboard = GameObject.CreatePrimitive(PrimitiveType.Quad);
-                billboard.name = "ForgeOreArt";
-                billboard.transform.SetParent(ore.transform, false);
-                billboard.transform.localPosition = new Vector3(0f, 0f, -0.9f);
-                billboard.transform.localScale = Vector3.one * 2.6f;
-                billboard.GetComponent<Renderer>().sharedMaterial = oreBillboardMaterial;
-                Destroy(billboard.GetComponent<Collider>());
+                CreateOreChunk(ore.transform, new Vector3(0f, 0f, 0.1f), new Vector3(1.45f, 1.18f, 1.22f), new Vector3(8f, 0f, -10f));
+                CreateOreChunk(ore.transform, new Vector3(-0.76f, -0.2f, 0.2f), new Vector3(0.7f, 0.62f, 0.66f), new Vector3(15f, 18f, -18f));
+                CreateOreChunk(ore.transform, new Vector3(0.72f, -0.26f, 0.18f), new Vector3(0.65f, 0.58f, 0.62f), new Vector3(12f, -24f, 15f));
+                CreateOreChunk(ore.transform, new Vector3(0.08f, 0.56f, 0.1f), new Vector3(0.74f, 0.5f, 0.68f), new Vector3(-14f, 8f, 10f));
+                CreateOreChunk(ore.transform, new Vector3(-0.35f, 0.28f, -0.82f), new Vector3(0.28f, 0.25f, 0.12f), new Vector3(0f, 24f, 0f));
+                CreateOreChunk(ore.transform, new Vector3(0.38f, -0.08f, -0.86f), new Vector3(0.22f, 0.2f, 0.1f), new Vector3(0f, -18f, 0f));
+
+                if (oreBillboardMaterial != null)
+                {
+                    var billboard = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                    billboard.name = "ForgeOreArt";
+                    billboard.transform.SetParent(ore.transform, false);
+                    billboard.transform.localPosition = new Vector3(0f, 0f, -0.9f);
+                    billboard.transform.localScale = Vector3.one * 2.6f;
+                    billboard.GetComponent<Renderer>().sharedMaterial = oreBillboardMaterial;
+                    Destroy(billboard.GetComponent<Collider>());
+                }
             }
 
             oreVisual = ore.transform;
+            oreRenderers = ore.GetComponentsInChildren<Renderer>();
             UpdateOreVisual();
+        }
+
+        private void CreateOreChunk(Transform parent, Vector3 position, Vector3 scale, Vector3 rotation)
+        {
+            var chunk = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            chunk.name = "OreChunk";
+            chunk.transform.SetParent(parent, false);
+            chunk.transform.localPosition = position;
+            chunk.transform.localScale = scale;
+            chunk.transform.localEulerAngles = rotation;
+            var renderer = chunk.GetComponent<Renderer>();
+            if (oreMaterial != null)
+            {
+                renderer.sharedMaterial = oreMaterial;
+            }
+
+            Destroy(chunk.GetComponent<Collider>());
         }
 
         private void UpdateOreVisual()
         {
-            if (oreVisual == null || gameState == null)
+            if (oreVisual == null || gameState == null || usesGeneratedOreModel)
             {
                 return;
             }
 
-            oreVisual.GetComponent<Renderer>().material.color = gameState.Ore.Definition.GetVisualColor(gameState.Ore.IsRare);
+            var baseColor = gameState.Ore.Definition.GetVisualColor(gameState.Ore.IsRare);
+            foreach (var renderer in oreRenderers)
+            {
+                renderer.material.color = baseColor;
+            }
         }
 
         private void AnimateOreVisual()
@@ -115,7 +156,7 @@ namespace PocketForge.Mining
             }
 
             var pulse = 1f + Mathf.Sin(Time.time * 2f) * 0.03f;
-            oreVisual.localScale = Vector3.one * 1.6f * pulse;
+            oreVisual.localScale = oreBaseScale * pulse;
             oreVisual.Rotate(0f, 12f * Time.deltaTime, 0f, Space.World);
         }
     }

@@ -20,6 +20,7 @@ namespace PocketForge.Mining
         private RawImage pickaxeIcon;
         private RawImage drillIcon;
         private RawImage robotIcon;
+        private RawImage backdropImage;
         private Text offlineRewardText;
         private Image offlineRewardSurface;
         private Button settingsButton;
@@ -59,16 +60,20 @@ namespace PocketForge.Mining
             robotButton.onClick.AddListener(() => upgradeAction(UpgradeType.Robot));
         }
 
-        public void SetTheme(Texture upgradeIcons)
+        public void SetTheme(Texture upgradeIcons, Texture backdrop)
         {
-            if (upgradeIcons == null)
+            if (backdrop != null)
             {
-                return;
+                backdropImage.texture = backdrop;
+                backdropImage.color = new Color(1f, 1f, 1f, 0.42f);
             }
 
-            SetIcon(pickaxeIcon, upgradeIcons, 0);
-            SetIcon(drillIcon, upgradeIcons, 1);
-            SetIcon(robotIcon, upgradeIcons, 2);
+            if (upgradeIcons != null)
+            {
+                SetIcon(pickaxeIcon, upgradeIcons, 0);
+                SetIcon(drillIcon, upgradeIcons, 1);
+                SetIcon(robotIcon, upgradeIcons, 2);
+            }
         }
 
         public void Render(MiningGameState state, MiningGameService service)
@@ -77,11 +82,11 @@ namespace PocketForge.Mining
             lastService = service;
             var player = state.Player;
             var ore = state.Ore;
-            headerText.text = $"POCKET FORGE\n<size=32>{LanguageService.Get("credits")}  {player.credits:N0}     {LanguageService.Get("depth")}  {player.stage}</size>";
-            oreText.text = $"{(ore.IsRare ? "RARE " : string.Empty)}{LanguageService.Get("ore").ToUpper()}  {Mathf.CeilToInt(ore.Health)} / {Mathf.CeilToInt(ore.Durability)}";
+            headerText.text = $"<b>POCKET FORGE</b>\n<size=30><color=#FFD75A>{LanguageService.Get("credits").ToUpper()}  {player.credits:N0}</color>     <color=#7BE8FF>{LanguageService.Get("depth").ToUpper()}  {player.stage}</color></size>";
+            oreText.text = $"<b>{(ore.IsRare ? "RARE " : string.Empty)}{LanguageService.Get("ore").ToUpper()}</b>  <color=#D9E4FF>{Mathf.CeilToInt(ore.Health)} / {Mathf.CeilToInt(ore.Durability)}</color>";
             oreProgress.fillAmount = Mathf.Clamp01(ore.Health / ore.Durability);
-            oreProgress.color = ore.IsRare ? new Color(0.4f, 0.9f, 1f) : new Color(0.95f, 0.45f, 0.12f);
-            mineButton.GetComponentInChildren<Text>().text = $"{LanguageService.Get("mine").ToUpper()}  +{service.GetTapPower(player.pickaxeLevel):0}";
+            oreProgress.color = ore.IsRare ? new Color(0.48f, 0.92f, 1f) : new Color(1f, 0.72f, 0.2f);
+            mineButton.GetComponentInChildren<Text>().text = $"<b>{LanguageService.Get("mine").ToUpper()}</b>  +{service.GetTapPower(player.pickaxeLevel):0}";
             SetUpgradeText(pickaxeButton, $"{LanguageService.Get("pickaxe").ToUpper()}  Lv.{player.pickaxeLevel}  {LanguageService.Get("tap")} +1", service.GetUpgradeCost(UpgradeType.Pickaxe, player.pickaxeLevel));
             SetUpgradeText(drillButton, $"{LanguageService.Get("drill").ToUpper()}  Lv.{player.drillLevel}  {LanguageService.Get("auto")} +{service.GetAutoPowerPerSecond(player.drillLevel + 1) - service.GetAutoPowerPerSecond(player.drillLevel):0.0}/s", service.GetUpgradeCost(UpgradeType.Drill, player.drillLevel));
             SetUpgradeText(robotButton, $"{LanguageService.Get("robot").ToUpper()}  Lv.{player.robotLevel}  {LanguageService.Get("reward")} +10%", service.GetUpgradeCost(UpgradeType.Robot, player.robotLevel));
@@ -117,9 +122,13 @@ namespace PocketForge.Mining
 
         private void Build()
         {
-            CreatePanel("TopSurface", transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -142f), new Vector2(1000f, 230f), new Color(0.035f, 0.07f, 0.13f, 0.94f));
-            CreatePanel("UpgradeSurface", transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 230f), new Vector2(1000f, 480f), new Color(0.025f, 0.045f, 0.085f, 0.9f));
-            CreatePanel("MineSurface", transform, new Vector2(0.5f, 0.41f), new Vector2(0.5f, 0.41f), new Vector2(0f, 0f), new Vector2(970f, 176f), new Color(0.05f, 0.07f, 0.1f, 0.82f));
+            backdropImage = CreateBackdrop(transform);
+            CreatePanel("SkyGradient", transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1080f, 1920f), new Color(0.055f, 0.09f, 0.23f, 0.12f));
+            CreatePanel("GlowLeft", transform, new Vector2(0f, 0.72f), new Vector2(0f, 0.72f), new Vector2(150f, 0f), new Vector2(430f, 430f), new Color(0.22f, 0.18f, 0.6f, 0.22f));
+            CreatePanel("GlowRight", transform, new Vector2(1f, 0.42f), new Vector2(1f, 0.42f), new Vector2(-110f, 0f), new Vector2(360f, 360f), new Color(0.05f, 0.64f, 0.85f, 0.14f));
+            CreatePanel("TopSurface", transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -142f), new Vector2(1000f, 230f), new Color(0.08f, 0.12f, 0.29f, 0.94f));
+            CreatePanel("UpgradeSurface", transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 255f), new Vector2(1000f, 530f), new Color(0.055f, 0.08f, 0.2f, 0.94f));
+            CreatePanel("MineSurface", transform, new Vector2(0.5f, 0.41f), new Vector2(0.5f, 0.41f), new Vector2(0f, 0f), new Vector2(970f, 190f), new Color(0.12f, 0.16f, 0.34f, 0.9f));
 
             headerText = CreateText("Header", transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-76f, -126f), new Vector2(760f, 142f), 48, TextAnchor.MiddleCenter);
             settingsButton = CreateButton("SettingsButton", transform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-142f, -50f), new Vector2(190f, 54f), new Color(0.12f, 0.2f, 0.3f));
@@ -139,10 +148,10 @@ namespace PocketForge.Mining
             oreProgress.fillMethod = Image.FillMethod.Horizontal;
             oreProgress.fillOrigin = (int)Image.OriginHorizontal.Left;
 
-            mineButton = CreateButton("MineButton", transform, new Vector2(0.5f, 0.41f), new Vector2(0.5f, 0.41f), new Vector2(0f, 0f), new Vector2(920f, 126f), new Color(0.94f, 0.31f, 0.06f));
-            pickaxeButton = CreateButton("PickaxeButton", transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 310f), new Vector2(920f, 86f), new Color(0.15f, 0.22f, 0.32f));
-            drillButton = CreateButton("DrillButton", transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 210f), new Vector2(920f, 86f), new Color(0.15f, 0.22f, 0.32f));
-            robotButton = CreateButton("RobotButton", transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 110f), new Vector2(920f, 86f), new Color(0.15f, 0.22f, 0.32f));
+            mineButton = CreateButton("MineButton", transform, new Vector2(0.5f, 0.41f), new Vector2(0.5f, 0.41f), new Vector2(0f, 0f), new Vector2(920f, 132f), new Color(1f, 0.48f, 0.12f));
+            pickaxeButton = CreateButton("PickaxeButton", transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 350f), new Vector2(920f, 92f), new Color(0.16f, 0.29f, 0.5f));
+            drillButton = CreateButton("DrillButton", transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 240f), new Vector2(920f, 92f), new Color(0.16f, 0.29f, 0.5f));
+            robotButton = CreateButton("RobotButton", transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 130f), new Vector2(920f, 92f), new Color(0.16f, 0.29f, 0.5f));
             pickaxeIcon = CreateIcon("PickaxeIcon", pickaxeButton.transform);
             drillIcon = CreateIcon("DrillIcon", drillButton.transform);
             robotIcon = CreateIcon("RobotIcon", robotButton.transform);
@@ -236,6 +245,21 @@ namespace PocketForge.Mining
             rect.anchoredPosition = new Vector2(62f, 0f);
             rect.sizeDelta = new Vector2(88f, 88f);
             var image = iconObject.GetComponent<RawImage>();
+            image.raycastTarget = false;
+            return image;
+        }
+
+        private static RawImage CreateBackdrop(Transform parent)
+        {
+            var imageObject = new GameObject("CrystalQuarryBackdrop", typeof(RectTransform), typeof(CanvasRenderer), typeof(RawImage));
+            imageObject.transform.SetParent(parent, false);
+            var rect = imageObject.GetComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+            var image = imageObject.GetComponent<RawImage>();
+            image.color = Color.clear;
             image.raycastTarget = false;
             return image;
         }

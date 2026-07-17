@@ -5,6 +5,14 @@
 - 2026-07-16: Added Iron (stage 4) and Gold (stage 7) ore definitions to the existing content catalog, preserving Copper (stage 1) and Crystal (stage 10).
 - Verification: Unity EditMode 18/18 passed, including the catalog milestone selection test, before the Task 12 visual redesign begins.
 
+## Change item 21
+
+- Recorded at: 2026-07-17 22:38:00
+- Request: Replace the temporary code-built ore shape with a genuine AI-generated 3D model suitable for the casual mining presentation.
+- Applied: Generated an original turquoise crystal ore concept, used Meshy image-to-3D to create a textured GLB, installed `com.unity.cloud.gltfast` 6.19.0 for GLB import, and assigned the imported model to `MineGameController.generatedOrePrefab`. The previous primitive/billboard ore remains as a null-reference fallback.
+- Verification: Unity console errors 0, EditMode 18/18 passed, Android development build succeeded (errors 0, warnings 2), and the refreshed APK installed and displayed the colored 3D crystal ore on SM-S938N. No Unity, AndroidRuntime, or glTF runtime error was found in the captured log.
+- Next: Continue Task 12 UI readability and visual polish; keep the generated model's mobile memory footprint under review before release builds.
+
 ## 수정사항 20
 
 - 기록 시각: 2026-07-16 23:30:00
