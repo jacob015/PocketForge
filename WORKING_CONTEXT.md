@@ -212,3 +212,12 @@
 - 수정한 내용: 상단 정보, 채굴 행동, 강화 목록에 별도 표면 패널·그림자·버튼 외곽선을 적용하고 오프라인 보상 안내를 강조 패널로 변경했다.
 - 테스트 결과: Unity 컴파일 오류 0건, EditMode 13/13 통과, Android APK 빌드 성공(오류 0건), SM-S938N 설치·실행 및 화면 캡처로 레이아웃 확인.
 - 다음 작업: 설정창과 언어 선택 UI 또는 성장 콘텐츠 확장을 별도 승인받아 진행한다.
+## 변경사항 19
+
+- 기록 시각: 2026-07-18
+- 작업 요청 요약: AI 생성 UI 이미지를 실제 HUD에 적용하고, 약 157MB였던 Android APK를 50MB 이하로 최적화한다.
+- 작업 전 상태: 4개 Meshy GLB가 각 27~30MB의 빌드 데이터를 차지했고, 런타임 HUD는 단색 프로토타입 패널을 사용했다.
+- 변경 내용: UnityMeshSimplifier 3.1.1 기반 재생성 가능한 `OreAssetOptimizer`를 추가했다. 4개 광석을 약 17,196~22,630 triangles, 512px ASTC 6x6 텍스처, URP Lit 네이티브 prefab으로 변환하고 OreDefinition 참조를 교체했다. AI 생성 HUD 레퍼런스와 투명 UI 키트를 추가하고 `MineHudView`에서 9-slice 아틀라스로 적용했다. 원본 GLB fallback 참조와 배경을 가리던 프로토타입 glow 레이어를 제거했다.
+- 검증 결과: 씬·광석 정의의 GLB 의존성 0건, Unity 컴파일 오류 0건, EditMode 18/18 통과. 비개발 IL2CPP Android APK는 37,146,673바이트(35.43MiB)이며 APK v2 서명 검증과 SM-S938N 설치·실행에 성공했다. 기기에서 채굴 버튼 2회 입력 후 광석 체력이 62에서 56으로 감소했다.
+- 알려진 로그: Unity 6 Android 런타임이 선택적 Play Asset Pack 클래스 `AssetPackManager`를 탐색하며 ClassNotFoundException 한 건을 기록하지만, 앱 기동·렌더링·입력은 정상이다. 배포 설정 단계에서 Play Asset Delivery 사용 여부와 함께 정리한다.
+- 다음 작업: Task 12의 설정 버튼·모달을 새 UI 언어에 맞게 폴리싱하고 사용자 화면 피드백을 반영한다.

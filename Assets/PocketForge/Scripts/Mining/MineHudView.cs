@@ -21,6 +21,10 @@ namespace PocketForge.Mining
         private RawImage drillIcon;
         private RawImage robotIcon;
         private RawImage backdropImage;
+        private Image topSurface;
+        private Image upgradeSurface;
+        private Image actionSurface;
+        private Image progressBackground;
         private Text offlineRewardText;
         private Image offlineRewardSurface;
         private Button settingsButton;
@@ -60,12 +64,12 @@ namespace PocketForge.Mining
             robotButton.onClick.AddListener(() => upgradeAction(UpgradeType.Robot));
         }
 
-        public void SetTheme(Texture upgradeIcons, Texture backdrop)
+        public void SetTheme(Texture upgradeIcons, Texture backdrop, Texture2D uiKit)
         {
             if (backdrop != null)
             {
                 backdropImage.texture = backdrop;
-            backdropImage.color = new Color(1f, 1f, 1f, 0.68f);
+                backdropImage.color = new Color(1f, 1f, 1f, 0.34f);
             }
 
             if (upgradeIcons != null)
@@ -73,6 +77,11 @@ namespace PocketForge.Mining
                 SetIcon(pickaxeIcon, upgradeIcons, 0);
                 SetIcon(drillIcon, upgradeIcons, 1);
                 SetIcon(robotIcon, upgradeIcons, 2);
+            }
+
+            if (uiKit != null)
+            {
+                ApplyUiKit(uiKit);
             }
         }
 
@@ -124,11 +133,9 @@ namespace PocketForge.Mining
         {
             backdropImage = CreateBackdrop(transform);
             CreatePanel("SkyGradient", transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1080f, 1920f), new Color(0.055f, 0.09f, 0.23f, 0.05f));
-            CreatePanel("GlowLeft", transform, new Vector2(0f, 0.72f), new Vector2(0f, 0.72f), new Vector2(150f, 0f), new Vector2(430f, 430f), new Color(0.22f, 0.18f, 0.6f, 0.22f));
-            CreatePanel("GlowRight", transform, new Vector2(1f, 0.42f), new Vector2(1f, 0.42f), new Vector2(-110f, 0f), new Vector2(360f, 360f), new Color(0.05f, 0.64f, 0.85f, 0.14f));
-            CreatePanel("TopSurface", transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -96f), new Vector2(1000f, 150f), new Color(0.06f, 0.1f, 0.24f, 0.78f));
-            CreatePanel("UpgradeSurface", transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 160f), new Vector2(1020f, 300f), new Color(0.04f, 0.07f, 0.17f, 0.72f));
-            CreatePanel("ActionSurface", transform, new Vector2(0.5f, 0.32f), new Vector2(0.5f, 0.32f), Vector2.zero, new Vector2(940f, 142f), new Color(0.04f, 0.07f, 0.15f, 0.42f));
+            topSurface = CreatePanel("TopSurface", transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -96f), new Vector2(1000f, 150f), new Color(0.06f, 0.1f, 0.24f, 0.78f));
+            upgradeSurface = CreatePanel("UpgradeSurface", transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 160f), new Vector2(1020f, 300f), new Color(0.04f, 0.07f, 0.17f, 0.72f));
+            actionSurface = CreatePanel("ActionSurface", transform, new Vector2(0.5f, 0.32f), new Vector2(0.5f, 0.32f), Vector2.zero, new Vector2(940f, 142f), new Color(0.04f, 0.07f, 0.15f, 0.42f));
 
             headerText = CreateText("Header", transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-74f, -84f), new Vector2(760f, 104f), 42, TextAnchor.MiddleCenter);
             settingsButton = CreateButton("SettingsButton", transform, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-134f, -46f), new Vector2(176f, 52f), new Color(0.12f, 0.2f, 0.3f));
@@ -142,7 +149,7 @@ namespace PocketForge.Mining
             feedbackText = CreateText("ActionFeedback", transform, new Vector2(0.5f, 0.66f), new Vector2(0.5f, 0.66f), Vector2.zero, new Vector2(600f, 48f), 30, TextAnchor.MiddleCenter);
             feedbackText.gameObject.SetActive(false);
 
-            CreatePanel("ProgressBackground", transform, new Vector2(0.5f, 0.575f), new Vector2(0.5f, 0.575f), Vector2.zero, new Vector2(620f, 28f), new Color(0.03f, 0.05f, 0.1f, 0.7f));
+            progressBackground = CreatePanel("ProgressBackground", transform, new Vector2(0.5f, 0.575f), new Vector2(0.5f, 0.575f), Vector2.zero, new Vector2(620f, 28f), new Color(0.03f, 0.05f, 0.1f, 0.7f));
             oreProgress = CreatePanel("ProgressFill", transform, new Vector2(0.5f, 0.575f), new Vector2(0.5f, 0.575f), Vector2.zero, new Vector2(606f, 16f), new Color(0.95f, 0.45f, 0.12f));
             oreProgress.type = Image.Type.Filled;
             oreProgress.fillMethod = Image.FillMethod.Horizontal;
@@ -160,6 +167,49 @@ namespace PocketForge.Mining
             ConfigureUpgradeCard(robotButton);
             CreateSettingsPanel();
             RenderSettings();
+        }
+
+        private void ApplyUiKit(Texture2D atlas)
+        {
+            var panelSprite = CreateAtlasSprite(atlas, new Rect(0.035f, 0.748f, 0.448f, 0.158f), new Vector4(0.08f, 0.24f, 0.08f, 0.24f));
+            var buttonSprite = CreateAtlasSprite(atlas, new Rect(0.518f, 0.735f, 0.447f, 0.177f), new Vector4(0.08f, 0.25f, 0.08f, 0.25f));
+            var cardSprite = CreateAtlasSprite(atlas, new Rect(0.124f, 0.312f, 0.264f, 0.359f), new Vector4(0.16f, 0.10f, 0.16f, 0.10f));
+
+            ApplySlicedSprite(topSurface, panelSprite, Color.white);
+            ApplySlicedSprite(upgradeSurface, panelSprite, new Color(0.72f, 0.82f, 1f, 0.92f));
+            ApplySlicedSprite(actionSurface, panelSprite, new Color(0.72f, 0.82f, 1f, 0.58f));
+            ApplySlicedSprite(progressBackground, panelSprite, new Color(0.58f, 0.7f, 0.92f, 0.96f));
+            ApplySlicedSprite(mineButton.image, buttonSprite, Color.white);
+            ApplySlicedSprite(pickaxeButton.image, cardSprite, Color.white);
+            ApplySlicedSprite(drillButton.image, cardSprite, Color.white);
+            ApplySlicedSprite(robotButton.image, cardSprite, Color.white);
+
+            mineButton.GetComponent<Outline>().enabled = false;
+            pickaxeButton.GetComponent<Outline>().enabled = false;
+            drillButton.GetComponent<Outline>().enabled = false;
+            robotButton.GetComponent<Outline>().enabled = false;
+        }
+
+        private static Sprite CreateAtlasSprite(Texture2D atlas, Rect normalizedRect, Vector4 normalizedBorder)
+        {
+            var rect = new Rect(
+                normalizedRect.x * atlas.width,
+                normalizedRect.y * atlas.height,
+                normalizedRect.width * atlas.width,
+                normalizedRect.height * atlas.height);
+            var border = new Vector4(
+                normalizedBorder.x * rect.width,
+                normalizedBorder.y * rect.height,
+                normalizedBorder.z * rect.width,
+                normalizedBorder.w * rect.height);
+            return Sprite.Create(atlas, rect, new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect, border);
+        }
+
+        private static void ApplySlicedSprite(Image image, Sprite sprite, Color color)
+        {
+            image.sprite = sprite;
+            image.type = Image.Type.Sliced;
+            image.color = color;
         }
 
         private void CreateSettingsPanel()

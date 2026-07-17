@@ -12,6 +12,7 @@ namespace PocketForge.Mining
         [SerializeField] private Material oreBillboardMaterial;
         [SerializeField] private Texture2D upgradeIconSheet;
         [SerializeField] private Texture2D quarryBackdrop;
+        [SerializeField] private Texture2D uiKitTexture;
         [SerializeField] private GameObject generatedOrePrefab;
         [SerializeField, Min(0.01f)] private float generatedOreScale = 1.25f;
         [SerializeField] private MiningContentCatalog contentCatalog;
@@ -39,7 +40,7 @@ namespace PocketForge.Mining
             var saveData = SaveService.Load();
             gameState = gameService.CreateInitialState(saveData, UnityEngine.Random.value);
             var view = MineHudView.Create();
-            view.SetTheme(upgradeIconSheet, quarryBackdrop);
+            view.SetTheme(upgradeIconSheet, quarryBackdrop, uiKitTexture);
             hudPresenter = new MineHudPresenter(view, gameService, gameState);
             hudPresenter.StateChanged += UpdateOreVisual;
             hudPresenter.SaveRequested += SaveGame;
