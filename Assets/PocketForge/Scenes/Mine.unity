@@ -281,6 +281,11 @@ MonoBehaviour:
   quarryBackdrop: {fileID: 2800000, guid: 29c7238cc731a7c4899b225e19873030, type: 3}
   uiKitTexture: {fileID: 2800000, guid: 643bac96741cd2d439f11cacd02032ab, type: 3}
   upgradeButtonTexture: {fileID: 2800000, guid: 9466171e8364edf4f8612576ae0936f0, type: 3}
+  feedbackPanelTexture: {fileID: 2800000, guid: befbd1228ad45414f930ff73a3da40f2, type: 3}
+  backgroundMusic: {fileID: 0}
+  uiClickSound: {fileID: 0}
+  upgradeSuccessSound: {fileID: 0}
+  rewardSound: {fileID: 0}
   generatedOrePrefab: {fileID: 0}
   generatedOreScale: 1.25
   orePresentationScale: 1.5

@@ -4,6 +4,8 @@ using PocketForge.Ads;
 using PocketForge.Economy;
 using PocketForge.Iap;
 using PocketForge.Localization;
+using PocketForge.Presentation;
+using PocketForge.Settings;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
@@ -13,7 +15,8 @@ namespace PocketForge.Mining
 {
     public sealed class MineHudView : MonoBehaviour
     {
-        private Text headerText;
+        private Text creditsText;
+        private Text depthText;
         private Text oreText;
         private Image oreProgress;
         private Button mineButton;
@@ -35,18 +38,32 @@ namespace PocketForge.Mining
         private Button rewardedAdButton;
         private GameObject settingsPanel;
         private Text settingsTitle;
+        private Text audioLabel;
+        private Text musicLabel;
+        private Text soundLabel;
+        private Text hapticsLabel;
+        private Text reduceMotionLabel;
         private Text languageLabel;
         private Text iapStatusText;
+        private Slider musicSlider;
+        private Slider soundSlider;
+        private Button musicMuteButton;
+        private Button soundMuteButton;
+        private Button hapticsButton;
+        private Button reduceMotionButton;
         private Button removeAdsButton;
         private Button restorePurchasesButton;
         private Button closeSettingsButton;
         private Image settingsCard;
         private readonly List<Image> languageButtonSurfaces = new();
+        private readonly List<Image> settingsControlSurfaces = new();
         private readonly List<Image> upgradeActionSurfaces = new();
         private Image[] pickaxePips;
         private Image[] drillPips;
         private Image[] robotPips;
         private Text feedbackText;
+        private Image feedbackSurface;
+        private PositiveFeedbackBurst positiveFeedback;
         private MiningGameState lastState;
         private MiningGameService lastService;
         private RectTransform safeAreaRoot;
@@ -58,9 +75,17 @@ namespace PocketForge.Mining
         private string removeAdsPrice = string.Empty;
         private bool adsRemoved;
 
-        private void OnEnable() => LanguageService.Changed += RefreshLocalization;
+        private void OnEnable()
+        {
+            LanguageService.Changed += RefreshLocalization;
+            GameSettingsService.Changed += RenderSettings;
+        }
 
-        private void OnDisable() => LanguageService.Changed -= RefreshLocalization;
+        private void OnDisable()
+        {
+            LanguageService.Changed -= RefreshLocalization;
+            GameSettingsService.Changed -= RenderSettings;
+        }
 
         public static MineHudView Create()
         {
@@ -71,7 +96,7 @@ namespace PocketForge.Mining
             var scaler = canvasObject.GetComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1080f, 1920f);
-            scaler.matchWidthOrHeight = 0f;
+            scaler.matchWidthOrHeight = 0.5f;
 
             var view = canvasObject.AddComponent<MineHudView>();
             view.Build();
@@ -97,7 +122,7 @@ namespace PocketForge.Mining
             restorePurchasesButton.onClick.AddListener(() => restorePurchasesAction());
         }
 
-        public void SetTheme(Texture upgradeIcons, Texture2D uiKit, Texture2D upgradeButton)
+        public void SetTheme(Texture upgradeIcons, Texture2D uiKit, Texture2D upgradeButton, Texture2D feedbackPanel)
         {
             if (upgradeIcons != null)
             {
@@ -116,6 +141,13 @@ namespace PocketForge.Mining
             {
                 ApplyUpgradeButton(upgradeButton);
             }
+
+            if (feedbackPanel != null)
+            {
+                ApplyFeedbackPanel(feedbackPanel);
+            }
+
+            RenderSettings();
         }
 
         public void Render(MiningGameState state, MiningGameService service)
@@ -124,13 +156,14 @@ namespace PocketForge.Mining
             lastService = service;
             var player = state.Player;
             var ore = state.Ore;
-            headerText.text = $"<b><color=#FFD75A>{LanguageService.Get("credits").ToUpper()}  {player.credits:N0}</color>        <color=#9FE8FF>{LanguageService.Get("depth").ToUpper()}  {player.stage}</color></b>";
-            oreText.text = $"<b>{(ore.IsRare ? "RARE " : string.Empty)}{LanguageService.Get("ore").ToUpper()}</b>  <color=#D9E4FF>{Mathf.CeilToInt(ore.Health)} / {Mathf.CeilToInt(ore.Durability)}</color>";
+            creditsText.text = $"<color=#FFD75A>{LanguageService.Get("credits").ToUpper()}</color>  <color=#FFFFFF>{player.credits:N0}</color>";
+            depthText.text = $"<color=#9FE8FF>{LanguageService.Get("depth").ToUpper()}</color>  <color=#FFFFFF>{player.stage}</color>";
+            oreText.text = $"{(ore.IsRare ? $"<color=#8FEAFF>{LanguageService.Get("rare").ToUpper()}</color>  " : string.Empty)}<color=#FFFFFF>{LanguageService.Get("ore").ToUpper()}</color>  <color=#D9E4FF>{Mathf.CeilToInt(ore.Health)} / {Mathf.CeilToInt(ore.Durability)}</color>";
             oreProgress.fillAmount = Mathf.Clamp01(ore.Health / ore.Durability);
             oreProgress.color = ore.IsRare ? new Color(0.48f, 0.92f, 1f) : new Color(1f, 0.72f, 0.2f);
-            SetUpgradeText(pickaxeButton, LanguageService.Get("pickaxe"), player.pickaxeLevel, $"{LanguageService.Get("tap")} +1", service.GetUpgradeCost(UpgradeType.Pickaxe, player.pickaxeLevel));
-            SetUpgradeText(drillButton, LanguageService.Get("drill"), player.drillLevel, $"{LanguageService.Get("auto")} +{service.GetAutoPowerPerSecond(player.drillLevel + 1) - service.GetAutoPowerPerSecond(player.drillLevel):0.0}/s", service.GetUpgradeCost(UpgradeType.Drill, player.drillLevel));
-            SetUpgradeText(robotButton, LanguageService.Get("robot"), player.robotLevel, $"{LanguageService.Get("reward")} +10%", service.GetUpgradeCost(UpgradeType.Robot, player.robotLevel));
+            SetUpgradeText(pickaxeButton, LanguageService.Get("pickaxe"), player.pickaxeLevel, service.GetUpgradeCost(UpgradeType.Pickaxe, player.pickaxeLevel));
+            SetUpgradeText(drillButton, LanguageService.Get("drill"), player.drillLevel, service.GetUpgradeCost(UpgradeType.Drill, player.drillLevel));
+            SetUpgradeText(robotButton, LanguageService.Get("robot"), player.robotLevel, service.GetUpgradeCost(UpgradeType.Robot, player.robotLevel));
             UpdatePips(pickaxePips, player.pickaxeLevel, new Color(0.28f, 0.72f, 1f));
             UpdatePips(drillPips, player.drillLevel, new Color(0.78f, 0.38f, 1f));
             UpdatePips(robotPips, player.robotLevel, new Color(1f, 0.7f, 0.16f));
@@ -147,9 +180,29 @@ namespace PocketForge.Mining
         {
             feedbackText.text = message;
             feedbackText.color = color;
+            feedbackSurface.gameObject.SetActive(true);
             feedbackText.gameObject.SetActive(true);
             CancelInvoke(nameof(HideFeedback));
             Invoke(nameof(HideFeedback), 1.2f);
+        }
+
+        public void PlayUpgradeSuccess(UpgradeType type)
+        {
+            var button = type switch
+            {
+                UpgradeType.Pickaxe => pickaxeButton,
+                UpgradeType.Drill => drillButton,
+                _ => robotButton
+            };
+            var accent = type switch
+            {
+                UpgradeType.Pickaxe => new Color(0.28f, 0.72f, 1f),
+                UpgradeType.Drill => new Color(0.78f, 0.38f, 1f),
+                _ => new Color(1f, 0.7f, 0.16f)
+            };
+
+            button.GetComponent<MobileButtonFeedback>()?.Celebrate(accent);
+            positiveFeedback?.Play(button.GetComponent<RectTransform>(), accent);
         }
 
         public void SetRewardedAdState(RewardedAdState state, int rewardCredits)
@@ -167,7 +220,11 @@ namespace PocketForge.Mining
             RenderIapState();
         }
 
-        private void HideFeedback() => feedbackText.gameObject.SetActive(false);
+        private void HideFeedback()
+        {
+            feedbackSurface.gameObject.SetActive(false);
+            feedbackText.gameObject.SetActive(false);
+        }
 
         private void LateUpdate() => ApplySafeArea();
 
@@ -189,42 +246,45 @@ namespace PocketForge.Mining
             ApplySafeArea(true);
             var hudRoot = safeAreaRoot.transform;
 
-            topSurface = CreatePanel("TopSurface", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-62f, -104f), new Vector2(856f, 148f), new Color(0.06f, 0.1f, 0.24f, 0.94f));
-            upgradeSurface = CreatePanel("UpgradeSurface", hudRoot, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 228f), new Vector2(970f, 456f), Color.clear);
+            topSurface = CreatePanel("TopSurface", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-70f, -92f), new Vector2(824f, 132f), new Color(0.06f, 0.1f, 0.24f, 0.96f));
+            upgradeSurface = CreatePanel("UpgradeSurface", hudRoot, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 226f), new Vector2(956f, 458f), Color.clear);
             actionSurface = CreatePanel("ActionSurface", hudRoot, new Vector2(0.5f, 0.315f), new Vector2(0.5f, 0.315f), Vector2.zero, new Vector2(600f, 250f), Color.clear);
             upgradeSurface.raycastTarget = false;
             actionSurface.raycastTarget = false;
 
-            headerCoin = CreatePanel("HeaderCoin", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-424f, -104f), new Vector2(82f, 82f), Color.white);
+            headerCoin = CreatePanel("HeaderCoin", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-414f, -92f), new Vector2(74f, 74f), Color.white);
             headerCoin.GetComponent<Shadow>().enabled = false;
-            headerText = CreateText("Header", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-54f, -104f), new Vector2(650f, 82f), 32, TextAnchor.MiddleCenter);
-            settingsButton = CreateButton("SettingsButton", hudRoot, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-62f, -104f), new Vector2(104f, 104f), new Color(0.12f, 0.2f, 0.3f));
-            settingsButton.onClick.AddListener(() => settingsPanel.SetActive(true));
-            offlineRewardSurface = CreatePanel("OfflineRewardSurface", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-240f, -204f), new Vector2(480f, 58f), new Color(0.04f, 0.2f, 0.16f, 0.88f));
-            offlineRewardText = CreateText("OfflineReward", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-240f, -204f), new Vector2(460f, 48f), 22, TextAnchor.MiddleCenter);
+            creditsText = CreateText("Credits", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-235f, -92f), new Vector2(260f, 72f), 29, TextAnchor.MiddleLeft);
+            depthText = CreateText("Depth", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(184f, -92f), new Vector2(280f, 72f), 29, TextAnchor.MiddleCenter);
+            settingsButton = CreateButton("SettingsButton", hudRoot, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-58f, -92f), new Vector2(96f, 96f), new Color(0.12f, 0.2f, 0.3f));
+            settingsButton.onClick.AddListener(OpenSettings);
+            offlineRewardSurface = CreatePanel("OfflineRewardSurface", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-236f, -174f), new Vector2(382f, 58f), new Color(0.04f, 0.2f, 0.16f, 0.92f));
+            offlineRewardText = CreateText("OfflineReward", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-236f, -174f), new Vector2(360f, 46f), 21, TextAnchor.MiddleCenter);
             offlineRewardText.color = new Color(0.45f, 0.95f, 0.7f);
             offlineRewardSurface.gameObject.SetActive(false);
             offlineRewardText.gameObject.SetActive(false);
-            rewardedAdButton = CreateButton("RewardedAdButton", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(280f, -204f), new Vector2(420f, 64f), new Color(0.18f, 0.58f, 0.3f));
-            rewardedAdButton.GetComponentInChildren<Text>().fontSize = 22;
+            rewardedAdButton = CreateButton("RewardedAdButton", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(278f, -174f), new Vector2(374f, 62f), new Color(0.18f, 0.58f, 0.3f));
+            rewardedAdButton.GetComponentInChildren<Text>().fontSize = 20;
             RenderRewardedAdState();
             oreText = CreateText("OreLabel", hudRoot, new Vector2(0.5f, 0.405f), new Vector2(0.5f, 0.405f), new Vector2(0f, 56f), new Vector2(560f, 50f), 30, TextAnchor.MiddleCenter);
-            feedbackText = CreateText("ActionFeedback", hudRoot, new Vector2(0.5f, 0.51f), new Vector2(0.5f, 0.51f), Vector2.zero, new Vector2(600f, 48f), 30, TextAnchor.MiddleCenter);
+            feedbackSurface = CreatePanel("ActionFeedbackSurface", hudRoot, new Vector2(0.5f, 0.51f), new Vector2(0.5f, 0.51f), Vector2.zero, new Vector2(520f, 82f), new Color(0.035f, 0.08f, 0.18f, 0.96f));
+            feedbackText = CreateText("ActionFeedback", hudRoot, new Vector2(0.5f, 0.51f), new Vector2(0.5f, 0.51f), Vector2.zero, new Vector2(480f, 54f), 28, TextAnchor.MiddleCenter);
+            feedbackSurface.gameObject.SetActive(false);
             feedbackText.gameObject.SetActive(false);
 
-            progressBackground = CreatePanel("ProgressBackground", hudRoot, new Vector2(0.5f, 0.405f), new Vector2(0.5f, 0.405f), Vector2.zero, new Vector2(620f, 54f), new Color(0.05f, 0.1f, 0.24f, 0.96f));
-            oreProgress = CreatePanel("ProgressFill", progressBackground.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(582f, 22f), new Color(0.95f, 0.45f, 0.12f));
+            progressBackground = CreatePanel("ProgressBackground", hudRoot, new Vector2(0.5f, 0.405f), new Vector2(0.5f, 0.405f), Vector2.zero, new Vector2(610f, 58f), new Color(0.05f, 0.1f, 0.24f, 0.96f));
+            oreProgress = CreatePanel("ProgressFill", progressBackground.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(568f, 24f), new Color(0.95f, 0.45f, 0.12f));
             oreProgress.GetComponent<Shadow>().enabled = false;
             oreProgress.type = Image.Type.Filled;
             oreProgress.fillMethod = Image.FillMethod.Horizontal;
             oreProgress.fillOrigin = (int)Image.OriginHorizontal.Left;
 
-            mineButton = CreateButton("MineButton", hudRoot, new Vector2(0.5f, 0.315f), new Vector2(0.5f, 0.315f), Vector2.zero, new Vector2(520f, 220f), new Color(1f, 0.48f, 0.12f));
+            mineButton = CreateButton("MineButton", hudRoot, new Vector2(0.5f, 0.315f), new Vector2(0.5f, 0.315f), Vector2.zero, new Vector2(560f, 232f), new Color(1f, 0.48f, 0.12f));
             mineButton.GetComponentInChildren<Text>().gameObject.SetActive(false);
             mineIcon = CreateIcon("MineIcon", mineButton.transform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(168f, 168f));
-            pickaxeButton = CreateButton("PickaxeButton", hudRoot, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(-324f, 228f), new Vector2(286f, 404f), new Color(0.14f, 0.3f, 0.52f));
-            drillButton = CreateButton("DrillButton", hudRoot, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 228f), new Vector2(286f, 404f), new Color(0.14f, 0.3f, 0.52f));
-            robotButton = CreateButton("RobotButton", hudRoot, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(324f, 228f), new Vector2(286f, 404f), new Color(0.14f, 0.3f, 0.52f));
+            pickaxeButton = CreateButton("PickaxeButton", hudRoot, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(-320f, 226f), new Vector2(292f, 410f), new Color(0.14f, 0.3f, 0.52f));
+            drillButton = CreateButton("DrillButton", hudRoot, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 226f), new Vector2(292f, 410f), new Color(0.14f, 0.3f, 0.52f));
+            robotButton = CreateButton("RobotButton", hudRoot, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(320f, 226f), new Vector2(292f, 410f), new Color(0.14f, 0.3f, 0.52f));
             pickaxeIcon = CreateIcon("PickaxeIcon", pickaxeButton.transform);
             drillIcon = CreateIcon("DrillIcon", drillButton.transform);
             robotIcon = CreateIcon("RobotIcon", robotButton.transform);
@@ -234,6 +294,8 @@ namespace PocketForge.Mining
             pickaxePips = CreateUpgradeDetails(pickaxeButton.transform, new Color(0.28f, 0.72f, 1f));
             drillPips = CreateUpgradeDetails(drillButton.transform, new Color(0.78f, 0.38f, 1f));
             robotPips = CreateUpgradeDetails(robotButton.transform, new Color(1f, 0.7f, 0.16f));
+            positiveFeedback = safeAreaRoot.gameObject.AddComponent<PositiveFeedbackBurst>();
+            positiveFeedback.Initialize(safeAreaRoot);
             CreateSettingsPanel();
             RenderSettings();
         }
@@ -250,6 +312,8 @@ namespace PocketForge.Mining
             upgradeSurface.color = Color.clear;
             actionSurface.color = Color.clear;
             ApplySlicedSprite(progressBackground, panelSprite, new Color(0.72f, 0.82f, 1f, 0.96f));
+            ApplySlicedSprite(feedbackSurface, panelSprite, new Color(0.7f, 0.82f, 1f, 0.98f));
+            ApplySlicedSprite(offlineRewardSurface, panelSprite, new Color(0.55f, 1f, 0.72f, 0.98f));
             headerCoin.sprite = coinSprite;
             headerCoin.type = Image.Type.Simple;
             ApplySlicedSprite(mineButton.image, buttonSprite, Color.white);
@@ -270,6 +334,11 @@ namespace PocketForge.Mining
                 ApplySlicedSprite(surface, panelSprite, Color.white);
             }
 
+            foreach (var surface in settingsControlSurfaces)
+            {
+                ApplySlicedSprite(surface, panelSprite, Color.white);
+            }
+
             ApplySlicedSprite(closeSettingsButton.image, buttonSprite, Color.white);
         }
 
@@ -283,6 +352,23 @@ namespace PocketForge.Mining
                 surface.color = Color.white;
                 surface.GetComponent<Shadow>().enabled = false;
             }
+        }
+
+        private void ApplyFeedbackPanel(Texture2D texture)
+        {
+            // The generated source keeps generous transparent margins. Cropping here preserves
+            // the authored bevel while 9-slicing lets the notification scale across aspect ratios.
+            var paddingX = Mathf.RoundToInt(texture.width * 0.068f);
+            var paddingY = Mathf.RoundToInt(texture.height * 0.20f);
+            var rect = new Rect(
+                paddingX,
+                paddingY,
+                texture.width - paddingX * 2f,
+                texture.height - paddingY * 2f);
+            var border = new Vector4(rect.height * 0.22f, rect.height * 0.25f, rect.height * 0.22f, rect.height * 0.25f);
+            var sprite = Sprite.Create(texture, rect, new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect, border);
+            ApplySlicedSprite(feedbackSurface, sprite, Color.white);
+            feedbackSurface.GetComponent<Shadow>().enabled = false;
         }
 
         private static Sprite CreateAtlasSprite(Texture2D atlas, Rect normalizedRect, Vector4 normalizedBorder)
@@ -309,33 +395,108 @@ namespace PocketForge.Mining
 
         private void CreateSettingsPanel()
         {
-            var backdrop = CreatePanel("SettingsBackdrop", transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1080f, 1920f), new Color(0f, 0f, 0f, 0.72f));
+            var backdrop = CreatePanel("SettingsBackdrop", transform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero, new Color(0.005f, 0.012f, 0.04f, 0.78f));
             settingsPanel = backdrop.gameObject;
-            settingsCard = CreatePanel("SettingsCard", settingsPanel.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(820f, 1450f), new Color(0.04f, 0.08f, 0.14f, 0.99f));
+            settingsCard = CreatePanel("SettingsCard", settingsPanel.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(840f, 1420f), new Color(0.035f, 0.075f, 0.15f, 0.99f));
             var card = settingsCard;
-            settingsTitle = CreateText("SettingsTitle", card.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -98f), new Vector2(680f, 76f), 48, TextAnchor.MiddleCenter);
-            languageLabel = CreateText("LanguageLabel", card.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -184f), new Vector2(640f, 54f), 28, TextAnchor.MiddleCenter);
+            settingsTitle = CreateText("SettingsTitle", card.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -66f), new Vector2(680f, 76f), 46, TextAnchor.MiddleCenter);
+            audioLabel = CreateText("AudioLabel", card.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -144f), new Vector2(650f, 42f), 24, TextAnchor.MiddleLeft);
 
-            CreateLanguageButton(card.transform, "KoreanLanguageButton", "\uD55C\uAD6D\uC5B4", SupportedLanguage.Korean, 82f);
-            CreateLanguageButton(card.transform, "EnglishLanguageButton", "English", SupportedLanguage.English, -28f);
-            CreateLanguageButton(card.transform, "JapaneseLanguageButton", "\u65E5\u672C\u8A9E", SupportedLanguage.Japanese, -138f);
-            CreateLanguageButton(card.transform, "ChineseLanguageButton", "\u7B80\u4F53\u4E2D\u6587", SupportedLanguage.ChineseSimplified, -248f);
-            iapStatusText = CreateText("IapStatus", card.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -350f), new Vector2(660f, 72f), 25, TextAnchor.MiddleCenter);
-            removeAdsButton = CreateButton("RemoveAdsButton", card.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -445f), new Vector2(620f, 82f), new Color(0.22f, 0.58f, 0.32f));
-            restorePurchasesButton = CreateButton("RestorePurchasesButton", card.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -545f), new Vector2(620f, 76f), new Color(0.12f, 0.2f, 0.32f));
+            CreateSettingSliderRow(card.transform, "MusicRow", -236f, out musicLabel, out musicSlider, out musicMuteButton);
+            CreateSettingSliderRow(card.transform, "SoundRow", -354f, out soundLabel, out soundSlider, out soundMuteButton);
+            CreateSettingToggleRow(card.transform, "HapticsRow", -482f, out hapticsLabel, out hapticsButton);
+            CreateSettingToggleRow(card.transform, "ReduceMotionRow", -594f, out reduceMotionLabel, out reduceMotionButton);
+
+            musicSlider.onValueChanged.AddListener(GameSettingsService.SetMusicVolume);
+            soundSlider.onValueChanged.AddListener(GameSettingsService.SetSoundVolume);
+            musicMuteButton.onClick.AddListener(() => GameSettingsService.SetMusicMuted(!GameSettingsService.MusicMuted));
+            soundMuteButton.onClick.AddListener(() => GameSettingsService.SetSoundMuted(!GameSettingsService.SoundMuted));
+            hapticsButton.onClick.AddListener(() => GameSettingsService.SetHapticsEnabled(!GameSettingsService.HapticsEnabled));
+            reduceMotionButton.onClick.AddListener(() => GameSettingsService.SetReduceMotion(!GameSettingsService.ReduceMotion));
+
+            languageLabel = CreateText("LanguageLabel", card.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -686f), new Vector2(650f, 42f), 24, TextAnchor.MiddleLeft);
+            CreateLanguageButton(card.transform, "KoreanLanguageButton", "\uD55C\uAD6D\uC5B4", SupportedLanguage.Korean, -184f, -768f);
+            CreateLanguageButton(card.transform, "EnglishLanguageButton", "English", SupportedLanguage.English, 184f, -768f);
+            CreateLanguageButton(card.transform, "JapaneseLanguageButton", "\u65E5\u672C\u8A9E", SupportedLanguage.Japanese, -184f, -860f);
+            CreateLanguageButton(card.transform, "ChineseLanguageButton", "\u7B80\u4F53\u4E2D\u6587", SupportedLanguage.ChineseSimplified, 184f, -860f);
+
+            iapStatusText = CreateText("IapStatus", card.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -950f), new Vector2(680f, 52f), 21, TextAnchor.MiddleCenter);
+            removeAdsButton = CreateButton("RemoveAdsButton", card.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -1032f), new Vector2(700f, 76f), new Color(0.22f, 0.58f, 0.32f));
+            restorePurchasesButton = CreateButton("RestorePurchasesButton", card.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -1122f), new Vector2(700f, 72f), new Color(0.12f, 0.2f, 0.32f));
             languageButtonSurfaces.Add(removeAdsButton.image);
             languageButtonSurfaces.Add(restorePurchasesButton.image);
-            closeSettingsButton = CreateButton("CloseSettingsButton", card.transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 74f), new Vector2(360f, 74f), new Color(0.2f, 0.28f, 0.38f));
-            closeSettingsButton.onClick.AddListener(() => settingsPanel.SetActive(false));
+            closeSettingsButton = CreateButton("CloseSettingsButton", card.transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 66f), new Vector2(360f, 76f), new Color(0.95f, 0.47f, 0.08f));
+            closeSettingsButton.onClick.AddListener(CloseSettings);
             settingsPanel.SetActive(false);
         }
 
-        private void CreateLanguageButton(Transform parent, string name, string label, SupportedLanguage language, float positionY)
+        private void CreateSettingSliderRow(Transform parent, string name, float positionY, out Text label, out Slider slider, out Button muteButton)
         {
-            var button = CreateButton(name, parent, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, positionY), new Vector2(620f, 86f), new Color(0.12f, 0.2f, 0.32f));
+            var row = CreatePanel(name, parent, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, positionY), new Vector2(720f, 102f), new Color(0.055f, 0.12f, 0.23f, 0.98f));
+            settingsControlSurfaces.Add(row);
+            label = CreateText("Label", row.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-258f, 0f), new Vector2(170f, 56f), 23, TextAnchor.MiddleLeft);
+            slider = CreateSlider("Slider", row.transform, new Vector2(58f, 0f), new Vector2(330f, 54f));
+            muteButton = CreateButton("MuteButton", row.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(292f, 0f), new Vector2(112f, 60f), new Color(0.2f, 0.62f, 0.28f));
+            settingsControlSurfaces.Add(muteButton.image);
+            muteButton.GetComponentInChildren<Text>().fontSize = 18;
+        }
+
+        private void CreateSettingToggleRow(Transform parent, string name, float positionY, out Text label, out Button toggleButton)
+        {
+            var row = CreatePanel(name, parent, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, positionY), new Vector2(720f, 94f), new Color(0.055f, 0.12f, 0.23f, 0.98f));
+            settingsControlSurfaces.Add(row);
+            label = CreateText("Label", row.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-190f, 0f), new Vector2(340f, 56f), 23, TextAnchor.MiddleLeft);
+            toggleButton = CreateButton("Toggle", row.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(242f, 0f), new Vector2(190f, 60f), new Color(0.2f, 0.62f, 0.28f));
+            settingsControlSurfaces.Add(toggleButton.image);
+            toggleButton.GetComponentInChildren<Text>().fontSize = 20;
+        }
+
+        private static Slider CreateSlider(string name, Transform parent, Vector2 position, Vector2 size)
+        {
+            var root = new GameObject(name, typeof(RectTransform), typeof(Slider));
+            root.transform.SetParent(parent, false);
+            var rootRect = root.GetComponent<RectTransform>();
+            rootRect.anchorMin = new Vector2(0.5f, 0.5f);
+            rootRect.anchorMax = new Vector2(0.5f, 0.5f);
+            rootRect.anchoredPosition = position;
+            rootRect.sizeDelta = size;
+
+            var background = CreateSimpleImage("Background", root.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(0f, -28f), new Color(0.015f, 0.035f, 0.09f, 1f));
+            var fillArea = CreateRect("FillArea", root.transform, new Vector2(0f, 0.5f), new Vector2(1f, 0.5f), Vector2.zero, new Vector2(-34f, 24f));
+            var fill = CreateSimpleImage("Fill", fillArea, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero, new Color(1f, 0.58f, 0.08f, 1f));
+            var handleArea = CreateRect("HandleArea", root.transform, new Vector2(0f, 0.5f), new Vector2(1f, 0.5f), Vector2.zero, new Vector2(-34f, 44f));
+            var handle = CreateSimpleImage("Handle", handleArea, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), Vector2.zero, new Vector2(44f, 44f), new Color(0.9f, 0.95f, 1f, 1f));
+
+            var slider = root.GetComponent<Slider>();
+            slider.minValue = 0f;
+            slider.maxValue = 1f;
+            slider.wholeNumbers = false;
+            slider.direction = Slider.Direction.LeftToRight;
+            slider.fillRect = fill.rectTransform;
+            slider.handleRect = handle.rectTransform;
+            slider.targetGraphic = handle;
+            return slider;
+        }
+
+        private void CreateLanguageButton(Transform parent, string name, string label, SupportedLanguage language, float positionX, float positionY)
+        {
+            var button = CreateButton(name, parent, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(positionX, positionY), new Vector2(332f, 76f), new Color(0.12f, 0.2f, 0.32f));
             languageButtonSurfaces.Add(button.image);
             button.GetComponentInChildren<Text>().text = label;
+            button.GetComponentInChildren<Text>().fontSize = 22;
             button.onClick.AddListener(() => LanguageService.SetLanguage(language));
+        }
+
+        private void OpenSettings()
+        {
+            RenderSettings();
+            settingsPanel.SetActive(true);
+        }
+
+        private void CloseSettings()
+        {
+            GameSettingsService.Flush();
+            settingsPanel.SetActive(false);
         }
 
         private void RenderSettings()
@@ -348,9 +509,26 @@ namespace PocketForge.Mining
             settingsButton.GetComponentInChildren<Text>().text = "⚙";
             settingsButton.GetComponentInChildren<Text>().fontSize = 52;
             settingsTitle.text = LanguageService.Get("settings").ToUpper();
+            audioLabel.text = LanguageService.Get("audio").ToUpper();
+            musicLabel.text = LanguageService.Get("music").ToUpper();
+            soundLabel.text = LanguageService.Get("sound").ToUpper();
+            hapticsLabel.text = LanguageService.Get("haptics").ToUpper();
+            reduceMotionLabel.text = LanguageService.Get("reduce_motion").ToUpper();
             languageLabel.text = LanguageService.Get("language").ToUpper();
+            musicSlider.SetValueWithoutNotify(GameSettingsService.MusicVolume);
+            soundSlider.SetValueWithoutNotify(GameSettingsService.SoundVolume);
+            SetToggleState(musicMuteButton, !GameSettingsService.MusicMuted);
+            SetToggleState(soundMuteButton, !GameSettingsService.SoundMuted);
+            SetToggleState(hapticsButton, GameSettingsService.HapticsEnabled);
+            SetToggleState(reduceMotionButton, GameSettingsService.ReduceMotion);
             closeSettingsButton.GetComponentInChildren<Text>().text = LanguageService.Get("close").ToUpper();
             RenderIapState();
+        }
+
+        private static void SetToggleState(Button button, bool enabled)
+        {
+            button.image.color = enabled ? new Color(0.52f, 0.9f, 0.18f) : new Color(0.28f, 0.34f, 0.43f);
+            button.GetComponentInChildren<Text>().text = LanguageService.Get(enabled ? "on" : "off").ToUpper();
         }
 
         private void RenderIapState()
@@ -460,6 +638,27 @@ namespace PocketForge.Mining
             return image;
         }
 
+        private static RectTransform CreateRect(string name, Transform parent, Vector2 anchorMin, Vector2 anchorMax, Vector2 position, Vector2 size)
+        {
+            var rectObject = new GameObject(name, typeof(RectTransform));
+            rectObject.transform.SetParent(parent, false);
+            var rect = rectObject.GetComponent<RectTransform>();
+            rect.anchorMin = anchorMin;
+            rect.anchorMax = anchorMax;
+            rect.anchoredPosition = position;
+            rect.sizeDelta = size;
+            return rect;
+        }
+
+        private static Image CreateSimpleImage(string name, Transform parent, Vector2 anchorMin, Vector2 anchorMax, Vector2 position, Vector2 size, Color color)
+        {
+            var rect = CreateRect(name, parent, anchorMin, anchorMax, position, size);
+            var image = rect.gameObject.AddComponent<Image>();
+            image.color = color;
+            image.raycastTarget = false;
+            return image;
+        }
+
         private static Button CreateButton(string name, Transform parent, Vector2 anchorMin, Vector2 anchorMax, Vector2 position, Vector2 size, Color color)
         {
             var image = CreatePanel(name, parent, anchorMin, anchorMax, position, size, color);
@@ -469,6 +668,7 @@ namespace PocketForge.Mining
             outline.effectColor = new Color(1f, 1f, 1f, 0.18f);
             outline.effectDistance = new Vector2(2f, -2f);
             CreateText("Label", image.transform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero, 27, TextAnchor.MiddleCenter);
+            image.gameObject.AddComponent<MobileButtonFeedback>();
             return button;
         }
 
@@ -507,11 +707,15 @@ namespace PocketForge.Mining
             rect.anchoredPosition = position;
             rect.sizeDelta = size;
             var text = textObject.GetComponent<Text>();
-            text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            text.font = UiFontProvider.Get();
             text.fontSize = fontSize;
+            text.fontStyle = FontStyle.Bold;
             text.alignment = alignment;
             text.color = Color.white;
             text.supportRichText = true;
+            var shadow = textObject.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0.01f, 0.02f, 0.08f, 0.82f);
+            shadow.effectDistance = new Vector2(1.5f, -2f);
             return text;
         }
 
@@ -519,17 +723,17 @@ namespace PocketForge.Mining
         {
             var label = button.GetComponentInChildren<Text>();
             var rect = label.rectTransform;
-            rect.anchorMin = new Vector2(0.04f, 0.22f);
-            rect.anchorMax = new Vector2(0.96f, 0.50f);
+            rect.anchorMin = new Vector2(0.05f, 0.22f);
+            rect.anchorMax = new Vector2(0.95f, 0.47f);
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = Vector2.zero;
             label.fontSize = 22;
             label.alignment = TextAnchor.MiddleCenter;
         }
 
-        private static void SetUpgradeText(Button button, string name, int level, string bonus, int cost)
+        private static void SetUpgradeText(Button button, string name, int level, int cost)
         {
-            button.GetComponentInChildren<Text>().text = $"<b>{name.ToUpper()}</b>  Lv.{level}\n<size=18>{bonus}</size>\n<color=#FFD75A>{cost:N0} C</color>";
+            button.GetComponentInChildren<Text>().text = $"<color=#FFFFFF>{name.ToUpper()}</color>  <color=#BBD8FF>Lv.{level}</color>\n<color=#FFD75A>{cost:N0} C</color>";
         }
 
         private Image[] CreateUpgradeDetails(Transform parent, Color activeColor)

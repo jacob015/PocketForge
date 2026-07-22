@@ -1,5 +1,7 @@
 using System;
+using PocketForge.Audio;
 using PocketForge.Economy;
+using PocketForge.Localization;
 using UnityEngine;
 
 namespace PocketForge.Mining
@@ -44,14 +46,14 @@ namespace PocketForge.Mining
 
         private void Upgrade(UpgradeType type)
         {
-            Apply(gameService.TryUpgrade(state, type));
+            Apply(gameService.TryUpgrade(state, type), type);
         }
 
-        private void Apply(MiningGameResult result)
+        private void Apply(MiningGameResult result, UpgradeType? upgradedType = null)
         {
             if (result.PurchaseFailed)
             {
-                view.ShowFeedback("NOT ENOUGH CREDITS", new Color(1f, 0.45f, 0.35f));
+                view.ShowFeedback(LanguageService.Get("not_enough_credits"), new Color(1f, 0.45f, 0.35f));
                 return;
             }
 
@@ -70,10 +72,12 @@ namespace PocketForge.Mining
             if (result.RewardCredits > 0)
             {
                 view.ShowFeedback($"+{result.RewardCredits:N0} C", new Color(1f, 0.82f, 0.3f));
+                GameAudioController.Instance?.PlayReward();
             }
-            else if (result.PurchaseSucceeded)
+            else if (result.PurchaseSucceeded && upgradedType.HasValue)
             {
-                view.ShowFeedback("UPGRADE COMPLETE", new Color(0.45f, 0.95f, 0.7f));
+                view.PlayUpgradeSuccess(upgradedType.Value);
+                GameAudioController.Instance?.PlayUpgradeSuccess();
             }
             if (result.OreBroken || result.PurchaseSucceeded)
             {

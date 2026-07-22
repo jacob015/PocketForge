@@ -1,9 +1,11 @@
 using System;
 using PocketForge.Ads;
+using PocketForge.Audio;
 using PocketForge.Content;
 using PocketForge.Iap;
 using PocketForge.Localization;
 using PocketForge.Save;
+using PocketForge.Settings;
 using UnityEngine;
 
 namespace PocketForge.Mining
@@ -16,6 +18,11 @@ namespace PocketForge.Mining
         [SerializeField] private Texture2D quarryBackdrop;
         [SerializeField] private Texture2D uiKitTexture;
         [SerializeField] private Texture2D upgradeButtonTexture;
+        [SerializeField] private Texture2D feedbackPanelTexture;
+        [SerializeField] private AudioClip backgroundMusic;
+        [SerializeField] private AudioClip uiClickSound;
+        [SerializeField] private AudioClip upgradeSuccessSound;
+        [SerializeField] private AudioClip rewardSound;
         [SerializeField] private GameObject generatedOrePrefab;
         [SerializeField, Min(0.01f)] private float generatedOreScale = 1.25f;
         [SerializeField, Min(0.1f)] private float orePresentationScale = 1.5f;
@@ -26,6 +33,7 @@ namespace PocketForge.Mining
         private MineHudPresenter hudPresenter;
         private MineAdCoordinator adCoordinator;
         private MineIapCoordinator iapCoordinator;
+        private GameAudioController audioController;
         private Transform oreVisual;
         private Renderer[] oreRenderers;
         private Vector3 oreBaseScale = Vector3.one;
@@ -46,13 +54,15 @@ namespace PocketForge.Mining
         {
             Application.targetFrameRate = 60;
             LanguageService.Initialize();
+            GameSettingsService.Initialize();
+            audioController = GameAudioController.Create(backgroundMusic, uiClickSound, upgradeSuccessSound, rewardSound);
             var catalog = contentCatalog != null ? contentCatalog : MiningContentCatalog.CreateRuntimeDefault();
             var gameService = new MiningGameService(catalog);
             var saveData = SaveService.Load();
             gameState = gameService.CreateInitialState(saveData, UnityEngine.Random.value);
             CreateQuarryBackdrop();
             var view = MineHudView.Create();
-            view.SetTheme(upgradeIconSheet, uiKitTexture, upgradeButtonTexture);
+            view.SetTheme(upgradeIconSheet, uiKitTexture, upgradeButtonTexture, feedbackPanelTexture);
             hudPresenter = new MineHudPresenter(view, gameService, gameState);
             hudPresenter.StateChanged += UpdateOreVisual;
             hudPresenter.SaveRequested += SaveGame;
@@ -92,11 +102,16 @@ namespace PocketForge.Mining
         {
             if (paused)
             {
+                GameSettingsService.Flush();
                 SaveGame();
             }
         }
 
-        private void OnApplicationQuit() => SaveGame();
+        private void OnApplicationQuit()
+        {
+            GameSettingsService.Flush();
+            SaveGame();
+        }
 
         private void OnDestroy()
         {
@@ -110,6 +125,11 @@ namespace PocketForge.Mining
             if (iapCoordinator != null)
             {
                 iapCoordinator.Dispose();
+            }
+
+            if (audioController != null)
+            {
+                Destroy(audioController.gameObject);
             }
 
             if (backdropMaterial != null)

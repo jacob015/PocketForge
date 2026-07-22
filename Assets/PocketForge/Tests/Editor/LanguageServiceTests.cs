@@ -5,10 +5,25 @@ namespace PocketForge.Tests.Editor
 {
     public sealed class LanguageServiceTests
     {
-        [TestCase(SupportedLanguage.Korean, "채굴")]
+        private SupportedLanguage originalLanguage;
+
+        [SetUp]
+        public void SetUp()
+        {
+            LanguageService.Initialize();
+            originalLanguage = LanguageService.Current;
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            LanguageService.SetLanguage(originalLanguage);
+        }
+
+        [TestCase(SupportedLanguage.Korean, "\uCC44\uAD74")]
         [TestCase(SupportedLanguage.English, "Mine")]
-        [TestCase(SupportedLanguage.Japanese, "採掘")]
-        [TestCase(SupportedLanguage.ChineseSimplified, "采矿")]
+        [TestCase(SupportedLanguage.Japanese, "\u63A1\u6398")]
+        [TestCase(SupportedLanguage.ChineseSimplified, "\u91C7\u77FF")]
         public void SelectedLanguage_ResolvesMineLabel(SupportedLanguage language, string expected)
         {
             LanguageService.SetLanguage(language);
@@ -33,6 +48,16 @@ namespace PocketForge.Tests.Editor
         {
             LanguageService.SetLanguage(language);
             Assert.AreEqual(expected, LanguageService.Get("remove_ads"));
+        }
+
+        [TestCase(SupportedLanguage.Korean, "\uBC30\uACBD\uC74C")]
+        [TestCase(SupportedLanguage.English, "Music")]
+        [TestCase(SupportedLanguage.Japanese, "BGM")]
+        [TestCase(SupportedLanguage.ChineseSimplified, "\u97F3\u4E50")]
+        public void SelectedLanguage_ResolvesMusicSetting(SupportedLanguage language, string expected)
+        {
+            LanguageService.SetLanguage(language);
+            Assert.AreEqual(expected, LanguageService.Get("music"));
         }
     }
 }
