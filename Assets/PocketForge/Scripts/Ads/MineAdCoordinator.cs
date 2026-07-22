@@ -45,6 +45,11 @@ namespace PocketForge.Ads
 
         public void RecordOreBroken()
         {
+            if (gameState.Player.adsRemoved)
+            {
+                return;
+            }
+
             if (interstitialPolicy.RegisterOreBreak() && adsService.ShowInterstitial())
             {
                 interstitialPolicy.MarkShown();

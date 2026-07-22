@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using PocketForge.Ads;
 using PocketForge.Economy;
+using PocketForge.Iap;
 using PocketForge.Localization;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -35,6 +36,9 @@ namespace PocketForge.Mining
         private GameObject settingsPanel;
         private Text settingsTitle;
         private Text languageLabel;
+        private Text iapStatusText;
+        private Button removeAdsButton;
+        private Button restorePurchasesButton;
         private Button closeSettingsButton;
         private Image settingsCard;
         private readonly List<Image> languageButtonSurfaces = new();
@@ -50,6 +54,9 @@ namespace PocketForge.Mining
         private Vector2Int appliedScreenSize = new(-1, -1);
         private RewardedAdState rewardedAdState = RewardedAdState.Initializing;
         private int rewardedAdCredits;
+        private IapState iapState = IapState.Initializing;
+        private string removeAdsPrice = string.Empty;
+        private bool adsRemoved;
 
         private void OnEnable() => LanguageService.Changed += RefreshLocalization;
 
@@ -82,6 +89,12 @@ namespace PocketForge.Mining
         public void BindRewardedAd(Action rewardedAdAction)
         {
             rewardedAdButton.onClick.AddListener(() => rewardedAdAction());
+        }
+
+        public void BindIap(Action purchaseRemoveAdsAction, Action restorePurchasesAction)
+        {
+            removeAdsButton.onClick.AddListener(() => purchaseRemoveAdsAction());
+            restorePurchasesButton.onClick.AddListener(() => restorePurchasesAction());
         }
 
         public void SetTheme(Texture upgradeIcons, Texture2D uiKit, Texture2D upgradeButton)
@@ -146,6 +159,14 @@ namespace PocketForge.Mining
             RenderRewardedAdState();
         }
 
+        public void SetIapState(IapState state, string localizedPrice, bool ownsRemoveAds)
+        {
+            iapState = state;
+            removeAdsPrice = localizedPrice ?? string.Empty;
+            adsRemoved = ownsRemoveAds;
+            RenderIapState();
+        }
+
         private void HideFeedback() => feedbackText.gameObject.SetActive(false);
 
         private void LateUpdate() => ApplySafeArea();
@@ -159,6 +180,7 @@ namespace PocketForge.Mining
 
             RenderSettings();
             RenderRewardedAdState();
+            RenderIapState();
         }
 
         private void Build()
@@ -289,7 +311,7 @@ namespace PocketForge.Mining
         {
             var backdrop = CreatePanel("SettingsBackdrop", transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1080f, 1920f), new Color(0f, 0f, 0f, 0.72f));
             settingsPanel = backdrop.gameObject;
-            settingsCard = CreatePanel("SettingsCard", settingsPanel.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(820f, 900f), new Color(0.04f, 0.08f, 0.14f, 0.99f));
+            settingsCard = CreatePanel("SettingsCard", settingsPanel.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(820f, 1450f), new Color(0.04f, 0.08f, 0.14f, 0.99f));
             var card = settingsCard;
             settingsTitle = CreateText("SettingsTitle", card.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -98f), new Vector2(680f, 76f), 48, TextAnchor.MiddleCenter);
             languageLabel = CreateText("LanguageLabel", card.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -184f), new Vector2(640f, 54f), 28, TextAnchor.MiddleCenter);
@@ -298,6 +320,11 @@ namespace PocketForge.Mining
             CreateLanguageButton(card.transform, "EnglishLanguageButton", "English", SupportedLanguage.English, -28f);
             CreateLanguageButton(card.transform, "JapaneseLanguageButton", "\u65E5\u672C\u8A9E", SupportedLanguage.Japanese, -138f);
             CreateLanguageButton(card.transform, "ChineseLanguageButton", "\u7B80\u4F53\u4E2D\u6587", SupportedLanguage.ChineseSimplified, -248f);
+            iapStatusText = CreateText("IapStatus", card.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -350f), new Vector2(660f, 72f), 25, TextAnchor.MiddleCenter);
+            removeAdsButton = CreateButton("RemoveAdsButton", card.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -445f), new Vector2(620f, 82f), new Color(0.22f, 0.58f, 0.32f));
+            restorePurchasesButton = CreateButton("RestorePurchasesButton", card.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -545f), new Vector2(620f, 76f), new Color(0.12f, 0.2f, 0.32f));
+            languageButtonSurfaces.Add(removeAdsButton.image);
+            languageButtonSurfaces.Add(restorePurchasesButton.image);
             closeSettingsButton = CreateButton("CloseSettingsButton", card.transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 74f), new Vector2(360f, 74f), new Color(0.2f, 0.28f, 0.38f));
             closeSettingsButton.onClick.AddListener(() => settingsPanel.SetActive(false));
             settingsPanel.SetActive(false);
@@ -323,6 +350,36 @@ namespace PocketForge.Mining
             settingsTitle.text = LanguageService.Get("settings").ToUpper();
             languageLabel.text = LanguageService.Get("language").ToUpper();
             closeSettingsButton.GetComponentInChildren<Text>().text = LanguageService.Get("close").ToUpper();
+            RenderIapState();
+        }
+
+        private void RenderIapState()
+        {
+            if (removeAdsButton == null)
+            {
+                return;
+            }
+
+            var busy = iapState is IapState.Initializing or IapState.Purchasing or IapState.Restoring;
+            removeAdsButton.interactable = !adsRemoved && iapState is IapState.Ready or IapState.Cancelled;
+            restorePurchasesButton.interactable = !busy;
+            iapStatusText.text = adsRemoved
+                ? LanguageService.Get("iap_purchased").ToUpper()
+                : LanguageService.Get(iapState switch
+                {
+                    IapState.Purchasing => "iap_purchasing",
+                    IapState.Restoring => "iap_restoring",
+                    IapState.Deferred => "iap_deferred",
+                    IapState.Cancelled => "iap_cancelled",
+                    IapState.Failed => "iap_unavailable",
+                    IapState.Ready => "remove_ads",
+                    _ => "iap_loading"
+                }).ToUpper();
+
+            removeAdsButton.GetComponentInChildren<Text>().text = adsRemoved
+                ? LanguageService.Get("iap_purchased").ToUpper()
+                : $"{LanguageService.Get("remove_ads").ToUpper()}{(string.IsNullOrEmpty(removeAdsPrice) ? string.Empty : $"  {removeAdsPrice}")}";
+            restorePurchasesButton.GetComponentInChildren<Text>().text = LanguageService.Get("restore_purchases").ToUpper();
         }
 
         private void RenderRewardedAdState()

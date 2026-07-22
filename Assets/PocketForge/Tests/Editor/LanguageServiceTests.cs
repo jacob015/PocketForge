@@ -24,5 +24,15 @@ namespace PocketForge.Tests.Editor
             LanguageService.SetLanguage(language);
             Assert.AreEqual(expected, LanguageService.Get("settings"));
         }
+
+        [TestCase(SupportedLanguage.Korean, "\uAD11\uACE0 \uC81C\uAC70")]
+        [TestCase(SupportedLanguage.English, "Remove ads")]
+        [TestCase(SupportedLanguage.Japanese, "\u5E83\u544A\u3092\u524A\u9664")]
+        [TestCase(SupportedLanguage.ChineseSimplified, "\u79FB\u9664\u5E7F\u544A")]
+        public void SelectedLanguage_ResolvesRemoveAdsLabel(SupportedLanguage language, string expected)
+        {
+            LanguageService.SetLanguage(language);
+            Assert.AreEqual(expected, LanguageService.Get("remove_ads"));
+        }
     }
 }

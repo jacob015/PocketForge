@@ -19,16 +19,25 @@ namespace PocketForge.Save
             return GameSaveMigrator.Normalize(data);
         }
 
-        public static void Save(GameSaveData data)
+        public static bool Save(GameSaveData data)
         {
-            Save(data, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+            return Save(data, DateTimeOffset.UtcNow.ToUnixTimeSeconds());
         }
 
-        public static void Save(GameSaveData data, long savedAtUnixSeconds)
+        public static bool Save(GameSaveData data, long savedAtUnixSeconds)
         {
-            data.lastSavedUnixSeconds = Math.Max(0, savedAtUnixSeconds);
-            PlayerPrefs.SetString(SaveKey, JsonUtility.ToJson(GameSaveMigrator.Normalize(data)));
-            PlayerPrefs.Save();
+            try
+            {
+                data.lastSavedUnixSeconds = Math.Max(0, savedAtUnixSeconds);
+                PlayerPrefs.SetString(SaveKey, JsonUtility.ToJson(GameSaveMigrator.Normalize(data)));
+                PlayerPrefs.Save();
+                return true;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogException(exception);
+                return false;
+            }
         }
     }
 }

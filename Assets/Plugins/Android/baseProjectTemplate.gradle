@@ -1,0 +1,23 @@
+plugins {
+    // Keep these versions aligned with the Gradle tooling bundled with Unity.
+    id 'com.android.application' version '9.0.0' apply false
+    id 'com.android.library' version '9.0.0' apply false
+    **BUILD_SCRIPT_DEPS**
+}
+
+// Unity IAP 5.4.1 brings Unity Services Core with Kotlin 1.6.21 while
+// Google Mobile Ads resolves Kotlin 1.8.22. Align the legacy split modules
+// with the selected stdlib to prevent duplicate jdk7/jdk8 classes.
+allprojects {
+    configurations.configureEach {
+        resolutionStrategy {
+            force 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22'
+            force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22'
+            force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22'
+        }
+    }
+}
+
+tasks.register('clean', Delete) {
+    delete rootProject.layout.buildDirectory
+}

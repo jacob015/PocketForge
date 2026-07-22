@@ -131,3 +131,23 @@ MineGameController (composition root)
 - `InterstitialAdPolicy`는 광석 파괴 횟수와 경과 시간을 순수 C# 상태로 관리한다. 기본 규칙은 광석 5개와 마지막 노출 후 180초를 모두 만족하는 경우다.
 - 보상 배율은 `MiningContentCatalog.rewardedAdRewardMultiplier`에서 조정한다. 현재 값은 일반 광석 보상 5회분이며 단계와 광석 체력은 변경하지 않는다.
 - 현재 설정은 Google 공식 테스트 ID 전용이다. 운영 ID, UMP 동의, 스토어 데이터 공개, 광고 제거 상품은 배포 전 별도 구성한다.
+
+## 인앱 결제와 광고 제거 권한
+
+```text
+MineGameController (composition root)
+  └─ MineIapCoordinator
+      ├─ IIapService
+      │   └─ UnityIapService (Unity IAP 5 adapter)
+      ├─ GameSaveData.adsRemoved (durable entitlement)
+      └─ MineHudView (purchase / restore / localized state)
+```
+
+- 상품 ID는 Google Play 비소모성 `remove_ads`이며 Codeless Catalog 없이 코드에서 등록한다.
+- `UnityIapService`는 연결 → 상품 조회 → 기존 구매 조회 순서를 지키고, 성공·실패·취소·보류·복원 이벤트를 게임 계층과 분리한다.
+- 새 구매는 `OnPurchasePending`에서 권한을 전달하고, `MineIapCoordinator`가 `adsRemoved`를 저장한 뒤에만 `ConfirmPurchase`를 호출한다. 저장 실패 시 권한을 되돌리고 주문을 승인하지 않아 다음 실행에서 재전달받는다.
+- 기존 확인된 비소모성 주문은 구매 조회 시 로컬 권한을 복원한다. 로컬 권한은 오프라인 플레이를 위해 조회 실패만으로 취소하지 않는다.
+- `MineAdCoordinator`는 `adsRemoved`가 참일 때 강제 전면 광고를 건너뛴다. 사용자가 선택하는 보상형 광고와 보상은 계속 제공한다.
+- 저장 형식 버전 4는 `adsRemoved`를 포함한다. 이전 저장은 기본값 `false`로 정규화된다.
+- Unity Services Core와 Google Mobile Ads의 Kotlin 전이 의존성은 `baseProjectTemplate.gradle`에서 1.8.22로 정렬한다.
+- 현재 구현은 로컬 영구 권한과 Google Play 복원을 제공한다. 환불·취소 반영 및 서버 영수증 검증은 운영 백엔드 범위다.

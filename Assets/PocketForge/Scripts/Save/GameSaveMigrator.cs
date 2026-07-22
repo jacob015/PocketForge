@@ -2,7 +2,7 @@ namespace PocketForge.Save
 {
     public static class GameSaveMigrator
     {
-        public const int CurrentVersion = 3;
+        public const int CurrentVersion = 4;
 
         public static GameSaveData Normalize(GameSaveData data)
         {

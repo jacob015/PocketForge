@@ -2,7 +2,7 @@
 
 ## 현재 작업 (2026-07-22 갱신)
 
-현재 작업: PROJECT_PLAN 테스트 광고 Task 구현 완료 — 다음은 인앱 결제 Task
+현재 작업: PROJECT_PLAN 인앱 결제 클라이언트 구현 완료 — 실제 Play 구매·복원 검증 승인 대기
 
 - 완료: AI 생성 UI 패널·버튼·카드를 하나의 1024px ASTC 6x6 아틀라스로 적용
 - 완료: Copper, Iron, Gold, Crystal Meshy 원본을 모바일 네이티브 메시·512px ASTC 텍스처로 최적화
@@ -23,7 +23,14 @@
 - 완료: 광고 상태 문구를 한국어·영어·일본어·중국어 간체에 추가
 - 완료: EditMode 21/21, 서명 AAB·Manifest·인증서 검증 및 SM-S938N 설치·기동·광고 실패 복구 UI 확인
 - 참고: SM-S938N의 `dns.adguard.com` 사설 DNS 환경에서 테스트 광고 로드가 `Unable to obtain a JavascriptEngine`으로 실패해 실제 광고 완료 콜백 검증은 DNS 해제 후 재시도 필요
-- 다음: PROJECT_PLAN의 인앱 결제 상품·구매 복원·광고 제거 Task를 승인 후 진행
+- 완료: Unity IAP 5.4.1과 비소모성 `remove_ads` 상품을 코드 기반 카탈로그로 연결
+- 완료: `IIapService`·`UnityIapService`·`MineIapCoordinator`로 스토어 SDK, 저장 권한, UI 조정을 분리
+- 완료: 광고 제거 권한을 저장 데이터 버전 4에 영속화하고 저장 성공 후에만 구매를 승인; 강제 전면 광고만 제거하고 보상형 광고는 유지
+- 완료: 설정창에 현지화 가격·구매·복원·완료·실패·취소·보류 상태를 네 언어로 추가하고 SM-S938N 화면 겹침 제거
+- 완료: Kotlin 1.6.21/1.8.22 충돌을 Base Gradle 의존성 정렬로 해결
+- 완료: EditMode 29/29, Release AAB 48,608,517바이트(46.36MiB), Bundletool·서명 검증, SM-S938N 설치·기동·상품 `$0.01` 조회·설정 UI 확인
+- 보류: 실제 구매와 복원은 금전·Play Console 상태가 관련되므로 별도 승인 후 내부 테스트 트랙에서 검증
+- 다음: Play Console의 `remove_ads` 상품·라이선스 테스터·내부 테스트 트랙을 확인하고 실제 구매/복원을 검증하거나, PROJECT_PLAN의 Jenkins AAB 자동화 Task로 진행
 
 ## 현재 작업
 

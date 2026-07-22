@@ -260,3 +260,13 @@
 - 수정 후 상태: 광고 구현은 게임 규칙·노출 정책·SDK 어댑터·UI 조정 계층으로 분리됐다. 테스트 ID만 포함하며 실제 광고 ID, UMP 동의 흐름, Play Console 데이터 공개, 광고 제거 상품은 후속 배포·결제 Task 범위다.
 - 테스트 결과: 별도 Android 타깃 Unity 프로젝트에서 컴파일 성공 및 EditMode 21/21 통과. Release IL2CPP AAB는 41,534,886바이트(39.61MiB)로 50MiB 목표 이내이며 Bundletool 구조, `com.jacob015.pocketforge` 0.1.0(1), AdMob 테스트 앱 ID, 출시 키 인증서 일치를 확인했다. SM-S938N 설치·기동과 SDK 초기화·테스트 광고 요청·실패 시 `광고 다시 받기` UI 전환을 확인했다. 기기의 `dns.adguard.com` 사설 DNS 환경에서 Google SDK가 `Unable to obtain a JavascriptEngine`을 반환해 실제 광고 표시와 보상 완료 콜백은 DNS 해제 후 재검증이 필요하다.
 - 다음 작업: 기기 네트워크 설정을 승인받아 테스트 광고 완료 콜백을 재검증한 뒤, PROJECT_PLAN의 인앱 결제 Task를 진행한다.
+
+## 수정사항 24
+
+- 기록 시각: 2026-07-22 19:35:00
+- 작업 요청 요약: PROJECT_PLAN의 인앱 결제 단계로 진행해 광고 제거 비소모성 상품, 구매 복원, 다국어 설정 UI와 Android 기기 검증을 구현한다.
+- 수정 전 상태: 광고 SDK와 전면·보상형 정책은 있었지만 결제 SDK, 상품 카탈로그, 영구 광고 제거 권한, 구매·복원 UI가 없었다.
+- 수정한 내용: Unity IAP 5.4.1을 추가하고 `remove_ads`를 비소모성 상품으로 등록했다. `IIapService`, `UnityIapService`, `MineIapCoordinator`를 도입해 SDK와 게임 상태를 분리했다. 저장 데이터를 버전 4로 올려 `adsRemoved` 권한을 영속화하고, 권한 저장 성공 후에만 Pending 주문을 승인한다. 복원·실패·취소·보류 상태와 현지화 가격을 설정창에 네 언어로 표시한다. 광고 제거 권한은 강제 전면 광고만 비활성화하며 선택형 보상 광고는 유지한다. Unity Services Core와 Google Ads의 Kotlin 중복 클래스는 Base Gradle 템플릿에서 1.8.22로 정렬했다.
+- 테스트 결과: 전체 자산이 포함된 격리 Unity 프로젝트에서 컴파일과 EditMode 29/29가 통과했다. 서명 Release AAB `Builds/Android/PocketForge-0.1.0-iap-release3.aab`은 48,608,517바이트(46.36MiB)이며 Bundletool 구조, `com.jacob015.pocketforge` 0.1.0(1), jarsigner 검증이 통과했다. SM-S938N에 기기별 APK 세트를 설치해 앱 프로세스 유지, 설정창의 현지화 상품 가격 `$0.01`, 구매·복원·닫기 버튼의 비겹침을 확인했다. 알려진 미사용 Play Asset Delivery 클래스 탐색 로그 1건 외 AndroidRuntime 크래시는 없었다.
+- 남은 작업: 실제 구매 버튼 입력과 복원은 금전 및 Play Console 내부 테스트 설정과 관련되므로 별도 승인 후 수행한다. 환불·취소 권한 회수와 서버 영수증 검증은 운영 백엔드 범위로 남긴다.
+- 다음 작업: Play Console 실제 구매·복원 검증을 승인받거나 PROJECT_PLAN의 Jenkins Android AAB 자동화 단계로 진행한다.

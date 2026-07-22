@@ -1,6 +1,7 @@
 using System;
 using PocketForge.Ads;
 using PocketForge.Content;
+using PocketForge.Iap;
 using PocketForge.Localization;
 using PocketForge.Save;
 using UnityEngine;
@@ -24,6 +25,7 @@ namespace PocketForge.Mining
         private MiningGameState gameState;
         private MineHudPresenter hudPresenter;
         private MineAdCoordinator adCoordinator;
+        private MineIapCoordinator iapCoordinator;
         private Transform oreVisual;
         private Renderer[] oreRenderers;
         private Vector3 oreBaseScale = Vector3.one;
@@ -62,10 +64,14 @@ namespace PocketForge.Mining
                 new InterstitialAdPolicy(5, 180f));
             hudPresenter.OreBroken += adCoordinator.RecordOreBroken;
             adCoordinator.SaveRequested += SaveGame;
+            iapCoordinator = new MineIapCoordinator(new UnityIapService(), gameState.Player, SaveEntitlement);
+            iapCoordinator.DisplayChanged += view.SetIapState;
+            view.BindIap(iapCoordinator.PurchaseRemoveAds, iapCoordinator.RestorePurchases);
 
             CreateOreVisual();
             hudPresenter.Render();
             adCoordinator.Initialize();
+            iapCoordinator.Initialize();
             var offlineReward = gameService.ApplyOfflineReward(gameState, DateTimeOffset.UtcNow.ToUnixTimeSeconds() - saveData.lastSavedUnixSeconds);
             hudPresenter.ShowOfflineReward(offlineReward);
             if (offlineReward > 0)
@@ -101,6 +107,11 @@ namespace PocketForge.Mining
                 adCoordinator.Dispose();
             }
 
+            if (iapCoordinator != null)
+            {
+                iapCoordinator.Dispose();
+            }
+
             if (backdropMaterial != null)
             {
                 Destroy(backdropMaterial);
@@ -118,6 +129,11 @@ namespace PocketForge.Mining
             {
                 SaveService.Save(gameState.Player);
             }
+        }
+
+        private bool SaveEntitlement()
+        {
+            return gameState != null && SaveService.Save(gameState.Player);
         }
 
         private void CreateOreVisual()

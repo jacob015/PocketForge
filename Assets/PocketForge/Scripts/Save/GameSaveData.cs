@@ -11,6 +11,7 @@ namespace PocketForge.Save
         public int pickaxeLevel;
         public int drillLevel;
         public int robotLevel;
+        public bool adsRemoved;
         public long lastSavedUnixSeconds;
     }
 }
