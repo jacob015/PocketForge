@@ -19,6 +19,7 @@ namespace PocketForge.Mining
         [SerializeField] private Texture2D uiKitTexture;
         [SerializeField] private Texture2D upgradeButtonTexture;
         [SerializeField] private Texture2D feedbackPanelTexture;
+        [SerializeField] private Texture2D hudIconsTexture;
         [SerializeField] private AudioClip backgroundMusic;
         [SerializeField] private AudioClip uiClickSound;
         [SerializeField] private AudioClip upgradeSuccessSound;
@@ -62,7 +63,7 @@ namespace PocketForge.Mining
             gameState = gameService.CreateInitialState(saveData, UnityEngine.Random.value);
             CreateQuarryBackdrop();
             var view = MineHudView.Create();
-            view.SetTheme(upgradeIconSheet, uiKitTexture, upgradeButtonTexture, feedbackPanelTexture);
+            view.SetTheme(upgradeIconSheet, uiKitTexture, upgradeButtonTexture, feedbackPanelTexture, hudIconsTexture);
             hudPresenter = new MineHudPresenter(view, gameService, gameState);
             hudPresenter.StateChanged += UpdateOreVisual;
             hudPresenter.SaveRequested += SaveGame;

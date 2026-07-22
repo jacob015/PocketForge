@@ -35,7 +35,16 @@ namespace PocketForge.Mining
         private Text offlineRewardText;
         private Image offlineRewardSurface;
         private Button settingsButton;
+        private Button creditsRewardButton;
         private Button rewardedAdButton;
+        private Image creditsCurrencyIcon;
+        private Image depthCurrencyIcon;
+        private Image settingsIcon;
+        private Image creditsPlusIcon;
+        private Image rewardedVideoIcon;
+        private Image rewardedPlusIcon;
+        private Image oreBadgeSurface;
+        private Image progressShine;
         private GameObject settingsPanel;
         private Text settingsTitle;
         private Text audioLabel;
@@ -58,6 +67,7 @@ namespace PocketForge.Mining
         private readonly List<Image> languageButtonSurfaces = new();
         private readonly List<Image> settingsControlSurfaces = new();
         private readonly List<Image> upgradeActionSurfaces = new();
+        private readonly List<Image> upgradeCostIcons = new();
         private Image[] pickaxePips;
         private Image[] drillPips;
         private Image[] robotPips;
@@ -96,7 +106,10 @@ namespace PocketForge.Mining
             var scaler = canvasObject.GetComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1080f, 1920f);
-            scaler.matchWidthOrHeight = 0.5f;
+            // Portrait HUD geometry is authored against a stable 1080-wide canvas. Matching
+            // width keeps controls equally legible on 16:9, 19.5:9 and 20:9 devices while the
+            // additional height becomes breathing room around the world-space ore.
+            scaler.matchWidthOrHeight = 0f;
 
             var view = canvasObject.AddComponent<MineHudView>();
             view.Build();
@@ -114,6 +127,7 @@ namespace PocketForge.Mining
         public void BindRewardedAd(Action rewardedAdAction)
         {
             rewardedAdButton.onClick.AddListener(() => rewardedAdAction());
+            creditsRewardButton.onClick.AddListener(() => rewardedAdAction());
         }
 
         public void BindIap(Action purchaseRemoveAdsAction, Action restorePurchasesAction)
@@ -122,7 +136,7 @@ namespace PocketForge.Mining
             restorePurchasesButton.onClick.AddListener(() => restorePurchasesAction());
         }
 
-        public void SetTheme(Texture upgradeIcons, Texture2D uiKit, Texture2D upgradeButton, Texture2D feedbackPanel)
+        public void SetTheme(Texture upgradeIcons, Texture2D uiKit, Texture2D upgradeButton, Texture2D feedbackPanel, Texture2D hudIcons)
         {
             if (upgradeIcons != null)
             {
@@ -147,6 +161,11 @@ namespace PocketForge.Mining
                 ApplyFeedbackPanel(feedbackPanel);
             }
 
+            if (hudIcons != null)
+            {
+                ApplyHudIcons(hudIcons);
+            }
+
             RenderSettings();
         }
 
@@ -156,14 +175,17 @@ namespace PocketForge.Mining
             lastService = service;
             var player = state.Player;
             var ore = state.Ore;
-            creditsText.text = $"<color=#FFD75A>{LanguageService.Get("credits").ToUpper()}</color>  <color=#FFFFFF>{player.credits:N0}</color>";
-            depthText.text = $"<color=#9FE8FF>{LanguageService.Get("depth").ToUpper()}</color>  <color=#FFFFFF>{player.stage}</color>";
-            oreText.text = $"{(ore.IsRare ? $"<color=#8FEAFF>{LanguageService.Get("rare").ToUpper()}</color>  " : string.Empty)}<color=#FFFFFF>{LanguageService.Get("ore").ToUpper()}</color>  <color=#D9E4FF>{Mathf.CeilToInt(ore.Health)} / {Mathf.CeilToInt(ore.Durability)}</color>";
+            creditsText.text = $"<color=#FFFFFF>{player.credits:N0}</color>";
+            depthText.text = $"<color=#FFFFFF>{player.stage:N0}</color>";
+            var oreKind = ore.IsRare
+                ? $"<color=#8FEAFF>{LanguageService.Get("rare").ToUpper()}</color>  {LanguageService.Get("ore").ToUpper()}"
+                : LanguageService.Get("ore").ToUpper();
+            oreText.text = $"{oreKind}  <color=#D9E4FF>{Mathf.CeilToInt(ore.Health):00} / {Mathf.CeilToInt(ore.Durability):00}</color>";
             oreProgress.fillAmount = Mathf.Clamp01(ore.Health / ore.Durability);
-            oreProgress.color = ore.IsRare ? new Color(0.48f, 0.92f, 1f) : new Color(1f, 0.72f, 0.2f);
-            SetUpgradeText(pickaxeButton, LanguageService.Get("pickaxe"), player.pickaxeLevel, service.GetUpgradeCost(UpgradeType.Pickaxe, player.pickaxeLevel));
-            SetUpgradeText(drillButton, LanguageService.Get("drill"), player.drillLevel, service.GetUpgradeCost(UpgradeType.Drill, player.drillLevel));
-            SetUpgradeText(robotButton, LanguageService.Get("robot"), player.robotLevel, service.GetUpgradeCost(UpgradeType.Robot, player.robotLevel));
+            oreProgress.color = ore.IsRare ? new Color(0.52f, 0.83f, 1f) : new Color(0.16f, 0.84f, 1f);
+            SetUpgradeText(pickaxeButton, player.pickaxeLevel, service.GetUpgradeCost(UpgradeType.Pickaxe, player.pickaxeLevel));
+            SetUpgradeText(drillButton, player.drillLevel, service.GetUpgradeCost(UpgradeType.Drill, player.drillLevel));
+            SetUpgradeText(robotButton, player.robotLevel, service.GetUpgradeCost(UpgradeType.Robot, player.robotLevel));
             UpdatePips(pickaxePips, player.pickaxeLevel, new Color(0.28f, 0.72f, 1f));
             UpdatePips(drillPips, player.drillLevel, new Color(0.78f, 0.38f, 1f));
             UpdatePips(robotPips, player.robotLevel, new Color(1f, 0.7f, 0.16f));
@@ -246,45 +268,60 @@ namespace PocketForge.Mining
             ApplySafeArea(true);
             var hudRoot = safeAreaRoot.transform;
 
-            topSurface = CreatePanel("TopSurface", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-70f, -92f), new Vector2(824f, 132f), new Color(0.06f, 0.1f, 0.24f, 0.96f));
-            upgradeSurface = CreatePanel("UpgradeSurface", hudRoot, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 226f), new Vector2(956f, 458f), Color.clear);
-            actionSurface = CreatePanel("ActionSurface", hudRoot, new Vector2(0.5f, 0.315f), new Vector2(0.5f, 0.315f), Vector2.zero, new Vector2(600f, 250f), Color.clear);
+            topSurface = CreatePanel("TopSurface", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-62f, -94f), new Vector2(846f, 142f), new Color(0.06f, 0.1f, 0.24f, 0.98f));
+            upgradeSurface = CreatePanel("UpgradeSurface", hudRoot, new Vector2(0.5f, 0.16f), new Vector2(0.5f, 0.16f), Vector2.zero, new Vector2(968f, 470f), Color.clear);
+            actionSurface = CreatePanel("ActionSurface", hudRoot, new Vector2(0.5f, 0.33f), new Vector2(0.5f, 0.33f), Vector2.zero, new Vector2(560f, 220f), Color.clear);
             upgradeSurface.raycastTarget = false;
             actionSurface.raycastTarget = false;
 
-            headerCoin = CreatePanel("HeaderCoin", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-414f, -92f), new Vector2(74f, 74f), Color.white);
+            headerCoin = CreatePanel("HeaderCoin", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-423f, -94f), new Vector2(96f, 96f), Color.white);
             headerCoin.GetComponent<Shadow>().enabled = false;
-            creditsText = CreateText("Credits", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-235f, -92f), new Vector2(260f, 72f), 29, TextAnchor.MiddleLeft);
-            depthText = CreateText("Depth", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(184f, -92f), new Vector2(280f, 72f), 29, TextAnchor.MiddleCenter);
-            settingsButton = CreateButton("SettingsButton", hudRoot, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-58f, -92f), new Vector2(96f, 96f), new Color(0.12f, 0.2f, 0.3f));
+            creditsRewardButton = CreateButton("CreditsRewardButton", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-194f, -94f), new Vector2(76f, 76f), new Color(0.42f, 0.84f, 0.14f));
+            creditsRewardButton.GetComponentInChildren<Text>().gameObject.SetActive(false);
+            creditsPlusIcon = CreateSimpleImage("PlusIcon", creditsRewardButton.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-4f, -4f), Color.white);
+            creditsCurrencyIcon = CreateSimpleImage("CreditsCurrencyIcon", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-72f, -94f), new Vector2(58f, 58f), Color.white);
+            creditsText = CreateText("Credits", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(22f, -94f), new Vector2(104f, 78f), 38, TextAnchor.MiddleLeft);
+            depthCurrencyIcon = CreateSimpleImage("DepthCurrencyIcon", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(151f, -94f), new Vector2(64f, 64f), Color.white);
+            depthText = CreateText("Depth", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(246f, -94f), new Vector2(108f, 78f), 38, TextAnchor.MiddleLeft);
+            settingsButton = CreateButton("SettingsButton", hudRoot, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-62f, -94f), new Vector2(112f, 112f), new Color(0.12f, 0.2f, 0.3f));
+            settingsButton.GetComponentInChildren<Text>().gameObject.SetActive(false);
+            settingsIcon = CreateSimpleImage("SettingsIcon", settingsButton.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-4f, -4f), Color.white);
             settingsButton.onClick.AddListener(OpenSettings);
-            offlineRewardSurface = CreatePanel("OfflineRewardSurface", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-236f, -174f), new Vector2(382f, 58f), new Color(0.04f, 0.2f, 0.16f, 0.92f));
-            offlineRewardText = CreateText("OfflineReward", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-236f, -174f), new Vector2(360f, 46f), 21, TextAnchor.MiddleCenter);
+            offlineRewardSurface = CreatePanel("OfflineRewardSurface", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-248f, -228f), new Vector2(410f, 82f), new Color(0.04f, 0.2f, 0.16f, 0.96f));
+            offlineRewardText = CreateText("OfflineReward", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-248f, -228f), new Vector2(380f, 58f), 24, TextAnchor.MiddleCenter);
             offlineRewardText.color = new Color(0.45f, 0.95f, 0.7f);
             offlineRewardSurface.gameObject.SetActive(false);
             offlineRewardText.gameObject.SetActive(false);
-            rewardedAdButton = CreateButton("RewardedAdButton", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(278f, -174f), new Vector2(374f, 62f), new Color(0.18f, 0.58f, 0.3f));
-            rewardedAdButton.GetComponentInChildren<Text>().fontSize = 20;
+            rewardedAdButton = CreateButton("RewardedAdButton", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(256f, -228f), new Vector2(404f, 88f), new Color(0.08f, 0.16f, 0.34f));
+            var rewardedLabel = rewardedAdButton.GetComponentInChildren<Text>();
+            rewardedLabel.fontSize = 30;
+            rewardedLabel.rectTransform.offsetMin = new Vector2(76f, 0f);
+            rewardedLabel.rectTransform.offsetMax = new Vector2(-66f, 0f);
+            rewardedVideoIcon = CreateSimpleImage("VideoIcon", rewardedAdButton.transform, new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(66f, 0f), new Vector2(84f, -4f), Color.white);
+            rewardedPlusIcon = CreateSimpleImage("PlusIcon", rewardedAdButton.transform, new Vector2(1f, 0f), new Vector2(1f, 1f), new Vector2(-48f, 0f), new Vector2(72f, -8f), Color.white);
             RenderRewardedAdState();
-            oreText = CreateText("OreLabel", hudRoot, new Vector2(0.5f, 0.405f), new Vector2(0.5f, 0.405f), new Vector2(0f, 56f), new Vector2(560f, 50f), 30, TextAnchor.MiddleCenter);
-            feedbackSurface = CreatePanel("ActionFeedbackSurface", hudRoot, new Vector2(0.5f, 0.51f), new Vector2(0.5f, 0.51f), Vector2.zero, new Vector2(520f, 82f), new Color(0.035f, 0.08f, 0.18f, 0.96f));
-            feedbackText = CreateText("ActionFeedback", hudRoot, new Vector2(0.5f, 0.51f), new Vector2(0.5f, 0.51f), Vector2.zero, new Vector2(480f, 54f), 28, TextAnchor.MiddleCenter);
+            oreBadgeSurface = CreatePanel("OreBadge", hudRoot, new Vector2(0.5f, 0.405f), new Vector2(0.5f, 0.405f), new Vector2(0f, 48f), new Vector2(382f, 78f), new Color(0.05f, 0.1f, 0.24f, 0.98f));
+            oreText = CreateText("OreLabel", oreBadgeSurface.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-24f, -10f), 29, TextAnchor.MiddleCenter);
+            feedbackSurface = CreatePanel("ActionFeedbackSurface", hudRoot, new Vector2(0.5f, 0.51f), new Vector2(0.5f, 0.51f), Vector2.zero, new Vector2(540f, 88f), new Color(0.035f, 0.08f, 0.18f, 0.96f));
+            feedbackText = CreateText("ActionFeedback", hudRoot, new Vector2(0.5f, 0.51f), new Vector2(0.5f, 0.51f), Vector2.zero, new Vector2(500f, 58f), 29, TextAnchor.MiddleCenter);
             feedbackSurface.gameObject.SetActive(false);
             feedbackText.gameObject.SetActive(false);
 
-            progressBackground = CreatePanel("ProgressBackground", hudRoot, new Vector2(0.5f, 0.405f), new Vector2(0.5f, 0.405f), Vector2.zero, new Vector2(610f, 58f), new Color(0.05f, 0.1f, 0.24f, 0.96f));
-            oreProgress = CreatePanel("ProgressFill", progressBackground.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(568f, 24f), new Color(0.95f, 0.45f, 0.12f));
+            progressBackground = CreatePanel("ProgressBackground", hudRoot, new Vector2(0.5f, 0.405f), new Vector2(0.5f, 0.405f), new Vector2(0f, -8f), new Vector2(650f, 66f), new Color(0.05f, 0.1f, 0.24f, 0.98f));
+            var progressTrack = CreateSimpleImage("ProgressTrack", progressBackground.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(608f, 32f), new Color(0.015f, 0.04f, 0.11f, 1f));
+            oreProgress = CreatePanel("ProgressFill", progressTrack.transform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(304f, 0f), new Vector2(600f, 24f), new Color(0.16f, 0.84f, 1f));
             oreProgress.GetComponent<Shadow>().enabled = false;
             oreProgress.type = Image.Type.Filled;
             oreProgress.fillMethod = Image.FillMethod.Horizontal;
             oreProgress.fillOrigin = (int)Image.OriginHorizontal.Left;
+            progressShine = CreateSimpleImage("ProgressShine", oreProgress.transform, new Vector2(0f, 0.55f), new Vector2(1f, 1f), Vector2.zero, Vector2.zero, new Color(1f, 1f, 1f, 0.22f));
 
-            mineButton = CreateButton("MineButton", hudRoot, new Vector2(0.5f, 0.315f), new Vector2(0.5f, 0.315f), Vector2.zero, new Vector2(560f, 232f), new Color(1f, 0.48f, 0.12f));
+            mineButton = CreateButton("MineButton", hudRoot, new Vector2(0.5f, 0.33f), new Vector2(0.5f, 0.33f), Vector2.zero, new Vector2(520f, 204f), new Color(1f, 0.48f, 0.12f));
             mineButton.GetComponentInChildren<Text>().gameObject.SetActive(false);
-            mineIcon = CreateIcon("MineIcon", mineButton.transform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(168f, 168f));
-            pickaxeButton = CreateButton("PickaxeButton", hudRoot, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(-320f, 226f), new Vector2(292f, 410f), new Color(0.14f, 0.3f, 0.52f));
-            drillButton = CreateButton("DrillButton", hudRoot, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 226f), new Vector2(292f, 410f), new Color(0.14f, 0.3f, 0.52f));
-            robotButton = CreateButton("RobotButton", hudRoot, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(320f, 226f), new Vector2(292f, 410f), new Color(0.14f, 0.3f, 0.52f));
+            mineIcon = CreateIcon("MineIcon", mineButton.transform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(158f, 158f));
+            pickaxeButton = CreateButton("PickaxeButton", hudRoot, new Vector2(0.5f, 0.16f), new Vector2(0.5f, 0.16f), new Vector2(-320f, 0f), new Vector2(300f, 448f), new Color(0.14f, 0.3f, 0.52f));
+            drillButton = CreateButton("DrillButton", hudRoot, new Vector2(0.5f, 0.16f), new Vector2(0.5f, 0.16f), Vector2.zero, new Vector2(300f, 448f), new Color(0.14f, 0.3f, 0.52f));
+            robotButton = CreateButton("RobotButton", hudRoot, new Vector2(0.5f, 0.16f), new Vector2(0.5f, 0.16f), new Vector2(320f, 0f), new Vector2(300f, 448f), new Color(0.14f, 0.3f, 0.52f));
             pickaxeIcon = CreateIcon("PickaxeIcon", pickaxeButton.transform);
             drillIcon = CreateIcon("DrillIcon", drillButton.transform);
             robotIcon = CreateIcon("RobotIcon", robotButton.transform);
@@ -312,10 +349,13 @@ namespace PocketForge.Mining
             upgradeSurface.color = Color.clear;
             actionSurface.color = Color.clear;
             ApplySlicedSprite(progressBackground, panelSprite, new Color(0.72f, 0.82f, 1f, 0.96f));
+            ApplySlicedSprite(oreBadgeSurface, panelSprite, new Color(0.86f, 0.92f, 1f, 1f));
             ApplySlicedSprite(feedbackSurface, panelSprite, new Color(0.7f, 0.82f, 1f, 0.98f));
             ApplySlicedSprite(offlineRewardSurface, panelSprite, new Color(0.55f, 1f, 0.72f, 0.98f));
             headerCoin.sprite = coinSprite;
             headerCoin.type = Image.Type.Simple;
+            creditsCurrencyIcon.sprite = coinSprite;
+            creditsCurrencyIcon.type = Image.Type.Simple;
             ApplySlicedSprite(mineButton.image, buttonSprite, Color.white);
             ApplySlicedSprite(pickaxeButton.image, cardSprite, Color.white);
             ApplySlicedSprite(drillButton.image, cardSprite, Color.white);
@@ -326,8 +366,15 @@ namespace PocketForge.Mining
             drillButton.GetComponent<Outline>().enabled = false;
             robotButton.GetComponent<Outline>().enabled = false;
             ApplySlicedSprite(settingsButton.image, cardSprite, new Color(0.74f, 0.84f, 1f));
-            ApplySlicedSprite(rewardedAdButton.image, buttonSprite, new Color(0.72f, 1f, 0.7f));
+            ApplySlicedSprite(rewardedAdButton.image, panelSprite, Color.white);
+            ApplySlicedSprite(creditsRewardButton.image, buttonSprite, new Color(0.72f, 1f, 0.7f));
             rewardedAdButton.GetComponent<Outline>().enabled = false;
+            creditsRewardButton.GetComponent<Outline>().enabled = false;
+            foreach (var costIcon in upgradeCostIcons)
+            {
+                costIcon.sprite = coinSprite;
+                costIcon.type = Image.Type.Simple;
+            }
             ApplySlicedSprite(settingsCard, cardSprite, Color.white);
             foreach (var surface in languageButtonSurfaces)
             {
@@ -340,6 +387,28 @@ namespace PocketForge.Mining
             }
 
             ApplySlicedSprite(closeSettingsButton.image, buttonSprite, Color.white);
+        }
+
+        private void ApplyHudIcons(Texture2D atlas)
+        {
+            var gear = CreateAtlasSprite(atlas, new Rect(0f, 0.5f, 0.5f, 0.5f), Vector4.zero);
+            var plus = CreateAtlasSprite(atlas, new Rect(0.5f, 0.5f, 0.5f, 0.5f), Vector4.zero);
+            var video = CreateAtlasSprite(atlas, new Rect(0f, 0f, 0.5f, 0.5f), Vector4.zero);
+            var crystal = CreateAtlasSprite(atlas, new Rect(0.5f, 0f, 0.5f, 0.5f), Vector4.zero);
+
+            ApplySimpleSprite(settingsIcon, gear);
+            ApplySimpleSprite(creditsPlusIcon, plus);
+            ApplySimpleSprite(rewardedPlusIcon, plus);
+            ApplySimpleSprite(rewardedVideoIcon, video);
+            ApplySimpleSprite(depthCurrencyIcon, crystal);
+        }
+
+        private static void ApplySimpleSprite(Image image, Sprite sprite)
+        {
+            image.sprite = sprite;
+            image.type = Image.Type.Simple;
+            image.preserveAspect = true;
+            image.color = Color.white;
         }
 
         private void ApplyUpgradeButton(Texture2D texture)
@@ -506,8 +575,6 @@ namespace PocketForge.Mining
                 return;
             }
 
-            settingsButton.GetComponentInChildren<Text>().text = "⚙";
-            settingsButton.GetComponentInChildren<Text>().fontSize = 52;
             settingsTitle.text = LanguageService.Get("settings").ToUpper();
             audioLabel.text = LanguageService.Get("audio").ToUpper();
             musicLabel.text = LanguageService.Get("music").ToUpper();
@@ -568,9 +635,10 @@ namespace PocketForge.Mining
             }
 
             rewardedAdButton.interactable = rewardedAdState is RewardedAdState.Ready or RewardedAdState.Failed;
+            creditsRewardButton.interactable = rewardedAdButton.interactable;
             rewardedAdButton.GetComponentInChildren<Text>().text = rewardedAdState switch
             {
-                RewardedAdState.Ready => $"{LanguageService.Get("free_reward").ToUpper()}  +{rewardedAdCredits:N0} C",
+                RewardedAdState.Ready => $"+{rewardedAdCredits:N0} C",
                 RewardedAdState.Failed => LanguageService.Get("ad_retry").ToUpper(),
                 RewardedAdState.Showing => LanguageService.Get("ad_showing").ToUpper(),
                 _ => LanguageService.Get("ad_loading").ToUpper()
@@ -674,7 +742,7 @@ namespace PocketForge.Mining
 
         private static RawImage CreateIcon(string name, Transform parent)
         {
-            return CreateIcon(name, parent, new Vector2(0.5f, 0.69f), Vector2.zero, new Vector2(214f, 190f));
+            return CreateIcon(name, parent, new Vector2(0.5f, 0.72f), Vector2.zero, new Vector2(230f, 204f));
         }
 
         private static RawImage CreateIcon(string name, Transform parent, Vector2 anchor, Vector2 position, Vector2 size)
@@ -723,29 +791,31 @@ namespace PocketForge.Mining
         {
             var label = button.GetComponentInChildren<Text>();
             var rect = label.rectTransform;
-            rect.anchorMin = new Vector2(0.05f, 0.22f);
-            rect.anchorMax = new Vector2(0.95f, 0.47f);
-            rect.offsetMin = Vector2.zero;
-            rect.offsetMax = Vector2.zero;
-            label.fontSize = 22;
+            rect.anchorMin = new Vector2(0.05f, 0f);
+            rect.anchorMax = new Vector2(0.95f, 0f);
+            rect.anchoredPosition = new Vector2(0f, 130f);
+            rect.sizeDelta = new Vector2(0f, 116f);
+            label.fontSize = 29;
             label.alignment = TextAnchor.MiddleCenter;
         }
 
-        private static void SetUpgradeText(Button button, string name, int level, int cost)
+        private static void SetUpgradeText(Button button, int level, int cost)
         {
-            button.GetComponentInChildren<Text>().text = $"<color=#FFFFFF>{name.ToUpper()}</color>  <color=#BBD8FF>Lv.{level}</color>\n<color=#FFD75A>{cost:N0} C</color>";
+            button.GetComponentInChildren<Text>().text = $"<color=#FFFFFF>Lv. {level}</color>\n<color=#FFD75A>    {cost:N0}</color>";
         }
 
         private Image[] CreateUpgradeDetails(Transform parent, Color activeColor)
         {
-            var pips = new Image[5];
+            var pips = new Image[3];
             for (var index = 0; index < pips.Length; index++)
             {
-                pips[index] = CreatePanel($"LevelPip{index + 1}", parent, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(-84f + index * 42f, 82f), new Vector2(34f, 18f), new Color(0.04f, 0.09f, 0.2f, 0.95f));
+                pips[index] = CreatePanel($"LevelPip{index + 1}", parent, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(-52f + index * 52f, 202f), new Vector2(44f, 20f), new Color(0.04f, 0.09f, 0.2f, 0.95f));
                 pips[index].GetComponent<Shadow>().enabled = false;
             }
 
-            var action = CreatePanel("UpgradeAction", parent, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 42f), new Vector2(232f, 74f), new Color(0.38f, 0.76f, 0.16f));
+            var costIcon = CreateSimpleImage("CostIcon", parent, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(-48f, 100f), new Vector2(38f, 38f), Color.white);
+            upgradeCostIcons.Add(costIcon);
+            var action = CreatePanel("UpgradeAction", parent, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 50f), new Vector2(248f, 84f), new Color(0.38f, 0.76f, 0.16f));
             upgradeActionSurfaces.Add(action);
             UpdatePips(pips, 0, activeColor);
             return pips;
