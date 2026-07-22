@@ -70,10 +70,7 @@ namespace PocketForge.Iap
                 {
                     Debug.LogWarning($"Unity IAP restore failed: {error}");
                     SetState(IapState.Failed);
-                    return;
                 }
-
-                storeController.FetchPurchases();
             });
         }
 

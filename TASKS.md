@@ -2,7 +2,7 @@
 
 ## 현재 작업 (2026-07-22 갱신)
 
-현재 작업: IAP Play Console 내부 테스트 준비 — 상품·테스터·테스트 트랙 설정 승인 대기
+현재 작업: IAP Play Console 내부 테스트 준비 — 개발자 계정 인증 완료 대기
 
 - 완료: AI 생성 UI 패널·버튼·카드를 하나의 1024px ASTC 6x6 아틀라스로 적용
 - 완료: Copper, Iron, Gold, Crystal Meshy 원본을 모바일 네이티브 메시·512px ASTC 텍스처로 최적화
@@ -31,8 +31,11 @@
 - 완료: 설정창에 현지화 가격·구매·복원·완료·실패·취소·보류 상태를 네 언어로 추가하고 SM-S938N 화면 겹침 제거
 - 완료: Kotlin 1.6.21/1.8.22 충돌을 Base Gradle 의존성 정렬로 해결
 - 완료: EditMode 29/29, Release AAB 48,608,517바이트(46.36MiB), Bundletool·서명 검증, SM-S938N 설치·기동·상품 `$0.01` 조회·설정 UI 확인
+- 완료: Unity IAP 5.4.1의 `RestoreTransactions` 결과 전달과 중복되던 추가 `FetchPurchases` 호출 제거
+- 완료: 복원 권한 저장·중복 구매 차단·이벤트 해제 회귀 테스트 추가 및 EditMode 32/32 통과
+- 완료: 업로드 대기용 Release AAB `PocketForge-0.1.0-iap-release4.aab` 48,610,452바이트(46.36MiB) 생성, 패키지·버전·구조·서명 인증서 일치 확인
 - 보류: 실제 구매와 복원은 금전·Play Console 상태가 관련되므로 별도 승인 후 내부 테스트 트랙에서 검증
-- 다음: Play Console의 `remove_ads` 상품·라이선스 테스터·내부 테스트 트랙을 구성하고 실제 구매·복원을 검증
+- 다음: 개발자 계정 인증 완료 후 Play Console의 `remove_ads` 상품·라이선스 테스터·내부 테스트 트랙을 구성하고 실제 구매·복원을 검증
 
 ### 승인된 남은 작업 순서
 

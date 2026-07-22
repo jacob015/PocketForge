@@ -61,6 +61,59 @@ namespace PocketForge.Tests.Editor
         }
 
         [Test]
+        public void RestoredEntitlement_IsSavedWithoutConfirmingAgain()
+        {
+            var service = new FakeIapService();
+            var data = new GameSaveData();
+            var saveCount = 0;
+            using var coordinator = new MineIapCoordinator(service, data, () =>
+            {
+                saveCount++;
+                return true;
+            });
+
+            service.DeliverEntitlement(false);
+
+            Assert.IsTrue(data.adsRemoved);
+            Assert.AreEqual(1, saveCount);
+            Assert.AreEqual(0, service.ConfirmCount);
+        }
+
+        [Test]
+        public void ExistingEntitlement_BlocksDuplicatePurchase()
+        {
+            var service = new FakeIapService();
+            using var coordinator = new MineIapCoordinator(
+                service,
+                new GameSaveData { adsRemoved = true },
+                () => true);
+
+            coordinator.PurchaseRemoveAds();
+
+            Assert.AreEqual(0, service.PurchaseCount);
+        }
+
+        [Test]
+        public void Dispose_UnsubscribesFromEntitlementEvents()
+        {
+            var service = new FakeIapService();
+            var data = new GameSaveData();
+            var saveCount = 0;
+            var coordinator = new MineIapCoordinator(service, data, () =>
+            {
+                saveCount++;
+                return true;
+            });
+
+            coordinator.Dispose();
+            service.DeliverEntitlement(true);
+
+            Assert.IsFalse(data.adsRemoved);
+            Assert.AreEqual(0, saveCount);
+            Assert.AreEqual(0, service.ConfirmCount);
+        }
+
+        [Test]
         public void PurchaseAndRestore_AreForwardedToService()
         {
             var service = new FakeIapService();

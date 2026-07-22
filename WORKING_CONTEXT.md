@@ -290,3 +290,13 @@
 - 수정 후 상태: 보상형 광고 로드·표시·완료·보상·재로딩과 전면 광고 정책·복귀가 실기기에서 정상 동작한다. 현재 작업은 IAP Play Console 내부 테스트 준비로 이동했다.
 - 테스트 결과: 보상형 광고 완료 후 크레딧 `20 → 80 C`, 전면 광고 후 심도 `11` 진행 유지, 앱 프로세스 유지, AndroidRuntime 크래시와 `JavascriptEngine` 오류 없음, Unity MCP EditMode 29/29 통과를 확인했다. Resolver 이후 Unity Console에는 기존 obsolete API 경고와 테스트 러너의 결과 저장 로그만 남았다.
 - 남은 작업: Play Console에서 `remove_ads` 비소모성 상품과 라이선스 테스터·내부 테스트 트랙을 구성한 뒤 실제 구매·복원·재설치 권한 복구를 검증한다.
+
+## 수정사항 27
+
+- 기록 시각: 2026-07-22 21:26:32
+- 작업 요청 요약: Play Console 개발자 계정 인증을 기다리는 동안 IAP 복원 안정성과 업로드용 AAB 준비를 먼저 완료한다.
+- 수정 전 상태: Unity IAP 5.4.1의 `RestoreTransactions`가 복원 결과를 `OnPurchasesFetched`로 전달하지만, 성공 콜백에서 `FetchPurchases`를 한 번 더 호출해 동일 세션에서 구매 목록을 중복 조회할 수 있었다. IAP 조정자 테스트는 구매 권한 저장 순서를 다뤘지만 복원 권한 저장, 중복 구매 차단, 이벤트 해제 회귀 사례는 없었다.
+- 수정한 내용: `UnityIapService.RestorePurchases`의 성공 후 추가 `FetchPurchases`를 제거해 Unity IAP 5.4.1 복원 흐름에 맞췄다. `MineIapCoordinatorTests`에 복원 권한 저장, 기존 권한 보유자의 중복 구매 차단, Dispose 후 이벤트 무시 테스트를 추가했다. 기존 출시 키를 메모리에만 주입해 업로드 대기용 `PocketForge-0.1.0-iap-release4.aab`을 생성한 뒤 비밀번호를 Unity 메모리에서 비웠다.
+- 수정 후 상태: 복원 요청은 Unity IAP가 전달하는 단일 구매 목록 이벤트를 사용하며 IAP EditMode 회귀 범위가 3개 늘었다. 새 AAB은 `com.jacob015.pocketforge` 버전 `0.1.0 (1)` 설정과 기존 출시 키 서명을 유지한다.
+- 테스트 결과: 두 수정 스크립트 진단 경고·오류 0건, Unity Console 컴파일 오류 0건, EditMode 32/32 통과. Release AAB 빌드는 오류 0건·경고 4건으로 성공했으며 실제 파일은 48,610,452바이트(46.36MiB), SHA-256 `AAEE9D47B101A1173067E88005384B1C2C722BBDB841856380ADEDCDD5C81CA5`다. AAB의 `BundleConfig.pb`, base manifest·resources, 서명 파일 존재를 확인했고 생성된 release manifest는 `com.jacob015.pocketforge` 0.1.0(1), AAB 인증서 SHA-256은 기존 출시 키와 일치했다. `jarsigner -verify` 종료 코드는 0이었다.
+- 남은 작업: Play Console 개발자 계정 인증 완료 후 `remove_ads` 상품을 게시하고 라이선스 테스터·내부 테스트 트랙을 설정한다. 이후 Play 설치본에서 실제 테스트 구매·복원·재설치 권한 복구·전면 광고 제거를 검증한다.
