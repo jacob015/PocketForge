@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using PocketForge.Ads;
 using PocketForge.Economy;
 using PocketForge.Localization;
 using UnityEngine;
@@ -30,6 +31,7 @@ namespace PocketForge.Mining
         private Text offlineRewardText;
         private Image offlineRewardSurface;
         private Button settingsButton;
+        private Button rewardedAdButton;
         private GameObject settingsPanel;
         private Text settingsTitle;
         private Text languageLabel;
@@ -46,6 +48,8 @@ namespace PocketForge.Mining
         private RectTransform safeAreaRoot;
         private Rect appliedSafeArea = new(-1f, -1f, -1f, -1f);
         private Vector2Int appliedScreenSize = new(-1, -1);
+        private RewardedAdState rewardedAdState = RewardedAdState.Initializing;
+        private int rewardedAdCredits;
 
         private void OnEnable() => LanguageService.Changed += RefreshLocalization;
 
@@ -73,6 +77,11 @@ namespace PocketForge.Mining
             pickaxeButton.onClick.AddListener(() => upgradeAction(UpgradeType.Pickaxe));
             drillButton.onClick.AddListener(() => upgradeAction(UpgradeType.Drill));
             robotButton.onClick.AddListener(() => upgradeAction(UpgradeType.Robot));
+        }
+
+        public void BindRewardedAd(Action rewardedAdAction)
+        {
+            rewardedAdButton.onClick.AddListener(() => rewardedAdAction());
         }
 
         public void SetTheme(Texture upgradeIcons, Texture2D uiKit, Texture2D upgradeButton)
@@ -130,6 +139,13 @@ namespace PocketForge.Mining
             Invoke(nameof(HideFeedback), 1.2f);
         }
 
+        public void SetRewardedAdState(RewardedAdState state, int rewardCredits)
+        {
+            rewardedAdState = state;
+            rewardedAdCredits = rewardCredits;
+            RenderRewardedAdState();
+        }
+
         private void HideFeedback() => feedbackText.gameObject.SetActive(false);
 
         private void LateUpdate() => ApplySafeArea();
@@ -142,6 +158,7 @@ namespace PocketForge.Mining
             }
 
             RenderSettings();
+            RenderRewardedAdState();
         }
 
         private void Build()
@@ -161,11 +178,14 @@ namespace PocketForge.Mining
             headerText = CreateText("Header", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-54f, -104f), new Vector2(650f, 82f), 32, TextAnchor.MiddleCenter);
             settingsButton = CreateButton("SettingsButton", hudRoot, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-62f, -104f), new Vector2(104f, 104f), new Color(0.12f, 0.2f, 0.3f));
             settingsButton.onClick.AddListener(() => settingsPanel.SetActive(true));
-            offlineRewardSurface = CreatePanel("OfflineRewardSurface", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -204f), new Vector2(600f, 58f), new Color(0.04f, 0.2f, 0.16f, 0.88f));
-            offlineRewardText = CreateText("OfflineReward", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -204f), new Vector2(580f, 48f), 24, TextAnchor.MiddleCenter);
+            offlineRewardSurface = CreatePanel("OfflineRewardSurface", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-240f, -204f), new Vector2(480f, 58f), new Color(0.04f, 0.2f, 0.16f, 0.88f));
+            offlineRewardText = CreateText("OfflineReward", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-240f, -204f), new Vector2(460f, 48f), 22, TextAnchor.MiddleCenter);
             offlineRewardText.color = new Color(0.45f, 0.95f, 0.7f);
             offlineRewardSurface.gameObject.SetActive(false);
             offlineRewardText.gameObject.SetActive(false);
+            rewardedAdButton = CreateButton("RewardedAdButton", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(280f, -204f), new Vector2(420f, 64f), new Color(0.18f, 0.58f, 0.3f));
+            rewardedAdButton.GetComponentInChildren<Text>().fontSize = 22;
+            RenderRewardedAdState();
             oreText = CreateText("OreLabel", hudRoot, new Vector2(0.5f, 0.405f), new Vector2(0.5f, 0.405f), new Vector2(0f, 56f), new Vector2(560f, 50f), 30, TextAnchor.MiddleCenter);
             feedbackText = CreateText("ActionFeedback", hudRoot, new Vector2(0.5f, 0.51f), new Vector2(0.5f, 0.51f), Vector2.zero, new Vector2(600f, 48f), 30, TextAnchor.MiddleCenter);
             feedbackText.gameObject.SetActive(false);
@@ -220,6 +240,8 @@ namespace PocketForge.Mining
             drillButton.GetComponent<Outline>().enabled = false;
             robotButton.GetComponent<Outline>().enabled = false;
             ApplySlicedSprite(settingsButton.image, cardSprite, new Color(0.74f, 0.84f, 1f));
+            ApplySlicedSprite(rewardedAdButton.image, buttonSprite, new Color(0.72f, 1f, 0.7f));
+            rewardedAdButton.GetComponent<Outline>().enabled = false;
             ApplySlicedSprite(settingsCard, cardSprite, Color.white);
             foreach (var surface in languageButtonSurfaces)
             {
@@ -301,6 +323,23 @@ namespace PocketForge.Mining
             settingsTitle.text = LanguageService.Get("settings").ToUpper();
             languageLabel.text = LanguageService.Get("language").ToUpper();
             closeSettingsButton.GetComponentInChildren<Text>().text = LanguageService.Get("close").ToUpper();
+        }
+
+        private void RenderRewardedAdState()
+        {
+            if (rewardedAdButton == null)
+            {
+                return;
+            }
+
+            rewardedAdButton.interactable = rewardedAdState is RewardedAdState.Ready or RewardedAdState.Failed;
+            rewardedAdButton.GetComponentInChildren<Text>().text = rewardedAdState switch
+            {
+                RewardedAdState.Ready => $"{LanguageService.Get("free_reward").ToUpper()}  +{rewardedAdCredits:N0} C",
+                RewardedAdState.Failed => LanguageService.Get("ad_retry").ToUpper(),
+                RewardedAdState.Showing => LanguageService.Get("ad_showing").ToUpper(),
+                _ => LanguageService.Get("ad_loading").ToUpper()
+            };
         }
 
         private static void EnsureEventSystem()

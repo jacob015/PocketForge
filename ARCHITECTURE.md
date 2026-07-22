@@ -112,3 +112,22 @@ MineGameController.Awake
 - 저장 데이터 버전 3은 마지막 저장 Unix 시각을 포함한다.
 - 오프라인 보상은 `drill power × 경과 시간 × (현재 광석 Credits / 내구도)`로 산정하고, 카탈로그의 4시간 상한을 적용한다.
 - 오프라인 보상은 Credits만 추가한다. 단계·현재 광석 체력은 앱이 실행 중인 자동 채굴 처리와 구분해 변경하지 않는다.
+
+## 광고 경계와 노출 정책
+
+```text
+MineGameController (composition root)
+  └─ MineAdCoordinator
+      ├─ IAdsService
+      │   └─ GoogleMobileAdsService (Google SDK adapter)
+      ├─ InterstitialAdPolicy (순수 노출 정책)
+      ├─ MiningGameService (보상 계산·지급)
+      └─ MineHudView (상태 표시·사용자 요청)
+```
+
+- `IAdsService`는 초기화, 보상형 광고 상태·표시, 전면 광고 표시만 노출해 게임 계층이 Google SDK 타입에 의존하지 않게 한다.
+- `GoogleMobileAdsService`는 SDK 초기화와 광고 인스턴스 생명주기를 담당한다. 보상은 SDK의 보상 완료 콜백에서만 전달하고, 닫힘·표시 실패 뒤에는 사용한 인스턴스를 폐기하고 새로 로드한다.
+- `MineAdCoordinator`는 HUD 요청을 광고 서비스에 전달하고 성공한 보상을 `MiningGameService`에 반영한 뒤 저장한다. 로드 실패는 게임 진행과 분리되며 사용자가 버튼으로 다시 시도할 수 있다.
+- `InterstitialAdPolicy`는 광석 파괴 횟수와 경과 시간을 순수 C# 상태로 관리한다. 기본 규칙은 광석 5개와 마지막 노출 후 180초를 모두 만족하는 경우다.
+- 보상 배율은 `MiningContentCatalog.rewardedAdRewardMultiplier`에서 조정한다. 현재 값은 일반 광석 보상 5회분이며 단계와 광석 체력은 변경하지 않는다.
+- 현재 설정은 Google 공식 테스트 ID 전용이다. 운영 ID, UMP 동의, 스토어 데이터 공개, 광고 제거 상품은 배포 전 별도 구성한다.

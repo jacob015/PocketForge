@@ -20,6 +20,7 @@ namespace PocketForge.Mining
 
         public event Action StateChanged;
         public event Action SaveRequested;
+        public event Action OreBroken;
 
         public void Render() => view.Render(state, gameService);
 
@@ -61,6 +62,11 @@ namespace PocketForge.Mining
 
             Render();
             StateChanged?.Invoke();
+            if (result.OreBroken)
+            {
+                OreBroken?.Invoke();
+            }
+
             if (result.RewardCredits > 0)
             {
                 view.ShowFeedback($"+{result.RewardCredits:N0} C", new Color(1f, 0.82f, 0.3f));

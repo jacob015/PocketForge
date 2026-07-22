@@ -1,4 +1,5 @@
 using System;
+using PocketForge.Ads;
 using PocketForge.Content;
 using PocketForge.Localization;
 using PocketForge.Save;
@@ -22,6 +23,7 @@ namespace PocketForge.Mining
 
         private MiningGameState gameState;
         private MineHudPresenter hudPresenter;
+        private MineAdCoordinator adCoordinator;
         private Transform oreVisual;
         private Renderer[] oreRenderers;
         private Vector3 oreBaseScale = Vector3.one;
@@ -52,9 +54,18 @@ namespace PocketForge.Mining
             hudPresenter = new MineHudPresenter(view, gameService, gameState);
             hudPresenter.StateChanged += UpdateOreVisual;
             hudPresenter.SaveRequested += SaveGame;
+            adCoordinator = new MineAdCoordinator(
+                view,
+                gameService,
+                gameState,
+                new GoogleMobileAdsService(),
+                new InterstitialAdPolicy(5, 180f));
+            hudPresenter.OreBroken += adCoordinator.RecordOreBroken;
+            adCoordinator.SaveRequested += SaveGame;
 
             CreateOreVisual();
             hudPresenter.Render();
+            adCoordinator.Initialize();
             var offlineReward = gameService.ApplyOfflineReward(gameState, DateTimeOffset.UtcNow.ToUnixTimeSeconds() - saveData.lastSavedUnixSeconds);
             hudPresenter.ShowOfflineReward(offlineReward);
             if (offlineReward > 0)
@@ -66,6 +77,7 @@ namespace PocketForge.Mining
         private void Update()
         {
             hudPresenter.Tick(Time.deltaTime);
+            adCoordinator.Tick(Time.unscaledDeltaTime);
             AnimateOreVisual();
             ResizeQuarryBackdrop();
         }
@@ -82,6 +94,13 @@ namespace PocketForge.Mining
 
         private void OnDestroy()
         {
+            if (hudPresenter != null && adCoordinator != null)
+            {
+                hudPresenter.OreBroken -= adCoordinator.RecordOreBroken;
+                adCoordinator.SaveRequested -= SaveGame;
+                adCoordinator.Dispose();
+            }
+
             if (backdropMaterial != null)
             {
                 Destroy(backdropMaterial);

@@ -83,6 +83,18 @@ namespace PocketForge.Mining
             return Mathf.CeilToInt(stage * multiplier * GetRewardMultiplier(robotLevel));
         }
 
+        public int GetRewardedAdCredits(MiningGameState state)
+        {
+            return GetOreReward(state.Player.stage, false, state.Player.robotLevel) * catalog.RewardedAdRewardMultiplier;
+        }
+
+        public MiningGameResult GrantRewardedAdCredits(MiningGameState state)
+        {
+            var reward = GetRewardedAdCredits(state);
+            state.Player.credits += reward;
+            return new MiningGameResult(true, false, false, reward);
+        }
+
         public int ApplyOfflineReward(MiningGameState state, long elapsedSeconds)
         {
             if (elapsedSeconds <= 0 || state.Player.drillLevel <= 0)

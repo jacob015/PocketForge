@@ -21,3 +21,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: e608e0f596f70c444a324418b8ded2d5, type: 2}
   - {fileID: 11400000, guid: 20fecb499bd34694ea70f1f5a8c045d6, type: 2}
   - {fileID: 11400000, guid: 7aa6de0641faebf4fa7cc27dacdcfb2a, type: 2}
+  maxOfflineRewardSeconds: 14400
+  rewardedAdRewardMultiplier: 5

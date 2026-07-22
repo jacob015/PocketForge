@@ -250,3 +250,13 @@
 - 수정 후 상태: 로컬 Unity Android 설정은 `pocketforge` 별칭의 사용자 키스토어를 가리킨다. `Builds/Android/PocketForge-0.1.0.aab`이 생성됐으며 파일 크기는 37,091,264바이트다.
 - 테스트 결과: 별도 임시 Unity 프로젝트에서 Release AAB 빌드 성공을 확인했다. Bundletool 검증 성공, 매니페스트 패키지 `com.jacob015.pocketforge`, 버전명 `0.1.0`, 버전 코드 `1`을 확인했다. `jarsigner` 검증이 성공했고 AAB 인증서와 키스토어 인증서의 SHA-256 지문이 일치했다.
 - 남은 작업: 키스토어와 복구 정보를 비밀번호 관리자 또는 오프라인 저장소에 추가 백업한다. 다음 구현 작업은 PROJECT_PLAN의 테스트 광고 보상·실패 처리다.
+
+## 수정사항 23
+
+- 기록 시각: 2026-07-22 17:50:00
+- 작업 요청 요약: PROJECT_PLAN 순서에 따라 테스트 광고의 보상·실패 처리를 구현하고 서명 Android 빌드와 실제 기기에서 검증한다.
+- 수정 전 상태: 프로젝트에 광고 SDK·광고 서비스 경계·보상형 광고 UI·전면 광고 노출 정책이 없었다.
+- 수정한 내용: OpenUPM으로 Google Mobile Ads Unity Plugin 11.3.0을 고정하고 공식 테스트 앱 ID와 보상형·전면 광고 단위 ID를 적용했다. `IAdsService`와 `GoogleMobileAdsService`로 SDK 의존성을 격리하고 `MineAdCoordinator`가 HUD, 게임 서비스, 저장을 연결한다. 보상형 광고는 현재 일반 광석 보상의 5배를 완료 콜백에서만 지급하며, 로드 실패 시 버튼을 수동 재시도로 전환한다. 전면 광고는 광석 5개 파괴 및 180초 쿨다운을 모두 만족할 때만 시도하고 실패해도 진행을 막지 않는다. 네 언어 광고 상태 문구와 정책·보상 단위 테스트를 추가했다.
+- 수정 후 상태: 광고 구현은 게임 규칙·노출 정책·SDK 어댑터·UI 조정 계층으로 분리됐다. 테스트 ID만 포함하며 실제 광고 ID, UMP 동의 흐름, Play Console 데이터 공개, 광고 제거 상품은 후속 배포·결제 Task 범위다.
+- 테스트 결과: 별도 Android 타깃 Unity 프로젝트에서 컴파일 성공 및 EditMode 21/21 통과. Release IL2CPP AAB는 41,534,886바이트(39.61MiB)로 50MiB 목표 이내이며 Bundletool 구조, `com.jacob015.pocketforge` 0.1.0(1), AdMob 테스트 앱 ID, 출시 키 인증서 일치를 확인했다. SM-S938N 설치·기동과 SDK 초기화·테스트 광고 요청·실패 시 `광고 다시 받기` UI 전환을 확인했다. 기기의 `dns.adguard.com` 사설 DNS 환경에서 Google SDK가 `Unable to obtain a JavascriptEngine`을 반환해 실제 광고 표시와 보상 완료 콜백은 DNS 해제 후 재검증이 필요하다.
+- 다음 작업: 기기 네트워크 설정을 승인받아 테스트 광고 완료 콜백을 재검증한 뒤, PROJECT_PLAN의 인앱 결제 Task를 진행한다.

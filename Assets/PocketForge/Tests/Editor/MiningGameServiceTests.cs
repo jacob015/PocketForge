@@ -84,6 +84,22 @@ namespace PocketForge.Tests.Editor
         }
 
         [Test]
+        public void RewardedAd_GrantsConfiguredCreditsWithoutChangingStage()
+        {
+            var catalog = MiningContentCatalog.CreateRuntimeDefault();
+            var service = new MiningGameService(catalog);
+            var state = service.CreateInitialState(new GameSaveData(), 1f);
+
+            var result = service.GrantRewardedAdCredits(state);
+
+            Assert.IsTrue(result.StateChanged);
+            Assert.AreEqual(10, result.RewardCredits);
+            Assert.AreEqual(10, state.Player.credits);
+            Assert.AreEqual(1, state.Player.stage);
+            Object.DestroyImmediate(catalog);
+        }
+
+        [Test]
         public void SaveMigrator_NormalizesLegacyInvalidValues()
         {
             var data = GameSaveMigrator.Normalize(new GameSaveData
