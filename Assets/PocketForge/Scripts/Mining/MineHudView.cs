@@ -440,7 +440,8 @@ namespace PocketForge.Mining
             ApplySlicedSprite(settingsButton.image, finalSkin.Sliced("HudSettingsButton", new Vector4(0.16f, 0.16f, 0.16f, 0.16f)), Color.white);
             ApplySlicedSprite(rewardedAdButton.image, finalSkin.Sliced("HudRewardPill", new Vector4(0.12f, 0.24f, 0.12f, 0.24f)), Color.white);
             ApplySlicedSprite(progressBackground, finalSkin.Sliced("HudProgressFrame", new Vector4(0.08f, 0.28f, 0.08f, 0.28f)), Color.white);
-            ApplySlicedSprite(progressTrack, finalSkin.Sliced("HudProgressTrack", new Vector4(0.06f, 0.24f, 0.06f, 0.24f)), Color.white);
+            ApplySimpleSprite(progressTrack, finalSkin.Simple("HudProgressTrack"));
+            progressTrack.preserveAspect = false;
             ApplySlicedSprite(mineButton.image, finalSkin.Sliced("HudMineButton", new Vector4(0.1f, 0.18f, 0.1f, 0.18f)), Color.white);
             ApplySlicedSprite(creditsRewardButton.image, finalSkin.Sliced("HudPlusButton", new Vector4(0.18f, 0.18f, 0.18f, 0.18f)), Color.white);
 
@@ -455,7 +456,10 @@ namespace PocketForge.Mining
 
             foreach (var pip in pickaxePips.Concat(drillPips).Concat(robotPips))
             {
-                ApplySlicedSprite(pip, finalSkin.Sliced("HudLevelPip", new Vector4(0.16f, 0.24f, 0.16f, 0.24f)), pip.color);
+                var tint = pip.color;
+                ApplySimpleSprite(pip, finalSkin.Simple("HudLevelPip"));
+                pip.preserveAspect = false;
+                pip.color = tint;
             }
 
             foreach (var icon in upgradeActionIcons)

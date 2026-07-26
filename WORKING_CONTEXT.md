@@ -380,3 +380,13 @@
 - 수정 후 상태: 다섯 대상 아이콘은 런타임에서 모두 256×256 텍스처로 로드되고, `OreBadge`는 생성되지 않는다. 진행 트랙은 `HudProgressTrack`, 세 강화 카드의 레벨 핍은 `HudLevelPip`을 사용한다. 사용자가 직접 맞춘 나머지 HUD 외곽 좌표와 크기는 유지된다.
 - 테스트 결과: Unity Console 컴파일·Play Mode 오류 0건, EditMode 50/50 통과. Play Mode 런타임 검사에서 대상 아이콘 256×256, `OreBadge` 부재, 새 트랙·핍 연결, 저장한 사용자 좌표 일치를 확인했다. 이번 요청에는 Android/APK 빌드와 실기기 검증을 포함하지 않았다.
 - 남은 작업: 사용자가 최신 HUD 화면에서 새 아이콘·트랙·핍의 시각 결과를 확인한다. 추가 수정이 없으면 Task 12 HUD 승인 여부를 결정한다.
+
+## 수정사항 35
+
+- 기록 시각: 2026-07-27 00:40:33
+- 작업 요청 요약: 새로 적용한 진행 트랙과 레벨 핍에 `Image.Type.Sliced`를 사용하지 않고 `Image.Type.Simple`을 사용한다.
+- 수정 전 상태: `HudProgressTrack`과 아홉 개 `HudLevelPip`은 `MineUiSkin.Sliced`로 스프라이트를 생성하고 `ApplySlicedSprite`로 표시했다.
+- 수정한 내용: 두 자산을 `MineUiSkin.Simple`과 `ApplySimpleSprite` 경로로 전환했다. 트랙과 핍이 현재 RectTransform 전체를 채우도록 `preserveAspect`는 끄고, 레벨 핍은 Simple 적용 전에 저장한 활성·비활성 틴트 색상을 복원하도록 했다. 기존 패널·버튼의 9-slice, 위치·크기, 설정창과 이미지 원본은 변경하지 않았다.
+- 수정 후 상태: 진행 트랙과 모든 레벨 핍의 런타임 `Image.Type`은 `Simple`이며 기존 RectTransform 크기와 레벨 색상 표현을 유지한다.
+- 테스트 결과: Unity 스크립트 컴파일 오류 0건, EditMode 50/50 통과. 회귀 테스트에서 트랙·핍의 자산 이름, `Image.Type.Simple`, `preserveAspect == false`를 확인한다.
+- 남은 작업: 사용자가 최신 HUD 화면에서 Simple 렌더링 결과를 확인한다. 이번 변경에는 Android/APK 빌드와 실기기 검증을 포함하지 않았다.

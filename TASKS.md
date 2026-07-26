@@ -7,7 +7,7 @@
 - 완료: 설정창과 사용자가 직접 맞춘 HUD 외곽 좌표·크기는 유지
 - 완료: `HeaderCoin`, `SettingsIcon`, `VideoIcon`, `IconPickaxe`, `IconDrill`을 원본 비율을 유지한 256×256 투명 캔버스로 정규화해 Unity NPOT 임포트 변형 제거
 - 완료: 의미 없는 `OreBadge`와 라벨을 HUD 생성·렌더링·스킨 경로에서 삭제
-- 완료: 현재 UI 키트와 맞는 `HudProgressTrack`, `HudLevelPip`을 생성해 9-slice 스프라이트로 적용
+- 완료: 현재 UI 키트와 맞는 `HudProgressTrack`, `HudLevelPip`을 생성하고 사용자 검수에 따라 `Image.Type.Simple`로 적용
 - 완료: 플레이 모드에서만 존재하던 사용자 조정값(크레딧·심도·광고 +·채굴 아이콘·업그레이드 액션 위치)을 코드에 영구 반영
 - 검증: Unity 컴파일 및 Play Mode 오류 0건, EditMode 50/50 통과
 - 제한: 이번 요청에는 Android/APK 빌드와 실기기 검증이 포함되지 않음

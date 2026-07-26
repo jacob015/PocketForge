@@ -148,6 +148,10 @@ namespace PocketForge.Tests.Editor
 
             Assert.That(track.sprite.texture.name, Is.EqualTo("HudProgressTrack"));
             Assert.That(pip.sprite.texture.name, Is.EqualTo("HudLevelPip"));
+            Assert.That(track.type, Is.EqualTo(Image.Type.Simple));
+            Assert.That(pip.type, Is.EqualTo(Image.Type.Simple));
+            Assert.That(track.preserveAspect, Is.False);
+            Assert.That(pip.preserveAspect, Is.False);
         }
 
         private (float Min, float Max) VerticalRange(string name, float parentHeight)
