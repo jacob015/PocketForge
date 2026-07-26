@@ -294,7 +294,7 @@ namespace PocketForge.Mining
             depthText = CreateText("Depth", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(238f, -117f), new Vector2(108f, 78f), 38, TextAnchor.MiddleLeft);
             settingsButton = CreateButton("SettingsButton", hudRoot, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-92f, -123f), new Vector2(116f, 116f), new Color(0.12f, 0.2f, 0.3f));
             settingsButton.GetComponentInChildren<Text>().gameObject.SetActive(false);
-            settingsIcon = CreateSimpleImage("SettingsIcon", settingsButton.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-4f, -4f), Color.white);
+            settingsIcon = CreateSimpleImage("SettingsIcon", settingsButton.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(100f, 100f), Color.white);
             settingsButton.onClick.AddListener(OpenSettings);
             offlineRewardSurface = CreatePanel("OfflineRewardSurface", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-248f, -228f), new Vector2(410f, 82f), new Color(0.04f, 0.2f, 0.16f, 0.96f));
             offlineRewardText = CreateText("OfflineReward", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-248f, -228f), new Vector2(380f, 58f), 24, TextAnchor.MiddleCenter);
@@ -398,18 +398,18 @@ namespace PocketForge.Mining
                 costIcon.sprite = coinSprite;
                 costIcon.type = Image.Type.Simple;
             }
-            ApplySlicedSprite(settingsCard, cardSprite, Color.white);
+            ApplyStretchedSimpleSprite(settingsCard, cardSprite, Color.white);
             foreach (var surface in languageButtonSurfaces)
             {
-                ApplySlicedSprite(surface, panelSprite, Color.white);
+                ApplyStretchedSimpleSprite(surface, panelSprite, Color.white);
             }
 
             foreach (var surface in settingsControlSurfaces)
             {
-                ApplySlicedSprite(surface, panelSprite, Color.white);
+                ApplyStretchedSimpleSprite(surface, panelSprite, Color.white);
             }
 
-            ApplySlicedSprite(closeSettingsButton.image, buttonSprite, Color.white);
+            ApplyStretchedSimpleSprite(closeSettingsButton.image, buttonSprite, Color.white);
         }
 
         private void ApplyHudIcons(Texture2D atlas)
@@ -481,22 +481,22 @@ namespace PocketForge.Mining
                 ApplySimpleSprite(upgradeCostIcons[index], finalSkin.Simple(costAssets[index]));
             }
 
-            ApplySlicedSprite(settingsCard, finalSkin.Sliced("SettingsModal", new Vector4(0.08f, 0.05f, 0.08f, 0.15f)), Color.white);
-            ApplySlicedSprite(settingsTitleSurface, finalSkin.Sliced("SettingsTitlePlaque", new Vector4(0.1f, 0.18f, 0.1f, 0.18f)), Color.white);
+            ApplyStretchedSimpleSprite(settingsCard, finalSkin.Simple("SettingsModal"), Color.white);
+            ApplyStretchedSimpleSprite(settingsTitleSurface, finalSkin.Simple("SettingsTitlePlaque"), Color.white);
             foreach (var surface in settingsControlSurfaces)
             {
-                ApplySlicedSprite(surface, finalSkin.Sliced("SettingsRow", new Vector4(0.08f, 0.2f, 0.08f, 0.2f)), Color.white);
+                ApplyStretchedSimpleSprite(surface, finalSkin.Simple("SettingsRow"), Color.white);
             }
 
             foreach (var well in settingsIconWells)
             {
-                ApplySlicedSprite(well, finalSkin.Sliced("SettingsIconWell", new Vector4(0.14f, 0.14f, 0.14f, 0.14f)), Color.white);
+                ApplyStretchedSimpleSprite(well, finalSkin.Simple("SettingsIconWell"), Color.white);
             }
 
             ApplySettingSliderSkin(musicSlider);
             ApplySettingSliderSkin(soundSlider);
-            ApplySlicedSprite(musicMuteButton.image, finalSkin.Sliced("SettingsIconButton", new Vector4(0.16f, 0.16f, 0.16f, 0.16f)), Color.white);
-            ApplySlicedSprite(soundMuteButton.image, finalSkin.Sliced("SettingsIconButton", new Vector4(0.16f, 0.16f, 0.16f, 0.16f)), Color.white);
+            ApplyStretchedSimpleSprite(musicMuteButton.image, finalSkin.Simple("SettingsIconButton"), Color.white);
+            ApplyStretchedSimpleSprite(soundMuteButton.image, finalSkin.Simple("SettingsIconButton"), Color.white);
 
             ApplySimpleSprite(musicSettingIcon, finalSkin.Simple("IconMusic"));
             ApplySimpleSprite(soundSettingIcon, finalSkin.Simple("IconSound"));
@@ -505,9 +505,9 @@ namespace PocketForge.Mining
             ApplySimpleSprite(hapticsSettingIcon, finalSkin.Simple("IconHaptics"));
             ApplySimpleSprite(reduceMotionSettingIcon, finalSkin.Simple("IconReduceMotion"));
 
-            ApplySlicedSprite(removeAdsButton.image, finalSkin.Sliced("SettingsActionButton", new Vector4(0.1f, 0.2f, 0.1f, 0.2f)), Color.white);
-            ApplySlicedSprite(restorePurchasesButton.image, finalSkin.Sliced("SettingsActionButton", new Vector4(0.1f, 0.2f, 0.1f, 0.2f)), Color.white);
-            ApplySlicedSprite(closeSettingsButton.image, finalSkin.Sliced("SettingsCloseButton", new Vector4(0.1f, 0.2f, 0.1f, 0.2f)), Color.white);
+            ApplyStretchedSimpleSprite(removeAdsButton.image, finalSkin.Simple("SettingsActionButton"), Color.white);
+            ApplyStretchedSimpleSprite(restorePurchasesButton.image, finalSkin.Simple("SettingsActionButton"), Color.white);
+            ApplyStretchedSimpleSprite(closeSettingsButton.image, finalSkin.Simple("SettingsCloseButton"), Color.white);
             ApplySimpleSprite(removeAdsIcon, finalSkin.Simple("IconAdsOff"));
             ApplySimpleSprite(restorePurchasesIcon, finalSkin.Simple("IconRestore"));
             ApplySimpleSprite(closeSettingsIcon, finalSkin.Simple("IconClose"));
@@ -540,7 +540,7 @@ namespace PocketForge.Mining
             var handle = slider.handleRect != null ? slider.handleRect.GetComponent<Image>() : null;
             if (background != null)
             {
-                ApplySlicedSprite(background, finalSkin.Sliced("SettingsSliderTrack", new Vector4(0.08f, 0.25f, 0.08f, 0.25f)), Color.white);
+                ApplyStretchedSimpleSprite(background, finalSkin.Simple("SettingsSliderTrack"), Color.white);
             }
 
             if (handle != null)
@@ -684,7 +684,7 @@ namespace PocketForge.Mining
             settingsControlSurfaces.Add(removeAdsRow);
             var removeAdsWell = CreatePanel("IconWell", removeAdsRow.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-308f, 0f), new Vector2(82f, 82f), Color.white);
             settingsIconWells.Add(removeAdsWell);
-            removeAdsIcon = CreateSimpleImage("RemoveAdsIcon", removeAdsWell.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-14f, -14f), Color.white);
+            removeAdsIcon = CreateSimpleImage("RemoveAdsIcon", removeAdsWell.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(60f, 60f), Color.white);
             removeAdsButton = CreateButton("RemoveAdsButton", removeAdsRow.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(66f, 0f), new Vector2(560f, 78f), new Color(0.22f, 0.58f, 0.32f));
             removeAdsButton.GetComponentInChildren<Text>().fontSize = 21;
 
@@ -692,12 +692,12 @@ namespace PocketForge.Mining
             settingsControlSurfaces.Add(restoreRow);
             var restoreWell = CreatePanel("IconWell", restoreRow.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-308f, 0f), new Vector2(82f, 82f), Color.white);
             settingsIconWells.Add(restoreWell);
-            restorePurchasesIcon = CreateSimpleImage("RestorePurchasesIcon", restoreWell.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-14f, -14f), Color.white);
+            restorePurchasesIcon = CreateSimpleImage("RestorePurchasesIcon", restoreWell.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(60f, 60f), Color.white);
             restorePurchasesButton = CreateButton("RestorePurchasesButton", restoreRow.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(66f, 0f), new Vector2(560f, 78f), new Color(0.12f, 0.2f, 0.32f));
             restorePurchasesButton.GetComponentInChildren<Text>().fontSize = 21;
             closeSettingsButton = CreateButton("CloseSettingsButton", card.transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 66f), new Vector2(326f, 88f), new Color(0.95f, 0.47f, 0.08f));
             closeSettingsButton.GetComponentInChildren<Text>().gameObject.SetActive(false);
-            closeSettingsIcon = CreateSimpleImage("CloseIcon", closeSettingsButton.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-16f, -16f), Color.white);
+            closeSettingsIcon = CreateSimpleImage("CloseIcon", closeSettingsButton.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(64f, 64f), Color.white);
             closeSettingsButton.onClick.AddListener(CloseSettings);
             settingsPanel.SetActive(false);
         }
@@ -716,13 +716,13 @@ namespace PocketForge.Mining
             settingsControlSurfaces.Add(row);
             var iconWell = CreatePanel("IconWell", row.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-308f, 0f), new Vector2(82f, 82f), Color.white);
             settingsIconWells.Add(iconWell);
-            settingIcon = CreateSimpleImage("SettingIcon", iconWell.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-14f, -14f), Color.white);
+            settingIcon = CreateSimpleImage("SettingIcon", iconWell.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(60f, 60f), Color.white);
             label = CreateText("Label", row.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-210f, 0f), new Vector2(104f, 56f), 18, TextAnchor.MiddleLeft);
             label.gameObject.SetActive(false);
             slider = CreateSlider("Slider", row.transform, Vector2.zero, new Vector2(500f, 54f));
             muteButton = CreateButton("MuteButton", row.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(304f, 0f), new Vector2(78f, 72f), new Color(0.2f, 0.62f, 0.28f));
             muteButton.GetComponentInChildren<Text>().gameObject.SetActive(false);
-            muteIcon = CreateSimpleImage("MuteIcon", muteButton.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-14f, -14f), Color.white);
+            muteIcon = CreateSimpleImage("MuteIcon", muteButton.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(52f, 52f), Color.white);
         }
 
         private void CreateSettingToggleRow(Transform parent, string name, float positionY, out Text label, out Button toggleButton, out Image settingIcon)
@@ -731,7 +731,7 @@ namespace PocketForge.Mining
             settingsControlSurfaces.Add(row);
             var iconWell = CreatePanel("IconWell", row.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-308f, 0f), new Vector2(82f, 82f), Color.white);
             settingsIconWells.Add(iconWell);
-            settingIcon = CreateSimpleImage("SettingIcon", iconWell.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-14f, -14f), Color.white);
+            settingIcon = CreateSimpleImage("SettingIcon", iconWell.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(60f, 60f), Color.white);
             label = CreateText("Label", row.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-164f, 0f), new Vector2(220f, 56f), 21, TextAnchor.MiddleLeft);
             label.gameObject.SetActive(false);
             toggleButton = CreateButton("Toggle", row.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(242f, 0f), new Vector2(190f, 60f), new Color(0.2f, 0.62f, 0.28f));
@@ -773,7 +773,7 @@ namespace PocketForge.Mining
             var buttonLabel = button.GetComponentInChildren<Text>();
             buttonLabel.text = label;
             buttonLabel.gameObject.SetActive(false);
-            languageIcons[language] = CreateSimpleImage("FlagIcon", button.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-24f, -20f), Color.white);
+            languageIcons[language] = CreateSimpleImage("FlagIcon", button.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(114f, 68f), Color.white);
             button.onClick.AddListener(() => LanguageService.SetLanguage(language));
         }
 
@@ -821,9 +821,9 @@ namespace PocketForge.Mining
                 entry.Value.image.color = Color.white;
                 if (finalSkin != null)
                 {
-                    ApplySlicedSprite(
+                    ApplyStretchedSimpleSprite(
                         entry.Value.image,
-                        finalSkin.Sliced(selected ? "SettingsLanguageSelected" : "SettingsLanguageButton", new Vector4(0.14f, 0.18f, 0.14f, 0.18f)),
+                        finalSkin.Simple(selected ? "SettingsLanguageSelected" : "SettingsLanguageButton"),
                         Color.white);
                 }
             }
@@ -835,9 +835,9 @@ namespace PocketForge.Mining
         {
             if (finalSkin != null)
             {
-                ApplySlicedSprite(
+                ApplyStretchedSimpleSprite(
                     button.image,
-                    finalSkin.Sliced("SettingsIconButton", new Vector4(0.16f, 0.16f, 0.16f, 0.16f)),
+                    finalSkin.Simple("SettingsIconButton"),
                     enabled ? Color.white : new Color(0.48f, 0.52f, 0.6f, 1f));
             }
             else
@@ -850,9 +850,9 @@ namespace PocketForge.Mining
         {
             if (finalSkin != null)
             {
-                ApplySlicedSprite(
+                ApplyStretchedSimpleSprite(
                     button.image,
-                    finalSkin.Sliced(enabled ? "SettingsToggleOn" : "SettingsToggleOff", new Vector4(0.18f, 0.2f, 0.18f, 0.2f)),
+                    finalSkin.Simple(enabled ? "SettingsToggleOn" : "SettingsToggleOff"),
                     Color.white);
             }
             else

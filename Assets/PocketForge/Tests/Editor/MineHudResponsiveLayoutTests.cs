@@ -184,7 +184,29 @@ namespace PocketForge.Tests.Editor
                 AssertStretchedSimple(surface, surface.name);
             }
 
-            Assert.That(FindRect("SettingsCard").GetComponent<Image>().type, Is.EqualTo(Image.Type.Sliced));
+            AssertStretchedSimple(FindRect("SettingsCard").GetComponent<Image>(), "SettingsCard");
+        }
+
+        [Test]
+        public void FinalSettingsChrome_UsesSimpleImagesAndSmallerIcons()
+        {
+            view.SetTheme(null, null, null, null, null);
+
+            var settingsCard = FindRect("SettingsCard");
+            var slicedImages = settingsCard
+                .GetComponentsInChildren<Image>(true)
+                .Where(image => image.type == Image.Type.Sliced)
+                .Select(image => image.name)
+                .ToArray();
+
+            Assert.That(slicedImages, Is.Empty, $"Settings UI still contains sliced images: {string.Join(", ", slicedImages)}");
+            AssertIconSizes(settingsCard, "SettingIcon", new Vector2(60f, 60f), 4);
+            AssertIconSizes(settingsCard, "MuteIcon", new Vector2(52f, 52f), 2);
+            AssertIconSizes(settingsCard, "FlagIcon", new Vector2(114f, 68f), 4);
+            AssertIconSizes(settingsCard, "RemoveAdsIcon", new Vector2(60f, 60f), 1);
+            AssertIconSizes(settingsCard, "RestorePurchasesIcon", new Vector2(60f, 60f), 1);
+            AssertIconSizes(settingsCard, "CloseIcon", new Vector2(64f, 64f), 1);
+            Assert.That(FindRect("SettingsIcon").sizeDelta, Is.EqualTo(new Vector2(100f, 100f)));
         }
 
         private (float Min, float Max) VerticalRange(string name, float parentHeight)
@@ -210,6 +232,20 @@ namespace PocketForge.Tests.Editor
         {
             Assert.That(image.type, Is.EqualTo(Image.Type.Simple), $"{name} must not use 9-slice rendering.");
             Assert.That(image.preserveAspect, Is.False, $"{name} must fill its approved RectTransform.");
+        }
+
+        private static void AssertIconSizes(RectTransform parent, string name, Vector2 expectedSize, int expectedCount)
+        {
+            var icons = parent
+                .GetComponentsInChildren<RectTransform>(true)
+                .Where(rect => rect.name == name)
+                .ToArray();
+
+            Assert.That(icons, Has.Length.EqualTo(expectedCount));
+            foreach (var icon in icons)
+            {
+                Assert.That(icon.sizeDelta, Is.EqualTo(expectedSize));
+            }
         }
 
         private static RectTransform FindChildRect(RectTransform parent, string name)
