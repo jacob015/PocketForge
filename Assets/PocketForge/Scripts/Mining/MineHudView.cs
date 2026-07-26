@@ -28,6 +28,7 @@ namespace PocketForge.Mining
         private RawImage robotIcon;
         private RawImage mineIcon;
         private Image headerCoin;
+        private Image headerCounterSlot;
         private Image topSurface;
         private Image upgradeSurface;
         private Image actionSurface;
@@ -64,9 +65,23 @@ namespace PocketForge.Mining
         private Button restorePurchasesButton;
         private Button closeSettingsButton;
         private Image settingsCard;
+        private Image settingsTitleSurface;
+        private Image musicSettingIcon;
+        private Image soundSettingIcon;
+        private Image musicMuteIcon;
+        private Image soundMuteIcon;
+        private Image hapticsSettingIcon;
+        private Image reduceMotionSettingIcon;
+        private Image removeAdsIcon;
+        private Image restorePurchasesIcon;
+        private Image closeSettingsIcon;
+        private readonly Dictionary<SupportedLanguage, Button> languageButtons = new();
+        private readonly Dictionary<SupportedLanguage, Image> languageIcons = new();
         private readonly List<Image> languageButtonSurfaces = new();
         private readonly List<Image> settingsControlSurfaces = new();
+        private readonly List<Image> settingsIconWells = new();
         private readonly List<Image> upgradeActionSurfaces = new();
+        private readonly List<Image> upgradeActionIcons = new();
         private readonly List<Image> upgradeCostIcons = new();
         private Image[] pickaxePips;
         private Image[] drillPips;
@@ -84,6 +99,7 @@ namespace PocketForge.Mining
         private IapState iapState = IapState.Initializing;
         private string removeAdsPrice = string.Empty;
         private bool adsRemoved;
+        private MineUiSkin finalSkin;
 
         private void OnEnable()
         {
@@ -166,6 +182,7 @@ namespace PocketForge.Mining
                 ApplyHudIcons(hudIcons);
             }
 
+            ApplyFinalSkin();
             RenderSettings();
         }
 
@@ -276,6 +293,7 @@ namespace PocketForge.Mining
 
             headerCoin = CreatePanel("HeaderCoin", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-423f, -94f), new Vector2(96f, 96f), Color.white);
             headerCoin.GetComponent<Shadow>().enabled = false;
+            headerCounterSlot = CreatePanel("HeaderCounterSlot", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-310f, -94f), new Vector2(122f, 64f), new Color(0.025f, 0.07f, 0.16f, 0.96f));
             creditsRewardButton = CreateButton("CreditsRewardButton", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-194f, -94f), new Vector2(76f, 76f), new Color(0.42f, 0.84f, 0.14f));
             creditsRewardButton.GetComponentInChildren<Text>().gameObject.SetActive(false);
             creditsPlusIcon = CreateSimpleImage("PlusIcon", creditsRewardButton.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-4f, -4f), Color.white);
@@ -403,6 +421,148 @@ namespace PocketForge.Mining
             ApplySimpleSprite(depthCurrencyIcon, crystal);
         }
 
+        private void ApplyFinalSkin()
+        {
+            finalSkin = MineUiSkin.Load();
+            if (finalSkin == null)
+            {
+                Debug.LogWarning("Pocket Forge final UI skin could not be loaded. Keeping the fallback HUD theme.");
+                return;
+            }
+
+            ApplySlicedSprite(topSurface, finalSkin.Sliced("HudHeader", new Vector4(0.08f, 0.24f, 0.08f, 0.24f)), Color.white);
+            ApplySlicedSprite(headerCounterSlot, finalSkin.Sliced("HudCounterSlot", new Vector4(0.16f, 0.25f, 0.16f, 0.25f)), Color.white);
+            ApplySlicedSprite(settingsButton.image, finalSkin.Sliced("HudSettingsButton", new Vector4(0.16f, 0.16f, 0.16f, 0.16f)), Color.white);
+            ApplySlicedSprite(rewardedAdButton.image, finalSkin.Sliced("HudRewardPill", new Vector4(0.12f, 0.24f, 0.12f, 0.24f)), Color.white);
+            ApplySlicedSprite(oreBadgeSurface, finalSkin.Sliced("HudOreBadge", new Vector4(0.14f, 0.24f, 0.14f, 0.24f)), Color.white);
+            ApplySlicedSprite(progressBackground, finalSkin.Sliced("HudProgressFrame", new Vector4(0.08f, 0.28f, 0.08f, 0.28f)), Color.white);
+            ApplySlicedSprite(mineButton.image, finalSkin.Sliced("HudMineButton", new Vector4(0.1f, 0.18f, 0.1f, 0.18f)), Color.white);
+            ApplySlicedSprite(creditsRewardButton.image, finalSkin.Sliced("HudPlusButton", new Vector4(0.18f, 0.18f, 0.18f, 0.18f)), Color.white);
+
+            ApplySlicedSprite(pickaxeButton.image, finalSkin.Sliced("HudUpgradeCard", new Vector4(0.1f, 0.08f, 0.1f, 0.08f)), Color.white);
+            ApplySlicedSprite(drillButton.image, finalSkin.Sliced("HudUpgradeCard", new Vector4(0.1f, 0.08f, 0.1f, 0.08f)), Color.white);
+            ApplySlicedSprite(robotButton.image, finalSkin.Sliced("HudUpgradeCard", new Vector4(0.1f, 0.08f, 0.1f, 0.08f)), Color.white);
+            foreach (var surface in upgradeActionSurfaces)
+            {
+                ApplySlicedSprite(surface, finalSkin.Sliced("HudUpgradeButton", new Vector4(0.12f, 0.18f, 0.12f, 0.18f)), Color.white);
+                surface.GetComponent<Shadow>().enabled = false;
+            }
+
+            foreach (var icon in upgradeActionIcons)
+            {
+                ApplySimpleSprite(icon, finalSkin.Simple("IconUpgradeArrow"));
+            }
+
+            ApplySimpleSprite(headerCoin, finalSkin.Simple("IconGoldBadge"));
+            ApplySimpleSprite(creditsCurrencyIcon, finalSkin.Simple("IconGoldCoin"));
+            ApplySimpleSprite(depthCurrencyIcon, finalSkin.Simple("IconPurpleGem"));
+            ApplySimpleSprite(settingsIcon, finalSkin.Simple("IconGear"));
+            ApplySimpleSprite(creditsPlusIcon, finalSkin.Simple("IconPlus"));
+            ApplySimpleSprite(rewardedVideoIcon, finalSkin.Simple("IconVideo"));
+            ApplySimpleSprite(rewardedPlusIcon, finalSkin.Simple("IconPlus"));
+            ApplyRawTexture(mineIcon, finalSkin.Texture("IconPickaxe"));
+            ApplyRawTexture(pickaxeIcon, finalSkin.Texture("IconPickaxe"));
+            ApplyRawTexture(drillIcon, finalSkin.Texture("IconDrill"));
+            ApplyRawTexture(robotIcon, finalSkin.Texture("IconRobot"));
+
+            var costAssets = new[] { "IconCyanCrystal", "IconPurpleGem", "IconGoldBadge" };
+            for (var index = 0; index < upgradeCostIcons.Count && index < costAssets.Length; index++)
+            {
+                ApplySimpleSprite(upgradeCostIcons[index], finalSkin.Simple(costAssets[index]));
+            }
+
+            ApplySlicedSprite(settingsCard, finalSkin.Sliced("SettingsModal", new Vector4(0.08f, 0.05f, 0.08f, 0.15f)), Color.white);
+            ApplySlicedSprite(settingsTitleSurface, finalSkin.Sliced("SettingsTitlePlaque", new Vector4(0.1f, 0.18f, 0.1f, 0.18f)), Color.white);
+            foreach (var surface in settingsControlSurfaces)
+            {
+                ApplySlicedSprite(surface, finalSkin.Sliced("SettingsRow", new Vector4(0.08f, 0.2f, 0.08f, 0.2f)), Color.white);
+            }
+
+            foreach (var well in settingsIconWells)
+            {
+                ApplySlicedSprite(well, finalSkin.Sliced("SettingsIconWell", new Vector4(0.14f, 0.14f, 0.14f, 0.14f)), Color.white);
+            }
+
+            ApplySettingSliderSkin(musicSlider);
+            ApplySettingSliderSkin(soundSlider);
+            ApplySlicedSprite(musicMuteButton.image, finalSkin.Sliced("SettingsIconButton", new Vector4(0.16f, 0.16f, 0.16f, 0.16f)), Color.white);
+            ApplySlicedSprite(soundMuteButton.image, finalSkin.Sliced("SettingsIconButton", new Vector4(0.16f, 0.16f, 0.16f, 0.16f)), Color.white);
+
+            ApplySimpleSprite(musicSettingIcon, finalSkin.Simple("IconMusic"));
+            ApplySimpleSprite(soundSettingIcon, finalSkin.Simple("IconSound"));
+            ApplySimpleSprite(musicMuteIcon, finalSkin.Simple("IconMusic"));
+            ApplySimpleSprite(soundMuteIcon, finalSkin.Simple("IconSound"));
+            ApplySimpleSprite(hapticsSettingIcon, finalSkin.Simple("IconHaptics"));
+            ApplySimpleSprite(reduceMotionSettingIcon, finalSkin.Simple("IconReduceMotion"));
+
+            ApplySlicedSprite(removeAdsButton.image, finalSkin.Sliced("SettingsActionButton", new Vector4(0.1f, 0.2f, 0.1f, 0.2f)), Color.white);
+            ApplySlicedSprite(restorePurchasesButton.image, finalSkin.Sliced("SettingsActionButton", new Vector4(0.1f, 0.2f, 0.1f, 0.2f)), Color.white);
+            ApplySlicedSprite(closeSettingsButton.image, finalSkin.Sliced("SettingsCloseButton", new Vector4(0.1f, 0.2f, 0.1f, 0.2f)), Color.white);
+            ApplySimpleSprite(removeAdsIcon, finalSkin.Simple("IconAdsOff"));
+            ApplySimpleSprite(restorePurchasesIcon, finalSkin.Simple("IconRestore"));
+            ApplySimpleSprite(closeSettingsIcon, finalSkin.Simple("IconClose"));
+
+            ApplyLanguageIcon(SupportedLanguage.Korean, "IconFlagKorean");
+            ApplyLanguageIcon(SupportedLanguage.English, "IconFlagEnglish");
+            ApplyLanguageIcon(SupportedLanguage.Japanese, "IconFlagJapanese");
+            ApplyLanguageIcon(SupportedLanguage.ChineseSimplified, "IconFlagChinese");
+
+            DisableOutline(mineButton);
+            DisableOutline(pickaxeButton);
+            DisableOutline(drillButton);
+            DisableOutline(robotButton);
+            DisableOutline(settingsButton);
+            DisableOutline(rewardedAdButton);
+            DisableOutline(creditsRewardButton);
+            DisableOutline(removeAdsButton);
+            DisableOutline(restorePurchasesButton);
+            DisableOutline(closeSettingsButton);
+        }
+
+        private void ApplySettingSliderSkin(Slider slider)
+        {
+            if (slider == null)
+            {
+                return;
+            }
+
+            var background = slider.transform.Find("Background")?.GetComponent<Image>();
+            var handle = slider.handleRect != null ? slider.handleRect.GetComponent<Image>() : null;
+            if (background != null)
+            {
+                ApplySlicedSprite(background, finalSkin.Sliced("SettingsSliderTrack", new Vector4(0.08f, 0.25f, 0.08f, 0.25f)), Color.white);
+            }
+
+            if (handle != null)
+            {
+                ApplySimpleSprite(handle, finalSkin.Simple("SettingsSliderKnob"));
+            }
+        }
+
+        private void ApplyLanguageIcon(SupportedLanguage language, string assetName)
+        {
+            if (languageIcons.TryGetValue(language, out var icon))
+            {
+                ApplySimpleSprite(icon, finalSkin.Simple(assetName));
+            }
+        }
+
+        private static void ApplyRawTexture(RawImage image, Texture texture)
+        {
+            image.texture = texture;
+            image.uvRect = new Rect(0f, 0f, 1f, 1f);
+            image.color = Color.white;
+        }
+
+        private static void DisableOutline(Button button)
+        {
+            var outline = button.GetComponent<Outline>();
+            if (outline != null)
+            {
+                outline.enabled = false;
+            }
+        }
+
         private static void ApplySimpleSprite(Image image, Sprite sprite)
         {
             image.sprite = sprite;
@@ -466,15 +626,17 @@ namespace PocketForge.Mining
         {
             var backdrop = CreatePanel("SettingsBackdrop", transform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero, new Color(0.005f, 0.012f, 0.04f, 0.78f));
             settingsPanel = backdrop.gameObject;
-            settingsCard = CreatePanel("SettingsCard", settingsPanel.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(840f, 1420f), new Color(0.035f, 0.075f, 0.15f, 0.99f));
+            settingsCard = CreatePanel("SettingsCard", settingsPanel.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(840f, 1450f), new Color(0.035f, 0.075f, 0.15f, 0.99f));
             var card = settingsCard;
-            settingsTitle = CreateText("SettingsTitle", card.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -66f), new Vector2(680f, 76f), 46, TextAnchor.MiddleCenter);
-            audioLabel = CreateText("AudioLabel", card.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -144f), new Vector2(650f, 42f), 24, TextAnchor.MiddleLeft);
+            settingsTitleSurface = CreatePanel("SettingsTitleSurface", card.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -48f), new Vector2(560f, 130f), Color.white);
+            settingsTitle = CreateText("SettingsTitle", settingsTitleSurface.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-38f, -14f), 46, TextAnchor.MiddleCenter);
+            audioLabel = CreateText("AudioLabel", card.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -136f), new Vector2(650f, 36f), 22, TextAnchor.MiddleLeft);
+            audioLabel.gameObject.SetActive(false);
 
-            CreateSettingSliderRow(card.transform, "MusicRow", -236f, out musicLabel, out musicSlider, out musicMuteButton);
-            CreateSettingSliderRow(card.transform, "SoundRow", -354f, out soundLabel, out soundSlider, out soundMuteButton);
-            CreateSettingToggleRow(card.transform, "HapticsRow", -482f, out hapticsLabel, out hapticsButton);
-            CreateSettingToggleRow(card.transform, "ReduceMotionRow", -594f, out reduceMotionLabel, out reduceMotionButton);
+            CreateSettingSliderRow(card.transform, "MusicRow", -220f, out musicLabel, out musicSlider, out musicMuteButton, out musicSettingIcon, out musicMuteIcon);
+            CreateSettingSliderRow(card.transform, "SoundRow", -340f, out soundLabel, out soundSlider, out soundMuteButton, out soundSettingIcon, out soundMuteIcon);
+            CreateSettingToggleRow(card.transform, "HapticsRow", -460f, out hapticsLabel, out hapticsButton, out hapticsSettingIcon);
+            CreateSettingToggleRow(card.transform, "ReduceMotionRow", -580f, out reduceMotionLabel, out reduceMotionButton, out reduceMotionSettingIcon);
 
             musicSlider.onValueChanged.AddListener(GameSettingsService.SetMusicVolume);
             soundSlider.onValueChanged.AddListener(GameSettingsService.SetSoundVolume);
@@ -483,40 +645,69 @@ namespace PocketForge.Mining
             hapticsButton.onClick.AddListener(() => GameSettingsService.SetHapticsEnabled(!GameSettingsService.HapticsEnabled));
             reduceMotionButton.onClick.AddListener(() => GameSettingsService.SetReduceMotion(!GameSettingsService.ReduceMotion));
 
-            languageLabel = CreateText("LanguageLabel", card.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -686f), new Vector2(650f, 42f), 24, TextAnchor.MiddleLeft);
-            CreateLanguageButton(card.transform, "KoreanLanguageButton", "\uD55C\uAD6D\uC5B4", SupportedLanguage.Korean, -184f, -768f);
-            CreateLanguageButton(card.transform, "EnglishLanguageButton", "English", SupportedLanguage.English, 184f, -768f);
-            CreateLanguageButton(card.transform, "JapaneseLanguageButton", "\u65E5\u672C\u8A9E", SupportedLanguage.Japanese, -184f, -860f);
-            CreateLanguageButton(card.transform, "ChineseLanguageButton", "\u7B80\u4F53\u4E2D\u6587", SupportedLanguage.ChineseSimplified, 184f, -860f);
+            languageLabel = CreateText("LanguageLabel", card.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-286f, -692f), new Vector2(100f, 42f), 20, TextAnchor.MiddleLeft);
+            CreateLanguageButton(card.transform, "KoreanLanguageButton", "\uD55C\uAD6D\uC5B4", SupportedLanguage.Korean, -270f, -775f);
+            CreateLanguageButton(card.transform, "EnglishLanguageButton", "English", SupportedLanguage.English, -90f, -775f);
+            CreateLanguageButton(card.transform, "JapaneseLanguageButton", "\u65E5\u672C\u8A9E", SupportedLanguage.Japanese, 90f, -775f);
+            CreateLanguageButton(card.transform, "ChineseLanguageButton", "\u7B80\u4F53\u4E2D\u6587", SupportedLanguage.ChineseSimplified, 270f, -775f);
 
-            iapStatusText = CreateText("IapStatus", card.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -950f), new Vector2(680f, 52f), 21, TextAnchor.MiddleCenter);
-            removeAdsButton = CreateButton("RemoveAdsButton", card.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -1032f), new Vector2(700f, 76f), new Color(0.22f, 0.58f, 0.32f));
-            restorePurchasesButton = CreateButton("RestorePurchasesButton", card.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -1122f), new Vector2(700f, 72f), new Color(0.12f, 0.2f, 0.32f));
-            languageButtonSurfaces.Add(removeAdsButton.image);
-            languageButtonSurfaces.Add(restorePurchasesButton.image);
-            closeSettingsButton = CreateButton("CloseSettingsButton", card.transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 66f), new Vector2(360f, 76f), new Color(0.95f, 0.47f, 0.08f));
+            iapStatusText = CreateText("IapStatus", card.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -894f), new Vector2(680f, 38f), 18, TextAnchor.MiddleCenter);
+
+            var removeAdsRow = CreatePanel("RemoveAdsRow", card.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -982f), new Vector2(720f, 104f), new Color(0.055f, 0.12f, 0.23f, 0.98f));
+            settingsControlSurfaces.Add(removeAdsRow);
+            var removeAdsWell = CreatePanel("IconWell", removeAdsRow.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-308f, 0f), new Vector2(82f, 82f), Color.white);
+            settingsIconWells.Add(removeAdsWell);
+            removeAdsIcon = CreateSimpleImage("RemoveAdsIcon", removeAdsWell.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-14f, -14f), Color.white);
+            removeAdsButton = CreateButton("RemoveAdsButton", removeAdsRow.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(66f, 0f), new Vector2(560f, 78f), new Color(0.22f, 0.58f, 0.32f));
+            removeAdsButton.GetComponentInChildren<Text>().fontSize = 21;
+
+            var restoreRow = CreatePanel("RestorePurchasesRow", card.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -1102f), new Vector2(720f, 104f), new Color(0.055f, 0.12f, 0.23f, 0.98f));
+            settingsControlSurfaces.Add(restoreRow);
+            var restoreWell = CreatePanel("IconWell", restoreRow.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-308f, 0f), new Vector2(82f, 82f), Color.white);
+            settingsIconWells.Add(restoreWell);
+            restorePurchasesIcon = CreateSimpleImage("RestorePurchasesIcon", restoreWell.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-14f, -14f), Color.white);
+            restorePurchasesButton = CreateButton("RestorePurchasesButton", restoreRow.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(66f, 0f), new Vector2(560f, 78f), new Color(0.12f, 0.2f, 0.32f));
+            restorePurchasesButton.GetComponentInChildren<Text>().fontSize = 21;
+            closeSettingsButton = CreateButton("CloseSettingsButton", card.transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 56f), new Vector2(360f, 88f), new Color(0.95f, 0.47f, 0.08f));
+            closeSettingsButton.GetComponentInChildren<Text>().gameObject.SetActive(false);
+            closeSettingsIcon = CreateSimpleImage("CloseIcon", closeSettingsButton.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-16f, -16f), Color.white);
             closeSettingsButton.onClick.AddListener(CloseSettings);
             settingsPanel.SetActive(false);
         }
 
-        private void CreateSettingSliderRow(Transform parent, string name, float positionY, out Text label, out Slider slider, out Button muteButton)
+        private void CreateSettingSliderRow(
+            Transform parent,
+            string name,
+            float positionY,
+            out Text label,
+            out Slider slider,
+            out Button muteButton,
+            out Image settingIcon,
+            out Image muteIcon)
         {
-            var row = CreatePanel(name, parent, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, positionY), new Vector2(720f, 102f), new Color(0.055f, 0.12f, 0.23f, 0.98f));
+            var row = CreatePanel(name, parent, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, positionY), new Vector2(720f, 104f), new Color(0.055f, 0.12f, 0.23f, 0.98f));
             settingsControlSurfaces.Add(row);
-            label = CreateText("Label", row.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-258f, 0f), new Vector2(170f, 56f), 23, TextAnchor.MiddleLeft);
-            slider = CreateSlider("Slider", row.transform, new Vector2(58f, 0f), new Vector2(330f, 54f));
-            muteButton = CreateButton("MuteButton", row.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(292f, 0f), new Vector2(112f, 60f), new Color(0.2f, 0.62f, 0.28f));
-            settingsControlSurfaces.Add(muteButton.image);
-            muteButton.GetComponentInChildren<Text>().fontSize = 18;
+            var iconWell = CreatePanel("IconWell", row.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-308f, 0f), new Vector2(82f, 82f), Color.white);
+            settingsIconWells.Add(iconWell);
+            settingIcon = CreateSimpleImage("SettingIcon", iconWell.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-14f, -14f), Color.white);
+            label = CreateText("Label", row.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-210f, 0f), new Vector2(104f, 56f), 18, TextAnchor.MiddleLeft);
+            label.gameObject.SetActive(false);
+            slider = CreateSlider("Slider", row.transform, new Vector2(54f, 0f), new Vector2(420f, 54f));
+            muteButton = CreateButton("MuteButton", row.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(304f, 0f), new Vector2(78f, 72f), new Color(0.2f, 0.62f, 0.28f));
+            muteButton.GetComponentInChildren<Text>().gameObject.SetActive(false);
+            muteIcon = CreateSimpleImage("MuteIcon", muteButton.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-14f, -14f), Color.white);
         }
 
-        private void CreateSettingToggleRow(Transform parent, string name, float positionY, out Text label, out Button toggleButton)
+        private void CreateSettingToggleRow(Transform parent, string name, float positionY, out Text label, out Button toggleButton, out Image settingIcon)
         {
-            var row = CreatePanel(name, parent, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, positionY), new Vector2(720f, 94f), new Color(0.055f, 0.12f, 0.23f, 0.98f));
+            var row = CreatePanel(name, parent, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, positionY), new Vector2(720f, 104f), new Color(0.055f, 0.12f, 0.23f, 0.98f));
             settingsControlSurfaces.Add(row);
-            label = CreateText("Label", row.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-190f, 0f), new Vector2(340f, 56f), 23, TextAnchor.MiddleLeft);
+            var iconWell = CreatePanel("IconWell", row.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-308f, 0f), new Vector2(82f, 82f), Color.white);
+            settingsIconWells.Add(iconWell);
+            settingIcon = CreateSimpleImage("SettingIcon", iconWell.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-14f, -14f), Color.white);
+            label = CreateText("Label", row.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-164f, 0f), new Vector2(220f, 56f), 21, TextAnchor.MiddleLeft);
+            label.gameObject.SetActive(false);
             toggleButton = CreateButton("Toggle", row.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(242f, 0f), new Vector2(190f, 60f), new Color(0.2f, 0.62f, 0.28f));
-            settingsControlSurfaces.Add(toggleButton.image);
             toggleButton.GetComponentInChildren<Text>().fontSize = 20;
         }
 
@@ -549,10 +740,13 @@ namespace PocketForge.Mining
 
         private void CreateLanguageButton(Transform parent, string name, string label, SupportedLanguage language, float positionX, float positionY)
         {
-            var button = CreateButton(name, parent, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(positionX, positionY), new Vector2(332f, 76f), new Color(0.12f, 0.2f, 0.32f));
+            var button = CreateButton(name, parent, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(positionX, positionY), new Vector2(150f, 96f), new Color(0.12f, 0.2f, 0.32f));
             languageButtonSurfaces.Add(button.image);
-            button.GetComponentInChildren<Text>().text = label;
-            button.GetComponentInChildren<Text>().fontSize = 22;
+            languageButtons[language] = button;
+            var buttonLabel = button.GetComponentInChildren<Text>();
+            buttonLabel.text = label;
+            buttonLabel.gameObject.SetActive(false);
+            languageIcons[language] = CreateSimpleImage("FlagIcon", button.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-24f, -20f), Color.white);
             button.onClick.AddListener(() => LanguageService.SetLanguage(language));
         }
 
@@ -584,18 +778,66 @@ namespace PocketForge.Mining
             languageLabel.text = LanguageService.Get("language").ToUpper();
             musicSlider.SetValueWithoutNotify(GameSettingsService.MusicVolume);
             soundSlider.SetValueWithoutNotify(GameSettingsService.SoundVolume);
-            SetToggleState(musicMuteButton, !GameSettingsService.MusicMuted);
-            SetToggleState(soundMuteButton, !GameSettingsService.SoundMuted);
+            SetIconButtonState(musicMuteButton, !GameSettingsService.MusicMuted);
+            SetIconButtonState(soundMuteButton, !GameSettingsService.SoundMuted);
             SetToggleState(hapticsButton, GameSettingsService.HapticsEnabled);
             SetToggleState(reduceMotionButton, GameSettingsService.ReduceMotion);
-            closeSettingsButton.GetComponentInChildren<Text>().text = LanguageService.Get("close").ToUpper();
+            var closeLabel = closeSettingsButton.GetComponentInChildren<Text>(true);
+            if (closeLabel != null)
+            {
+                closeLabel.text = LanguageService.Get("close").ToUpper();
+            }
+
+            foreach (var entry in languageButtons)
+            {
+                var selected = entry.Key == LanguageService.Current;
+                entry.Value.image.color = Color.white;
+                if (finalSkin != null)
+                {
+                    ApplySlicedSprite(
+                        entry.Value.image,
+                        finalSkin.Sliced(selected ? "SettingsLanguageSelected" : "SettingsLanguageButton", new Vector4(0.14f, 0.18f, 0.14f, 0.18f)),
+                        Color.white);
+                }
+            }
+
             RenderIapState();
         }
 
-        private static void SetToggleState(Button button, bool enabled)
+        private void SetIconButtonState(Button button, bool enabled)
         {
-            button.image.color = enabled ? new Color(0.52f, 0.9f, 0.18f) : new Color(0.28f, 0.34f, 0.43f);
-            button.GetComponentInChildren<Text>().text = LanguageService.Get(enabled ? "on" : "off").ToUpper();
+            if (finalSkin != null)
+            {
+                ApplySlicedSprite(
+                    button.image,
+                    finalSkin.Sliced("SettingsIconButton", new Vector4(0.16f, 0.16f, 0.16f, 0.16f)),
+                    enabled ? Color.white : new Color(0.48f, 0.52f, 0.6f, 1f));
+            }
+            else
+            {
+                button.image.color = enabled ? new Color(0.52f, 0.9f, 0.18f) : new Color(0.28f, 0.34f, 0.43f);
+            }
+        }
+
+        private void SetToggleState(Button button, bool enabled)
+        {
+            if (finalSkin != null)
+            {
+                ApplySlicedSprite(
+                    button.image,
+                    finalSkin.Sliced(enabled ? "SettingsToggleOn" : "SettingsToggleOff", new Vector4(0.18f, 0.2f, 0.18f, 0.2f)),
+                    Color.white);
+            }
+            else
+            {
+                button.image.color = enabled ? new Color(0.52f, 0.9f, 0.18f) : new Color(0.28f, 0.34f, 0.43f);
+            }
+
+            var label = button.GetComponentInChildren<Text>(true);
+            if (label != null)
+            {
+                label.text = LanguageService.Get(enabled ? "on" : "off").ToUpper();
+            }
         }
 
         private void RenderIapState()
@@ -608,6 +850,8 @@ namespace PocketForge.Mining
             var busy = iapState is IapState.Initializing or IapState.Purchasing or IapState.Restoring;
             removeAdsButton.interactable = !adsRemoved && iapState is IapState.Ready or IapState.Cancelled;
             restorePurchasesButton.interactable = !busy;
+            iapStatusText.gameObject.SetActive(
+                adsRemoved || iapState is IapState.Initializing or IapState.Purchasing or IapState.Restoring or IapState.Deferred or IapState.Failed);
             iapStatusText.text = adsRemoved
                 ? LanguageService.Get("iap_purchased").ToUpper()
                 : LanguageService.Get(iapState switch
@@ -817,6 +1061,8 @@ namespace PocketForge.Mining
             upgradeCostIcons.Add(costIcon);
             var action = CreatePanel("UpgradeAction", parent, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 50f), new Vector2(248f, 84f), new Color(0.38f, 0.76f, 0.16f));
             upgradeActionSurfaces.Add(action);
+            var actionIcon = CreateSimpleImage("UpgradeArrow", action.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-22f, -14f), Color.white);
+            upgradeActionIcons.Add(actionIcon);
             UpdatePips(pips, 0, activeColor);
             return pips;
         }
