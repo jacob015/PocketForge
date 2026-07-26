@@ -435,31 +435,27 @@ namespace PocketForge.Mining
                 return;
             }
 
-            ApplySlicedSprite(topSurface, finalSkin.Sliced("HudHeader", new Vector4(0.08f, 0.24f, 0.08f, 0.24f)), Color.white);
-            ApplySlicedSprite(headerCounterSlot, finalSkin.Sliced("HudCounterSlot", new Vector4(0.16f, 0.25f, 0.16f, 0.25f)), Color.white);
-            ApplySlicedSprite(settingsButton.image, finalSkin.Sliced("HudSettingsButton", new Vector4(0.16f, 0.16f, 0.16f, 0.16f)), Color.white);
-            ApplySlicedSprite(rewardedAdButton.image, finalSkin.Sliced("HudRewardPill", new Vector4(0.12f, 0.24f, 0.12f, 0.24f)), Color.white);
-            ApplySlicedSprite(progressBackground, finalSkin.Sliced("HudProgressFrame", new Vector4(0.08f, 0.28f, 0.08f, 0.28f)), Color.white);
-            ApplySimpleSprite(progressTrack, finalSkin.Simple("HudProgressTrack"));
-            progressTrack.preserveAspect = false;
-            ApplySlicedSprite(mineButton.image, finalSkin.Sliced("HudMineButton", new Vector4(0.1f, 0.18f, 0.1f, 0.18f)), Color.white);
-            ApplySlicedSprite(creditsRewardButton.image, finalSkin.Sliced("HudPlusButton", new Vector4(0.18f, 0.18f, 0.18f, 0.18f)), Color.white);
+            ApplyStretchedSimpleSprite(topSurface, finalSkin.Simple("HudHeader"), Color.white);
+            ApplyStretchedSimpleSprite(headerCounterSlot, finalSkin.Simple("HudCounterSlot"), Color.white);
+            ApplyStretchedSimpleSprite(settingsButton.image, finalSkin.Simple("HudSettingsButton"), Color.white);
+            ApplyStretchedSimpleSprite(rewardedAdButton.image, finalSkin.Simple("HudRewardPill"), Color.white);
+            ApplyStretchedSimpleSprite(progressBackground, finalSkin.Simple("HudProgressFrame"), Color.white);
+            ApplyStretchedSimpleSprite(progressTrack, finalSkin.Simple("HudProgressTrack"), Color.white);
+            ApplyStretchedSimpleSprite(mineButton.image, finalSkin.Simple("HudMineButton"), Color.white);
+            ApplyStretchedSimpleSprite(creditsRewardButton.image, finalSkin.Simple("HudPlusButton"), Color.white);
 
-            ApplySlicedSprite(pickaxeButton.image, finalSkin.Sliced("HudUpgradeCard", new Vector4(0.1f, 0.08f, 0.1f, 0.08f)), Color.white);
-            ApplySlicedSprite(drillButton.image, finalSkin.Sliced("HudUpgradeCard", new Vector4(0.1f, 0.08f, 0.1f, 0.08f)), Color.white);
-            ApplySlicedSprite(robotButton.image, finalSkin.Sliced("HudUpgradeCard", new Vector4(0.1f, 0.08f, 0.1f, 0.08f)), Color.white);
+            ApplyStretchedSimpleSprite(pickaxeButton.image, finalSkin.Simple("HudUpgradeCard"), Color.white);
+            ApplyStretchedSimpleSprite(drillButton.image, finalSkin.Simple("HudUpgradeCard"), Color.white);
+            ApplyStretchedSimpleSprite(robotButton.image, finalSkin.Simple("HudUpgradeCard"), Color.white);
             foreach (var surface in upgradeActionSurfaces)
             {
-                ApplySlicedSprite(surface, finalSkin.Sliced("HudUpgradeButton", new Vector4(0.12f, 0.18f, 0.12f, 0.18f)), Color.white);
+                ApplyStretchedSimpleSprite(surface, finalSkin.Simple("HudUpgradeButton"), Color.white);
                 surface.GetComponent<Shadow>().enabled = false;
             }
 
             foreach (var pip in pickaxePips.Concat(drillPips).Concat(robotPips))
             {
-                var tint = pip.color;
-                ApplySimpleSprite(pip, finalSkin.Simple("HudLevelPip"));
-                pip.preserveAspect = false;
-                pip.color = tint;
+                ApplyStretchedSimpleSprite(pip, finalSkin.Simple("HudLevelPip"), pip.color);
             }
 
             foreach (var icon in upgradeActionIcons)
@@ -600,6 +596,14 @@ namespace PocketForge.Mining
             image.type = Image.Type.Simple;
             image.preserveAspect = true;
             image.color = Color.white;
+        }
+
+        private static void ApplyStretchedSimpleSprite(Image image, Sprite sprite, Color color)
+        {
+            image.sprite = sprite;
+            image.type = Image.Type.Simple;
+            image.preserveAspect = false;
+            image.color = color;
         }
 
         private void ApplyUpgradeButton(Texture2D texture)

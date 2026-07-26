@@ -390,3 +390,13 @@
 - 수정 후 상태: 진행 트랙과 모든 레벨 핍의 런타임 `Image.Type`은 `Simple`이며 기존 RectTransform 크기와 레벨 색상 표현을 유지한다.
 - 테스트 결과: Unity 스크립트 컴파일 오류 0건, EditMode 50/50 통과. 회귀 테스트에서 트랙·핍의 자산 이름, `Image.Type.Simple`, `preserveAspect == false`를 확인한다.
 - 남은 작업: 사용자가 최신 HUD 화면에서 Simple 렌더링 결과를 확인한다. 이번 변경에는 Android/APK 빌드와 실기기 검증을 포함하지 않았다.
+
+## 수정사항 36
+
+- 기록 시각: 2026-07-27 00:53:29
+- 작업 요청 요약: 진행 트랙과 레벨 핍뿐 아니라 인게임 HUD의 다른 생성 이미지도 9-slice 왜곡이 없도록 `Image.Type.Simple`로 변경한다.
+- 수정 전 상태: 트랙·핍은 Simple로 교정됐지만 헤더, 카운터 슬롯, 설정 버튼 외곽, 광고 보상 pill, 진행 프레임, 채굴 버튼, 크레딧 + 버튼, 강화 카드와 강화 버튼은 최종 스킨에서 `Image.Type.Sliced`를 사용했다.
+- 수정한 내용: 최종 인게임 HUD 표면을 모두 `MineUiSkin.Simple`로 로드하고 `ApplyStretchedSimpleSprite`를 통해 `Image.Type.Simple`, `preserveAspect == false`로 적용했다. 레벨 핍 틴트를 포함한 기존 색상은 유지한다. 이전에 승인된 설정 모달과 그 내부 행·버튼·슬라이더의 9-slice는 변경하지 않았다. 위치·크기와 이미지 원본도 수정하지 않았다.
+- 수정 후 상태: 인게임 HUD의 헤더·카운터·상단 버튼·진행 UI·채굴 버튼·강화 카드·강화 버튼·레벨 핍은 모두 Simple 렌더링이며 현재 RectTransform 전체를 채운다. 설정 모달은 기존 Sliced 렌더링을 유지한다.
+- 테스트 결과: Unity 컴파일 및 Play Mode 오류 0건, EditMode 51/51 통과. Play Mode 런타임 검사에서 대상 HUD 14개 이름 그룹의 모든 인스턴스가 `Simple / preserveAspect false`이고 `SettingsCard`는 `Sliced`임을 확인했다.
+- 남은 작업: 사용자가 최신 HUD 화면에서 Simple 렌더링 결과를 확인한다. 이번 변경에는 Android/APK 빌드와 실기기 검증을 포함하지 않았다.

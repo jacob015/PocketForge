@@ -154,6 +154,39 @@ namespace PocketForge.Tests.Editor
             Assert.That(pip.preserveAspect, Is.False);
         }
 
+        [Test]
+        public void FinalHudChrome_UsesStretchedSimpleImages()
+        {
+            view.SetTheme(null, null, null, null, null);
+
+            var hudNames = new[]
+            {
+                "TopSurface",
+                "HeaderCounterSlot",
+                "SettingsButton",
+                "RewardedAdButton",
+                "ProgressBackground",
+                "ProgressTrack",
+                "MineButton",
+                "CreditsRewardButton",
+                "PickaxeButton",
+                "DrillButton",
+                "RobotButton"
+            };
+
+            foreach (var name in hudNames)
+            {
+                AssertStretchedSimple(FindRect(name).GetComponent<Image>(), name);
+            }
+
+            foreach (var surface in view.GetComponentsInChildren<Image>(true).Where(image => image.name == "UpgradeAction"))
+            {
+                AssertStretchedSimple(surface, surface.name);
+            }
+
+            Assert.That(FindRect("SettingsCard").GetComponent<Image>().type, Is.EqualTo(Image.Type.Sliced));
+        }
+
         private (float Min, float Max) VerticalRange(string name, float parentHeight)
         {
             var rect = FindRect(name);
@@ -171,6 +204,12 @@ namespace PocketForge.Tests.Editor
         private RectTransform FindRect(string name)
         {
             return view.GetComponentsInChildren<RectTransform>(true).Single(rect => rect.name == name);
+        }
+
+        private static void AssertStretchedSimple(Image image, string name)
+        {
+            Assert.That(image.type, Is.EqualTo(Image.Type.Simple), $"{name} must not use 9-slice rendering.");
+            Assert.That(image.preserveAspect, Is.False, $"{name} must fill its approved RectTransform.");
         }
 
         private static RectTransform FindChildRect(RectTransform parent, string name)
