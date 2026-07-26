@@ -85,7 +85,6 @@ namespace PocketForge.Tests.Editor
             AssertRect("TopSurface", new Vector2(-61f, -123f), new Vector2(826f, 140f));
             AssertRect("SettingsButton", new Vector2(-92f, -123f), new Vector2(116f, 116f));
             AssertRect("RewardedAdButton", new Vector2(263f, -254f), new Vector2(400f, 88f));
-            AssertRect("OreBadge", new Vector2(0f, 64f), new Vector2(322f, 66f));
             AssertRect("ProgressBackground", new Vector2(0f, 22f), new Vector2(638f, 64f));
             AssertRect("MineButton", new Vector2(0f, 14f), new Vector2(504f, 232f));
             AssertRect("PickaxeButton", new Vector2(-320f, -6f), new Vector2(300f, 460f));
@@ -131,6 +130,24 @@ namespace PocketForge.Tests.Editor
             Assert.That(VerticalRange(pip).Min, Is.GreaterThanOrEqualTo(VerticalRange(level).Max));
             Assert.That(VerticalRange(level).Min, Is.GreaterThanOrEqualTo(VerticalRange(cost).Max));
             Assert.That(VerticalRange(cost).Min, Is.GreaterThanOrEqualTo(VerticalRange(action).Max));
+        }
+
+        [Test]
+        public void RemovedOreBadge_IsNotCreated()
+        {
+            Assert.That(view.GetComponentsInChildren<RectTransform>(true).Any(rect => rect.name == "OreBadge"), Is.False);
+        }
+
+        [Test]
+        public void GeneratedTrackAndPips_AreAppliedByFinalSkin()
+        {
+            view.SetTheme(null, null, null, null, null);
+
+            var track = FindRect("ProgressTrack").GetComponent<Image>();
+            var pip = FindChildRect(FindRect("PickaxeButton"), "LevelPip1").GetComponent<Image>();
+
+            Assert.That(track.sprite.texture.name, Is.EqualTo("HudProgressTrack"));
+            Assert.That(pip.sprite.texture.name, Is.EqualTo("HudLevelPip"));
         }
 
         private (float Min, float Max) VerticalRange(string name, float parentHeight)
