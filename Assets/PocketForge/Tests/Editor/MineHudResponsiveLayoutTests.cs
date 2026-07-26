@@ -78,6 +78,20 @@ namespace PocketForge.Tests.Editor
             Assert.That(robot.Max, Is.LessThanOrEqualTo(width));
         }
 
+        [Test]
+        public void ApprovedSnapshotChrome_UsesMeasured1080WideGeometry()
+        {
+            AssertRect("TopSurface", new Vector2(-61f, -123f), new Vector2(826f, 140f));
+            AssertRect("SettingsButton", new Vector2(-92f, -123f), new Vector2(116f, 116f));
+            AssertRect("RewardedAdButton", new Vector2(263f, -254f), new Vector2(400f, 88f));
+            AssertRect("OreBadge", new Vector2(0f, 64f), new Vector2(322f, 66f));
+            AssertRect("ProgressBackground", new Vector2(0f, 22f), new Vector2(638f, 64f));
+            AssertRect("MineButton", new Vector2(0f, 14f), new Vector2(504f, 232f));
+            AssertRect("PickaxeButton", new Vector2(-320f, -6f), new Vector2(300f, 460f));
+            AssertRect("SettingsCard", new Vector2(0f, 53f), new Vector2(900f, 1344f));
+            AssertRect("CloseSettingsButton", new Vector2(0f, 66f), new Vector2(326f, 88f));
+        }
+
         private (float Min, float Max) VerticalRange(string name, float parentHeight)
         {
             var rect = FindRect(name);
@@ -95,6 +109,13 @@ namespace PocketForge.Tests.Editor
         private RectTransform FindRect(string name)
         {
             return view.GetComponentsInChildren<RectTransform>(true).Single(rect => rect.name == name);
+        }
+
+        private void AssertRect(string name, Vector2 position, Vector2 size)
+        {
+            var rect = FindRect(name);
+            Assert.That(rect.anchoredPosition, Is.EqualTo(position), $"{name} position drifted from the approved snapshot.");
+            Assert.That(rect.sizeDelta, Is.EqualTo(size), $"{name} size drifted from the approved snapshot.");
         }
     }
 }

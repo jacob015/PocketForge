@@ -285,23 +285,25 @@ namespace PocketForge.Mining
             ApplySafeArea(true);
             var hudRoot = safeAreaRoot.transform;
 
-            topSurface = CreatePanel("TopSurface", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-62f, -94f), new Vector2(846f, 142f), new Color(0.06f, 0.1f, 0.24f, 0.98f));
+            // Final HUD geometry is measured from the approved 853x1844 reference and
+            // authored on the stable 1080-wide canvas (scale 1080 / 853).
+            topSurface = CreatePanel("TopSurface", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-61f, -123f), new Vector2(826f, 140f), new Color(0.06f, 0.1f, 0.24f, 0.98f));
             upgradeSurface = CreatePanel("UpgradeSurface", hudRoot, new Vector2(0.5f, 0.16f), new Vector2(0.5f, 0.16f), Vector2.zero, new Vector2(968f, 470f), Color.clear);
             actionSurface = CreatePanel("ActionSurface", hudRoot, new Vector2(0.5f, 0.33f), new Vector2(0.5f, 0.33f), Vector2.zero, new Vector2(560f, 220f), Color.clear);
             upgradeSurface.raycastTarget = false;
             actionSurface.raycastTarget = false;
 
-            headerCoin = CreatePanel("HeaderCoin", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-423f, -94f), new Vector2(96f, 96f), Color.white);
+            headerCoin = CreatePanel("HeaderCoin", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-405f, -123f), new Vector2(80f, 88f), Color.white);
             headerCoin.GetComponent<Shadow>().enabled = false;
-            headerCounterSlot = CreatePanel("HeaderCounterSlot", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-310f, -94f), new Vector2(122f, 64f), new Color(0.025f, 0.07f, 0.16f, 0.96f));
-            creditsRewardButton = CreateButton("CreditsRewardButton", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-194f, -94f), new Vector2(76f, 76f), new Color(0.42f, 0.84f, 0.14f));
+            headerCounterSlot = CreatePanel("HeaderCounterSlot", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-286f, -123f), new Vector2(132f, 62f), new Color(0.025f, 0.07f, 0.16f, 0.96f));
+            creditsRewardButton = CreateButton("CreditsRewardButton", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-181f, -123f), new Vector2(66f, 66f), new Color(0.42f, 0.84f, 0.14f));
             creditsRewardButton.GetComponentInChildren<Text>().gameObject.SetActive(false);
             creditsPlusIcon = CreateSimpleImage("PlusIcon", creditsRewardButton.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-4f, -4f), Color.white);
-            creditsCurrencyIcon = CreateSimpleImage("CreditsCurrencyIcon", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-72f, -94f), new Vector2(58f, 58f), Color.white);
-            creditsText = CreateText("Credits", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(22f, -94f), new Vector2(104f, 78f), 38, TextAnchor.MiddleLeft);
-            depthCurrencyIcon = CreateSimpleImage("DepthCurrencyIcon", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(151f, -94f), new Vector2(64f, 64f), Color.white);
-            depthText = CreateText("Depth", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(246f, -94f), new Vector2(108f, 78f), 38, TextAnchor.MiddleLeft);
-            settingsButton = CreateButton("SettingsButton", hudRoot, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-62f, -94f), new Vector2(112f, 112f), new Color(0.12f, 0.2f, 0.3f));
+            creditsCurrencyIcon = CreateSimpleImage("CreditsCurrencyIcon", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-52f, -123f), new Vector2(52f, 52f), Color.white);
+            creditsText = CreateText("Credits", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(69f, -123f), new Vector2(104f, 78f), 38, TextAnchor.MiddleLeft);
+            depthCurrencyIcon = CreateSimpleImage("DepthCurrencyIcon", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(151f, -123f), new Vector2(54f, 54f), Color.white);
+            depthText = CreateText("Depth", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(265f, -123f), new Vector2(108f, 78f), 38, TextAnchor.MiddleLeft);
+            settingsButton = CreateButton("SettingsButton", hudRoot, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-92f, -123f), new Vector2(116f, 116f), new Color(0.12f, 0.2f, 0.3f));
             settingsButton.GetComponentInChildren<Text>().gameObject.SetActive(false);
             settingsIcon = CreateSimpleImage("SettingsIcon", settingsButton.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-4f, -4f), Color.white);
             settingsButton.onClick.AddListener(OpenSettings);
@@ -310,7 +312,7 @@ namespace PocketForge.Mining
             offlineRewardText.color = new Color(0.45f, 0.95f, 0.7f);
             offlineRewardSurface.gameObject.SetActive(false);
             offlineRewardText.gameObject.SetActive(false);
-            rewardedAdButton = CreateButton("RewardedAdButton", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(256f, -228f), new Vector2(404f, 88f), new Color(0.08f, 0.16f, 0.34f));
+            rewardedAdButton = CreateButton("RewardedAdButton", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(263f, -254f), new Vector2(400f, 88f), new Color(0.08f, 0.16f, 0.34f));
             var rewardedLabel = rewardedAdButton.GetComponentInChildren<Text>();
             rewardedLabel.fontSize = 30;
             rewardedLabel.rectTransform.offsetMin = new Vector2(76f, 0f);
@@ -318,14 +320,14 @@ namespace PocketForge.Mining
             rewardedVideoIcon = CreateSimpleImage("VideoIcon", rewardedAdButton.transform, new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(66f, 0f), new Vector2(84f, -4f), Color.white);
             rewardedPlusIcon = CreateSimpleImage("PlusIcon", rewardedAdButton.transform, new Vector2(1f, 0f), new Vector2(1f, 1f), new Vector2(-48f, 0f), new Vector2(72f, -8f), Color.white);
             RenderRewardedAdState();
-            oreBadgeSurface = CreatePanel("OreBadge", hudRoot, new Vector2(0.5f, 0.405f), new Vector2(0.5f, 0.405f), new Vector2(0f, 48f), new Vector2(382f, 78f), new Color(0.05f, 0.1f, 0.24f, 0.98f));
+            oreBadgeSurface = CreatePanel("OreBadge", hudRoot, new Vector2(0.5f, 0.405f), new Vector2(0.5f, 0.405f), new Vector2(0f, 64f), new Vector2(322f, 66f), new Color(0.05f, 0.1f, 0.24f, 0.98f));
             oreText = CreateText("OreLabel", oreBadgeSurface.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-24f, -10f), 29, TextAnchor.MiddleCenter);
             feedbackSurface = CreatePanel("ActionFeedbackSurface", hudRoot, new Vector2(0.5f, 0.51f), new Vector2(0.5f, 0.51f), Vector2.zero, new Vector2(540f, 88f), new Color(0.035f, 0.08f, 0.18f, 0.96f));
             feedbackText = CreateText("ActionFeedback", hudRoot, new Vector2(0.5f, 0.51f), new Vector2(0.5f, 0.51f), Vector2.zero, new Vector2(500f, 58f), 29, TextAnchor.MiddleCenter);
             feedbackSurface.gameObject.SetActive(false);
             feedbackText.gameObject.SetActive(false);
 
-            progressBackground = CreatePanel("ProgressBackground", hudRoot, new Vector2(0.5f, 0.405f), new Vector2(0.5f, 0.405f), new Vector2(0f, -8f), new Vector2(650f, 66f), new Color(0.05f, 0.1f, 0.24f, 0.98f));
+            progressBackground = CreatePanel("ProgressBackground", hudRoot, new Vector2(0.5f, 0.405f), new Vector2(0.5f, 0.405f), new Vector2(0f, 22f), new Vector2(638f, 64f), new Color(0.05f, 0.1f, 0.24f, 0.98f));
             var progressTrack = CreateSimpleImage("ProgressTrack", progressBackground.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(608f, 32f), new Color(0.015f, 0.04f, 0.11f, 1f));
             oreProgress = CreatePanel("ProgressFill", progressTrack.transform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(304f, 0f), new Vector2(600f, 24f), new Color(0.16f, 0.84f, 1f));
             oreProgress.GetComponent<Shadow>().enabled = false;
@@ -334,12 +336,12 @@ namespace PocketForge.Mining
             oreProgress.fillOrigin = (int)Image.OriginHorizontal.Left;
             progressShine = CreateSimpleImage("ProgressShine", oreProgress.transform, new Vector2(0f, 0.55f), new Vector2(1f, 1f), Vector2.zero, Vector2.zero, new Color(1f, 1f, 1f, 0.22f));
 
-            mineButton = CreateButton("MineButton", hudRoot, new Vector2(0.5f, 0.33f), new Vector2(0.5f, 0.33f), Vector2.zero, new Vector2(520f, 204f), new Color(1f, 0.48f, 0.12f));
+            mineButton = CreateButton("MineButton", hudRoot, new Vector2(0.5f, 0.33f), new Vector2(0.5f, 0.33f), new Vector2(0f, 14f), new Vector2(504f, 232f), new Color(1f, 0.48f, 0.12f));
             mineButton.GetComponentInChildren<Text>().gameObject.SetActive(false);
             mineIcon = CreateIcon("MineIcon", mineButton.transform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(158f, 158f));
-            pickaxeButton = CreateButton("PickaxeButton", hudRoot, new Vector2(0.5f, 0.16f), new Vector2(0.5f, 0.16f), new Vector2(-320f, 0f), new Vector2(300f, 448f), new Color(0.14f, 0.3f, 0.52f));
-            drillButton = CreateButton("DrillButton", hudRoot, new Vector2(0.5f, 0.16f), new Vector2(0.5f, 0.16f), Vector2.zero, new Vector2(300f, 448f), new Color(0.14f, 0.3f, 0.52f));
-            robotButton = CreateButton("RobotButton", hudRoot, new Vector2(0.5f, 0.16f), new Vector2(0.5f, 0.16f), new Vector2(320f, 0f), new Vector2(300f, 448f), new Color(0.14f, 0.3f, 0.52f));
+            pickaxeButton = CreateButton("PickaxeButton", hudRoot, new Vector2(0.5f, 0.16f), new Vector2(0.5f, 0.16f), new Vector2(-320f, -6f), new Vector2(300f, 460f), new Color(0.14f, 0.3f, 0.52f));
+            drillButton = CreateButton("DrillButton", hudRoot, new Vector2(0.5f, 0.16f), new Vector2(0.5f, 0.16f), new Vector2(0f, -6f), new Vector2(300f, 460f), new Color(0.14f, 0.3f, 0.52f));
+            robotButton = CreateButton("RobotButton", hudRoot, new Vector2(0.5f, 0.16f), new Vector2(0.5f, 0.16f), new Vector2(320f, -6f), new Vector2(300f, 460f), new Color(0.14f, 0.3f, 0.52f));
             pickaxeIcon = CreateIcon("PickaxeIcon", pickaxeButton.transform);
             drillIcon = CreateIcon("DrillIcon", drillButton.transform);
             robotIcon = CreateIcon("RobotIcon", robotButton.transform);
@@ -626,7 +628,7 @@ namespace PocketForge.Mining
         {
             var backdrop = CreatePanel("SettingsBackdrop", transform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero, new Color(0.005f, 0.012f, 0.04f, 0.78f));
             settingsPanel = backdrop.gameObject;
-            settingsCard = CreatePanel("SettingsCard", settingsPanel.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(840f, 1450f), new Color(0.035f, 0.075f, 0.15f, 0.99f));
+            settingsCard = CreatePanel("SettingsCard", settingsPanel.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 53f), new Vector2(900f, 1344f), new Color(0.035f, 0.075f, 0.15f, 0.99f));
             var card = settingsCard;
             settingsTitleSurface = CreatePanel("SettingsTitleSurface", card.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -48f), new Vector2(560f, 130f), Color.white);
             settingsTitle = CreateText("SettingsTitle", settingsTitleSurface.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-38f, -14f), 46, TextAnchor.MiddleCenter);
@@ -668,7 +670,7 @@ namespace PocketForge.Mining
             restorePurchasesIcon = CreateSimpleImage("RestorePurchasesIcon", restoreWell.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-14f, -14f), Color.white);
             restorePurchasesButton = CreateButton("RestorePurchasesButton", restoreRow.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(66f, 0f), new Vector2(560f, 78f), new Color(0.12f, 0.2f, 0.32f));
             restorePurchasesButton.GetComponentInChildren<Text>().fontSize = 21;
-            closeSettingsButton = CreateButton("CloseSettingsButton", card.transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 56f), new Vector2(360f, 88f), new Color(0.95f, 0.47f, 0.08f));
+            closeSettingsButton = CreateButton("CloseSettingsButton", card.transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 66f), new Vector2(326f, 88f), new Color(0.95f, 0.47f, 0.08f));
             closeSettingsButton.GetComponentInChildren<Text>().gameObject.SetActive(false);
             closeSettingsIcon = CreateSimpleImage("CloseIcon", closeSettingsButton.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-16f, -16f), Color.white);
             closeSettingsButton.onClick.AddListener(CloseSettings);
@@ -692,7 +694,7 @@ namespace PocketForge.Mining
             settingIcon = CreateSimpleImage("SettingIcon", iconWell.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-14f, -14f), Color.white);
             label = CreateText("Label", row.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-210f, 0f), new Vector2(104f, 56f), 18, TextAnchor.MiddleLeft);
             label.gameObject.SetActive(false);
-            slider = CreateSlider("Slider", row.transform, new Vector2(54f, 0f), new Vector2(420f, 54f));
+            slider = CreateSlider("Slider", row.transform, Vector2.zero, new Vector2(500f, 54f));
             muteButton = CreateButton("MuteButton", row.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(304f, 0f), new Vector2(78f, 72f), new Color(0.2f, 0.62f, 0.28f));
             muteButton.GetComponentInChildren<Text>().gameObject.SetActive(false);
             muteIcon = CreateSimpleImage("MuteIcon", muteButton.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-14f, -14f), Color.white);
