@@ -1,6 +1,7 @@
 using System.Linq;
 using NUnit.Framework;
 using PocketForge.Mining;
+using PocketForge.Presentation;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -92,6 +93,46 @@ namespace PocketForge.Tests.Editor
             AssertRect("CloseSettingsButton", new Vector2(0f, 66f), new Vector2(326f, 88f));
         }
 
+        [Test]
+        public void MiningFeedback_UsesTextOnlyCasualPresentation()
+        {
+            var surface = FindRect("ActionFeedbackSurface").GetComponent<Image>();
+            var feedback = FindRect("ActionFeedback").GetComponent<Text>();
+
+            view.ShowFeedback("+10 C", Color.yellow);
+
+            Assert.That(surface.gameObject.activeSelf, Is.False);
+            Assert.That(surface.raycastTarget, Is.False);
+            Assert.That(feedback.gameObject.activeSelf, Is.True);
+            Assert.That(feedback.fontSize, Is.EqualTo(46));
+            Assert.That(feedback.GetComponent<Outline>(), Is.Not.Null);
+            Assert.That(feedback.GetComponent<CasualFeedbackText>(), Is.Not.Null);
+        }
+
+        [Test]
+        public void FinalUpgradeIcons_PreserveTheirSourceAspectRatios()
+        {
+            view.SetTheme(null, null, null, null, null);
+
+            AssertTextureAspect("PickaxeIcon");
+            AssertTextureAspect("DrillIcon");
+            AssertTextureAspect("RobotIcon");
+        }
+
+        [Test]
+        public void UpgradeCardDetails_HaveSeparateNonOverlappingRows()
+        {
+            var card = FindRect("PickaxeButton");
+            var pip = FindChildRect(card, "LevelPip1");
+            var level = FindChildRect(card, "Label");
+            var cost = FindChildRect(card, "CostText");
+            var action = FindChildRect(card, "UpgradeAction");
+
+            Assert.That(VerticalRange(pip).Min, Is.GreaterThanOrEqualTo(VerticalRange(level).Max));
+            Assert.That(VerticalRange(level).Min, Is.GreaterThanOrEqualTo(VerticalRange(cost).Max));
+            Assert.That(VerticalRange(cost).Min, Is.GreaterThanOrEqualTo(VerticalRange(action).Max));
+        }
+
         private (float Min, float Max) VerticalRange(string name, float parentHeight)
         {
             var rect = FindRect(name);
@@ -111,11 +152,29 @@ namespace PocketForge.Tests.Editor
             return view.GetComponentsInChildren<RectTransform>(true).Single(rect => rect.name == name);
         }
 
+        private static RectTransform FindChildRect(RectTransform parent, string name)
+        {
+            return parent.GetComponentsInChildren<RectTransform>(true).Single(rect => rect.name == name);
+        }
+
+        private static (float Min, float Max) VerticalRange(RectTransform rect)
+        {
+            return (rect.anchoredPosition.y - rect.sizeDelta.y * 0.5f, rect.anchoredPosition.y + rect.sizeDelta.y * 0.5f);
+        }
+
         private void AssertRect(string name, Vector2 position, Vector2 size)
         {
             var rect = FindRect(name);
             Assert.That(rect.anchoredPosition, Is.EqualTo(position), $"{name} position drifted from the approved snapshot.");
             Assert.That(rect.sizeDelta, Is.EqualTo(size), $"{name} size drifted from the approved snapshot.");
+        }
+
+        private void AssertTextureAspect(string name)
+        {
+            var icon = FindRect(name).GetComponent<RawImage>();
+            var expected = icon.texture.width * icon.uvRect.width / (icon.texture.height * icon.uvRect.height);
+            var actual = icon.rectTransform.rect.width / icon.rectTransform.rect.height;
+            Assert.That(actual, Is.EqualTo(expected).Within(0.01f), $"{name} is visually stretched.");
         }
     }
 }

@@ -88,6 +88,7 @@ namespace PocketForge.Mining
         private Image[] robotPips;
         private Text feedbackText;
         private Image feedbackSurface;
+        private CasualFeedbackText feedbackPopup;
         private PositiveFeedbackBurst positiveFeedback;
         private MiningGameState lastState;
         private MiningGameService lastService;
@@ -219,10 +220,8 @@ namespace PocketForge.Mining
         {
             feedbackText.text = message;
             feedbackText.color = color;
-            feedbackSurface.gameObject.SetActive(true);
-            feedbackText.gameObject.SetActive(true);
-            CancelInvoke(nameof(HideFeedback));
-            Invoke(nameof(HideFeedback), 1.2f);
+            feedbackSurface.gameObject.SetActive(false);
+            feedbackPopup.Show();
         }
 
         public void PlayUpgradeSuccess(UpgradeType type)
@@ -257,12 +256,6 @@ namespace PocketForge.Mining
             removeAdsPrice = localizedPrice ?? string.Empty;
             adsRemoved = ownsRemoveAds;
             RenderIapState();
-        }
-
-        private void HideFeedback()
-        {
-            feedbackSurface.gameObject.SetActive(false);
-            feedbackText.gameObject.SetActive(false);
         }
 
         private void LateUpdate() => ApplySafeArea();
@@ -322,8 +315,25 @@ namespace PocketForge.Mining
             RenderRewardedAdState();
             oreBadgeSurface = CreatePanel("OreBadge", hudRoot, new Vector2(0.5f, 0.405f), new Vector2(0.5f, 0.405f), new Vector2(0f, 64f), new Vector2(322f, 66f), new Color(0.05f, 0.1f, 0.24f, 0.98f));
             oreText = CreateText("OreLabel", oreBadgeSurface.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-24f, -10f), 29, TextAnchor.MiddleCenter);
-            feedbackSurface = CreatePanel("ActionFeedbackSurface", hudRoot, new Vector2(0.5f, 0.51f), new Vector2(0.5f, 0.51f), Vector2.zero, new Vector2(540f, 88f), new Color(0.035f, 0.08f, 0.18f, 0.96f));
-            feedbackText = CreateText("ActionFeedback", hudRoot, new Vector2(0.5f, 0.51f), new Vector2(0.5f, 0.51f), Vector2.zero, new Vector2(500f, 58f), 29, TextAnchor.MiddleCenter);
+            feedbackSurface = CreatePanel("ActionFeedbackSurface", hudRoot, new Vector2(0.5f, 0.51f), new Vector2(0.5f, 0.51f), Vector2.zero, new Vector2(540f, 88f), Color.clear);
+            feedbackSurface.raycastTarget = false;
+            feedbackSurface.GetComponent<Shadow>().enabled = false;
+            feedbackText = CreateText("ActionFeedback", hudRoot, new Vector2(0.5f, 0.51f), new Vector2(0.5f, 0.51f), Vector2.zero, new Vector2(680f, 106f), 46, TextAnchor.MiddleCenter);
+            feedbackText.font = UiFontProvider.GetCasual();
+            feedbackText.resizeTextForBestFit = true;
+            feedbackText.resizeTextMinSize = 25;
+            feedbackText.resizeTextMaxSize = 46;
+            feedbackText.horizontalOverflow = HorizontalWrapMode.Overflow;
+            feedbackText.verticalOverflow = VerticalWrapMode.Overflow;
+            feedbackText.rectTransform.localRotation = Quaternion.Euler(0f, 0f, -1.5f);
+            var feedbackShadow = feedbackText.GetComponent<Shadow>();
+            feedbackShadow.effectColor = new Color(0.08f, 0.06f, 0.05f, 0.9f);
+            feedbackShadow.effectDistance = new Vector2(2f, -7f);
+            var feedbackOutline = feedbackText.gameObject.AddComponent<Outline>();
+            feedbackOutline.effectColor = new Color(0.12f, 0.08f, 0.05f, 0.96f);
+            feedbackOutline.effectDistance = new Vector2(3.5f, -3.5f);
+            feedbackOutline.useGraphicAlpha = true;
+            feedbackPopup = feedbackText.gameObject.AddComponent<CasualFeedbackText>();
             feedbackSurface.gameObject.SetActive(false);
             feedbackText.gameObject.SetActive(false);
 
@@ -335,6 +345,7 @@ namespace PocketForge.Mining
             oreProgress.fillMethod = Image.FillMethod.Horizontal;
             oreProgress.fillOrigin = (int)Image.OriginHorizontal.Left;
             progressShine = CreateSimpleImage("ProgressShine", oreProgress.transform, new Vector2(0f, 0.55f), new Vector2(1f, 1f), Vector2.zero, Vector2.zero, new Color(1f, 1f, 1f, 0.22f));
+            oreBadgeSurface.transform.SetSiblingIndex(progressBackground.transform.GetSiblingIndex() + 1);
 
             mineButton = CreateButton("MineButton", hudRoot, new Vector2(0.5f, 0.33f), new Vector2(0.5f, 0.33f), new Vector2(0f, 14f), new Vector2(504f, 232f), new Color(1f, 0.48f, 0.12f));
             mineButton.GetComponentInChildren<Text>().gameObject.SetActive(false);
@@ -370,7 +381,6 @@ namespace PocketForge.Mining
             actionSurface.color = Color.clear;
             ApplySlicedSprite(progressBackground, panelSprite, new Color(0.72f, 0.82f, 1f, 0.96f));
             ApplySlicedSprite(oreBadgeSurface, panelSprite, new Color(0.86f, 0.92f, 1f, 1f));
-            ApplySlicedSprite(feedbackSurface, panelSprite, new Color(0.7f, 0.82f, 1f, 0.98f));
             ApplySlicedSprite(offlineRewardSurface, panelSprite, new Color(0.55f, 1f, 0.72f, 0.98f));
             headerCoin.sprite = coinSprite;
             headerCoin.type = Image.Type.Simple;
@@ -462,10 +472,10 @@ namespace PocketForge.Mining
             ApplySimpleSprite(creditsPlusIcon, finalSkin.Simple("IconPlus"));
             ApplySimpleSprite(rewardedVideoIcon, finalSkin.Simple("IconVideo"));
             ApplySimpleSprite(rewardedPlusIcon, finalSkin.Simple("IconPlus"));
-            ApplyRawTexture(mineIcon, finalSkin.Texture("IconPickaxe"));
-            ApplyRawTexture(pickaxeIcon, finalSkin.Texture("IconPickaxe"));
-            ApplyRawTexture(drillIcon, finalSkin.Texture("IconDrill"));
-            ApplyRawTexture(robotIcon, finalSkin.Texture("IconRobot"));
+            ApplyRawTexture(mineIcon, finalSkin.Texture("IconPickaxe"), new Vector2(178f, 158f), 8f);
+            ApplyRawTexture(pickaxeIcon, finalSkin.Texture("IconPickaxe"), new Vector2(230f, 204f), 8f);
+            ApplyRawTexture(drillIcon, finalSkin.Texture("IconDrill"), new Vector2(230f, 204f));
+            ApplyRawTexture(robotIcon, finalSkin.Texture("IconRobot"), new Vector2(230f, 204f));
 
             var costAssets = new[] { "IconCyanCrystal", "IconPurpleGem", "IconGoldBadge" };
             for (var index = 0; index < upgradeCostIcons.Count && index < costAssets.Length; index++)
@@ -549,11 +559,28 @@ namespace PocketForge.Mining
             }
         }
 
-        private static void ApplyRawTexture(RawImage image, Texture texture)
+        private static void ApplyRawTexture(RawImage image, Texture texture, Vector2 fitBounds, float topCropPixels = 0f)
         {
+            if (image == null || texture == null)
+            {
+                return;
+            }
+
+            var crop = Mathf.Clamp(topCropPixels / texture.height, 0f, 0.25f);
             image.texture = texture;
-            image.uvRect = new Rect(0f, 0f, 1f, 1f);
+            image.uvRect = new Rect(0f, 0f, 1f, 1f - crop);
             image.color = Color.white;
+
+            var sourceAspect = texture.width / (texture.height * (1f - crop));
+            var width = fitBounds.x;
+            var height = width / sourceAspect;
+            if (height > fitBounds.y)
+            {
+                height = fitBounds.y;
+                width = height * sourceAspect;
+            }
+
+            image.rectTransform.sizeDelta = new Vector2(Mathf.Round(width), Mathf.Round(height));
         }
 
         private static void DisableOutline(Button button)
@@ -587,19 +614,11 @@ namespace PocketForge.Mining
 
         private void ApplyFeedbackPanel(Texture2D texture)
         {
-            // The generated source keeps generous transparent margins. Cropping here preserves
-            // the authored bevel while 9-slicing lets the notification scale across aspect ratios.
-            var paddingX = Mathf.RoundToInt(texture.width * 0.068f);
-            var paddingY = Mathf.RoundToInt(texture.height * 0.20f);
-            var rect = new Rect(
-                paddingX,
-                paddingY,
-                texture.width - paddingX * 2f,
-                texture.height - paddingY * 2f);
-            var border = new Vector4(rect.height * 0.22f, rect.height * 0.25f, rect.height * 0.22f, rect.height * 0.25f);
-            var sprite = Sprite.Create(texture, rect, new Vector2(0.5f, 0.5f), 100f, 0, SpriteMeshType.FullRect, border);
-            ApplySlicedSprite(feedbackSurface, sprite, Color.white);
-            feedbackSurface.GetComponent<Shadow>().enabled = false;
+            // Feedback is intentionally text-only. Keep this compatibility hook so old theme
+            // callers do not need to change while preventing the legacy panel from reappearing.
+            feedbackSurface.sprite = null;
+            feedbackSurface.color = Color.clear;
+            feedbackSurface.gameObject.SetActive(false);
         }
 
         private static Sprite CreateAtlasSprite(Texture2D atlas, Rect normalizedRect, Vector4 normalizedBorder)
@@ -1009,6 +1028,17 @@ namespace PocketForge.Mining
         {
             icon.texture = texture;
             icon.uvRect = new Rect(index / 3f, 0f, 1f / 3f, 1f);
+            var bounds = icon.rectTransform.sizeDelta;
+            var sourceAspect = texture.width / 3f / texture.height;
+            var width = bounds.x;
+            var height = width / sourceAspect;
+            if (height > bounds.y)
+            {
+                height = bounds.y;
+                width = height * sourceAspect;
+            }
+
+            icon.rectTransform.sizeDelta = new Vector2(Mathf.Round(width), Mathf.Round(height));
         }
 
         private static Text CreateText(string name, Transform parent, Vector2 anchorMin, Vector2 anchorMax, Vector2 position, Vector2 size, int fontSize, TextAnchor alignment)
@@ -1039,15 +1069,16 @@ namespace PocketForge.Mining
             var rect = label.rectTransform;
             rect.anchorMin = new Vector2(0.05f, 0f);
             rect.anchorMax = new Vector2(0.95f, 0f);
-            rect.anchoredPosition = new Vector2(0f, 130f);
-            rect.sizeDelta = new Vector2(0f, 116f);
-            label.fontSize = 29;
+            rect.anchoredPosition = new Vector2(0f, 148f);
+            rect.sizeDelta = new Vector2(0f, 46f);
+            label.fontSize = 31;
             label.alignment = TextAnchor.MiddleCenter;
         }
 
         private static void SetUpgradeText(Button button, int level, int cost)
         {
-            button.GetComponentInChildren<Text>().text = $"<color=#FFFFFF>Lv. {level}</color>\n<color=#FFD75A>    {cost:N0}</color>";
+            button.transform.Find("Label").GetComponent<Text>().text = $"<color=#FFFFFF>Lv. {level}</color>";
+            button.transform.Find("CostText").GetComponent<Text>().text = $"<color=#FFD75A>{cost:N0}</color>";
         }
 
         private Image[] CreateUpgradeDetails(Transform parent, Color activeColor)
@@ -1055,13 +1086,15 @@ namespace PocketForge.Mining
             var pips = new Image[3];
             for (var index = 0; index < pips.Length; index++)
             {
-                pips[index] = CreatePanel($"LevelPip{index + 1}", parent, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(-52f + index * 52f, 202f), new Vector2(44f, 20f), new Color(0.04f, 0.09f, 0.2f, 0.95f));
+                pips[index] = CreatePanel($"LevelPip{index + 1}", parent, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(-52f + index * 52f, 196f), new Vector2(44f, 20f), new Color(0.04f, 0.09f, 0.2f, 0.95f));
                 pips[index].GetComponent<Shadow>().enabled = false;
             }
 
-            var costIcon = CreateSimpleImage("CostIcon", parent, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(-48f, 100f), new Vector2(38f, 38f), Color.white);
+            var costIcon = CreateSimpleImage("CostIcon", parent, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(-52f, 103f), new Vector2(34f, 34f), Color.white);
             upgradeCostIcons.Add(costIcon);
-            var action = CreatePanel("UpgradeAction", parent, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 50f), new Vector2(248f, 84f), new Color(0.38f, 0.76f, 0.16f));
+            var costText = CreateText("CostText", parent, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(26f, 103f), new Vector2(130f, 38f), 29, TextAnchor.MiddleCenter);
+            costText.color = new Color(1f, 0.84f, 0.35f);
+            var action = CreatePanel("UpgradeAction", parent, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 44f), new Vector2(248f, 76f), new Color(0.38f, 0.76f, 0.16f));
             upgradeActionSurfaces.Add(action);
             var actionIcon = CreateSimpleImage("UpgradeArrow", action.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-22f, -14f), Color.white);
             upgradeActionIcons.Add(actionIcon);
