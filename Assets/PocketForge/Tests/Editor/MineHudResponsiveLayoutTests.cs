@@ -51,16 +51,20 @@ namespace PocketForge.Tests.Editor
         public void MainHudRegions_StayOrderedInsideCommonPortraitHeights(float virtualHeight)
         {
             var topBar = VerticalRange("TopSurface", virtualHeight);
-            var rewardedAd = VerticalRange("RewardedAdButton", virtualHeight);
+            var chapter = VerticalRange("ChapterInformationPanel", virtualHeight);
+            var bossWarning = VerticalRange("BossWarningPanel", virtualHeight);
             var progress = VerticalRange("ProgressBackground", virtualHeight);
             var mine = VerticalRange("MineButton", virtualHeight);
             var cards = VerticalRange("PickaxeButton", virtualHeight);
+            var navigation = VerticalRange("BottomNavigationBar", virtualHeight);
 
             Assert.That(topBar.Max, Is.LessThanOrEqualTo(virtualHeight));
-            Assert.That(rewardedAd.Max, Is.LessThanOrEqualTo(topBar.Min), "The ad pill must sit below the resource bar.");
+            Assert.That(chapter.Max, Is.LessThanOrEqualTo(topBar.Min), "Chapter information must sit below the resource bar.");
+            Assert.That(bossWarning.Max, Is.LessThanOrEqualTo(chapter.Min), "Boss warning must sit below chapter information.");
             Assert.That(mine.Max, Is.LessThanOrEqualTo(progress.Min + 0.01f), "The mine button must not cover the ore gauge.");
             Assert.That(cards.Max, Is.LessThanOrEqualTo(mine.Min + 0.01f), "Upgrade cards must not cover the mine button.");
-            Assert.That(cards.Min, Is.GreaterThanOrEqualTo(0f));
+            Assert.That(cards.Min, Is.GreaterThanOrEqualTo(navigation.Max - 0.01f));
+            Assert.That(navigation.Min, Is.GreaterThanOrEqualTo(0f));
         }
 
         [Test]
@@ -74,8 +78,9 @@ namespace PocketForge.Tests.Editor
             var robot = HorizontalRange("RobotButton", width);
 
             Assert.That(topBar.Min, Is.GreaterThanOrEqualTo(0f));
-            Assert.That(topBar.Max, Is.LessThanOrEqualTo(settings.Min));
             Assert.That(settings.Max, Is.LessThanOrEqualTo(width));
+            Assert.That(settings.Min, Is.GreaterThanOrEqualTo(topBar.Min));
+            Assert.That(settings.Max, Is.LessThanOrEqualTo(topBar.Max + 0.01f));
             Assert.That(pickaxe.Min, Is.GreaterThanOrEqualTo(0f));
             Assert.That(pickaxe.Max, Is.LessThanOrEqualTo(drill.Min));
             Assert.That(drill.Max, Is.LessThanOrEqualTo(robot.Min));
@@ -85,13 +90,16 @@ namespace PocketForge.Tests.Editor
         [Test]
         public void ApprovedSnapshotChrome_UsesMeasured1080WideGeometry()
         {
-            AssertRect("TopSurface", new Vector2(-61f, -123f), new Vector2(826f, 140f));
-            AssertRect("MinerRankButton", new Vector2(-321f, -123f), new Vector2(260f, 94f));
-            AssertRect("SettingsButton", new Vector2(-92f, -123f), new Vector2(116f, 116f));
-            AssertRect("RewardedAdButton", new Vector2(263f, -254f), new Vector2(400f, 88f));
-            AssertRect("ProgressBackground", new Vector2(0f, 29f), new Vector2(638f, 78f));
-            AssertRect("MineButton", new Vector2(0f, 14f), new Vector2(504f, 232f));
-            AssertRect("PickaxeButton", new Vector2(-320f, -6f), new Vector2(300f, 460f));
+            AssertRect("TopSurface", new Vector2(0f, -104f), new Vector2(1040f, 142f));
+            AssertRect("MinerRankButton", new Vector2(-324f, -104f), new Vector2(270f, 104f));
+            AssertRect("SettingsButton", new Vector2(471f, -104f), new Vector2(94f, 94f));
+            AssertRect("RewardedAdButton", new Vector2(33f, -104f), new Vector2(48f, 48f));
+            AssertRect("ChapterInformationPanel", new Vector2(-178f, -316f), new Vector2(650f, 180f));
+            AssertRect("PowerComparisonPanel", new Vector2(354f, -316f), new Vector2(294f, 180f));
+            AssertRect("ProgressBackground", new Vector2(0f, 20f), new Vector2(560f, 86f));
+            AssertRect("MineButton", new Vector2(0f, 660f), new Vector2(480f, 236f));
+            AssertRect("PickaxeButton", new Vector2(-327f, 365f), new Vector2(302f, 340f));
+            AssertRect("BottomNavigationBar", new Vector2(0f, 90f), new Vector2(1044f, 178f));
             AssertRect("SettingsCard", new Vector2(0f, 53f), new Vector2(900f, 1344f));
             AssertRect("CloseSettingsButton", new Vector2(0f, 66f), new Vector2(326f, 88f));
         }
@@ -131,9 +139,10 @@ namespace PocketForge.Tests.Editor
             var cost = FindChildRect(card, "CostText");
             var action = FindChildRect(card, "UpgradeAction");
 
-            Assert.That(VerticalRange(pip).Min, Is.GreaterThanOrEqualTo(VerticalRange(level).Max));
+            Assert.That(pip.gameObject.activeSelf, Is.False);
             Assert.That(VerticalRange(level).Min, Is.GreaterThanOrEqualTo(VerticalRange(cost).Max));
-            Assert.That(VerticalRange(cost).Min, Is.GreaterThanOrEqualTo(VerticalRange(action).Max));
+            Assert.That(cost.anchoredPosition.y, Is.EqualTo(action.anchoredPosition.y));
+            Assert.That(cost.anchoredPosition.x, Is.LessThan(action.anchoredPosition.x));
         }
 
         [Test]
@@ -143,7 +152,7 @@ namespace PocketForge.Tests.Editor
         }
 
         [Test]
-        public void BossStage_ShowsLocalizedCountdownAboveProgressBar()
+        public void BossStage_ShowsLocalizedCountdownInWarningPanel()
         {
             var catalog = MiningContentCatalog.CreateRuntimeDefault();
             try
@@ -154,12 +163,10 @@ namespace PocketForge.Tests.Editor
 
                 view.Render(state, service);
 
-                var status = FindRect("ChapterStatus").GetComponent<Text>();
+                var status = FindRect("BossWarning").GetComponent<Text>();
                 Assert.That(status.text, Does.Contain(LanguageService.Get("boss").ToUpper()));
                 Assert.That(status.text, Does.Contain("00:13"));
-                Assert.That(status.rectTransform.anchoredPosition, Is.EqualTo(new Vector2(0f, 66f)));
-                Assert.That(status.rectTransform.sizeDelta, Is.EqualTo(new Vector2(600f, 52f)));
-                Assert.That(status.GetComponent<Button>(), Is.Not.Null);
+                Assert.That(FindRect("ChapterInformationPanel").GetComponent<Button>(), Is.Not.Null);
             }
             finally
             {
@@ -168,60 +175,86 @@ namespace PocketForge.Tests.Editor
         }
 
         [Test]
-        public void GeneratedOreHealthBarAndPips_AreAppliedByFinalSkin()
+        public void V5OreHealthBar_UsesSeparateFrameAndFilledSprite()
         {
             view.SetTheme(null, null, null, null, null);
 
             var frame = FindRect("ProgressBackground").GetComponent<Image>();
             var track = FindRect("ProgressTrack").GetComponent<Image>();
             var fill = FindRect("ProgressFill").GetComponent<Image>();
-            var pip = FindChildRect(FindRect("PickaxeButton"), "LevelPip1").GetComponent<Image>();
 
-            Assert.That(frame.sprite.texture.name, Is.EqualTo("HudOreHealthFrame"));
-            Assert.That(track.sprite.texture.name, Is.EqualTo("HudOreHealthTrack"));
-            Assert.That(fill.sprite.texture.name, Is.EqualTo("HudOreHealthFill"));
-            Assert.That(pip.sprite.texture.name, Is.EqualTo("HudLevelPip"));
+            Assert.That(frame.sprite.texture.name, Is.EqualTo("12_OreHealthFrame"));
+            Assert.That(track.sprite, Is.Null);
+            Assert.That(fill.sprite.texture.name, Is.EqualTo("13_OreHealthFill"));
             Assert.That(frame.type, Is.EqualTo(Image.Type.Simple));
             Assert.That(track.type, Is.EqualTo(Image.Type.Simple));
-            Assert.That(fill.type, Is.EqualTo(Image.Type.Simple));
-            Assert.That(pip.type, Is.EqualTo(Image.Type.Simple));
-            Assert.That(frame.preserveAspect, Is.False);
+            Assert.That(fill.type, Is.EqualTo(Image.Type.Filled));
+            Assert.That(frame.preserveAspect, Is.True);
             Assert.That(track.preserveAspect, Is.False);
             Assert.That(fill.preserveAspect, Is.False);
-            Assert.That(pip.preserveAspect, Is.False);
         }
 
         [Test]
-        public void FinalHudChrome_UsesStretchedSimpleImages()
+        public void V5HudChrome_UsesSimpleImagesWithoutSlicing()
         {
             view.SetTheme(null, null, null, null, null);
 
             var hudNames = new[]
             {
                 "TopSurface",
-                "MinerRankButton",
                 "SettingsButton",
-                "RewardedAdButton",
+                "ChapterInformationPanel",
+                "PowerComparisonPanel",
+                "BossWarningPanel",
                 "ProgressBackground",
-                "ProgressTrack",
-                "ProgressFill",
                 "MineButton",
                 "PickaxeButton",
                 "DrillButton",
-                "RobotButton"
+                "RobotButton",
+                "BottomNavigationBar"
             };
 
             foreach (var name in hudNames)
             {
-                AssertStretchedSimple(FindRect(name).GetComponent<Image>(), name);
+                AssertSimple(FindRect(name).GetComponent<Image>(), name);
             }
 
-            foreach (var surface in view.GetComponentsInChildren<Image>(true).Where(image => image.name == "UpgradeAction"))
+            AssertSimple(FindRect("SettingsCard").GetComponent<Image>(), "SettingsCard");
+        }
+
+        [Test]
+        public void V5AssetSet_ContainsAllThirtyEightProductionSprites()
+        {
+            for (var index = 1; index <= 38; index++)
             {
-                AssertStretchedSimple(surface, surface.name);
-            }
+                var prefix = index.ToString("00") + "_";
+                var matches = Resources.LoadAll<Texture2D>("PocketForge/UI/V5")
+                    .Where(texture => texture.name.StartsWith(prefix))
+                    .ToArray();
 
-            AssertStretchedSimple(FindRect("SettingsCard").GetComponent<Image>(), "SettingsCard");
+                Assert.That(matches, Has.Length.EqualTo(1), $"V5 asset {prefix} is missing or duplicated.");
+            }
+        }
+
+        [Test]
+        public void V5RuntimeImages_AvoidSlicedRendering()
+        {
+            view.SetTheme(null, null, null, null, null);
+
+            var v5Images = view.GetComponentsInChildren<Image>(true)
+                .Where(image => image.sprite != null &&
+                                char.IsDigit(image.sprite.texture.name[0]) &&
+                                image.sprite.texture.name.Contains("_"))
+                .ToArray();
+
+            Assert.That(v5Images, Is.Not.Empty);
+            foreach (var image in v5Images)
+            {
+                Assert.That(
+                    image.type is Image.Type.Simple or Image.Type.Filled,
+                    Is.True,
+                    $"{image.name} unexpectedly uses {image.type}.");
+            }
         }
 
         [Test]
@@ -243,7 +276,7 @@ namespace PocketForge.Tests.Editor
             AssertIconSizes(settingsCard, "RemoveAdsIcon", new Vector2(60f, 60f), 1);
             AssertIconSizes(settingsCard, "RestorePurchasesIcon", new Vector2(60f, 60f), 1);
             AssertIconSizes(settingsCard, "CloseIcon", new Vector2(64f, 64f), 1);
-            Assert.That(FindRect("SettingsIcon").sizeDelta, Is.EqualTo(new Vector2(100f, 100f)));
+            Assert.That(FindRect("SettingsIcon").sizeDelta, Is.EqualTo(new Vector2(82f, 82f)));
         }
 
         private (float Min, float Max) VerticalRange(string name, float parentHeight)
@@ -265,10 +298,9 @@ namespace PocketForge.Tests.Editor
             return view.GetComponentsInChildren<RectTransform>(true).Single(rect => rect.name == name);
         }
 
-        private static void AssertStretchedSimple(Image image, string name)
+        private static void AssertSimple(Image image, string name)
         {
             Assert.That(image.type, Is.EqualTo(Image.Type.Simple), $"{name} must not use 9-slice rendering.");
-            Assert.That(image.preserveAspect, Is.False, $"{name} must fill its approved RectTransform.");
         }
 
         private static void AssertIconSizes(RectTransform parent, string name, Vector2 expectedSize, int expectedCount)
@@ -298,7 +330,7 @@ namespace PocketForge.Tests.Editor
         }
 
         [Test]
-        public void MinerRankDisplay_UsesReservedHeaderSpaceWithoutMovingExistingCounters()
+        public void MinerRankDisplay_UsesV5HeaderResourceSlots()
         {
             var catalog = MiningContentCatalog.CreateRuntimeDefault();
             try
@@ -314,8 +346,9 @@ namespace PocketForge.Tests.Editor
 
                 Assert.That(FindRect("MinerRank").GetComponent<Text>().text, Does.Contain("3"));
                 Assert.That(FindRect("MinerExperience").GetComponent<Text>().text, Does.Contain("12"));
-                AssertRect("CreditsCurrencyIcon", new Vector2(-52f, -123f), new Vector2(52f, 52f));
-                AssertRect("DepthCurrencyIcon", new Vector2(151f, -123f), new Vector2(54f, 54f));
+                AssertRect("CreditsCurrencyIcon", new Vector2(-116f, -104f), new Vector2(54f, 54f));
+                AssertRect("DepthCurrencyIcon", new Vector2(92f, -104f), new Vector2(54f, 54f));
+                Assert.That(FindRect("BlueprintCoreIcon"), Is.Not.Null);
             }
             finally
             {
@@ -403,7 +436,7 @@ namespace PocketForge.Tests.Editor
             var presenter = new MineHudPresenter(view, service, state);
             presenter.Render();
 
-            FindRect("ChapterStatus").GetComponent<Button>().onClick.Invoke();
+            FindRect("ChapterInformationPanel").GetComponent<Button>().onClick.Invoke();
 
             var backdrop = FindRect("ChapterSelectionBackdrop");
             Assert.That(backdrop.gameObject.activeSelf, Is.True);
@@ -422,7 +455,7 @@ namespace PocketForge.Tests.Editor
             Assert.That(state.Player.stage, Is.EqualTo(1));
             Assert.That(state.Player.furthestStage, Is.EqualTo(15));
 
-            FindRect("ChapterStatus").GetComponent<Button>().onClick.Invoke();
+            FindRect("ChapterInformationPanel").GetComponent<Button>().onClick.Invoke();
             chapterTwoAction = FindChildRect(FindRect("ChapterRow2"), "ChapterActionButton").GetComponent<Button>();
             Assert.That(chapterTwoAction.interactable, Is.True);
             Assert.That(chapterTwoAction.GetComponentInChildren<Text>().text, Is.EqualTo(LanguageService.Get("resume").ToUpper()));
@@ -451,11 +484,11 @@ namespace PocketForge.Tests.Editor
             var presenter = new MineHudPresenter(view, service, state);
             presenter.Render();
 
-            var status = FindRect("ChapterStatus").GetComponent<Text>().text;
+            var status = FindRect("BossWarning").GetComponent<Text>().text;
             Assert.That(status, Does.Contain(LanguageService.Get("boss_ready").ToUpper()));
-            Assert.That(status, Does.Contain("0.5/5.5"));
 
-            FindRect("ChapterStatus").GetComponent<Button>().onClick.Invoke();
+            Assert.That(FindRect("PowerValue").GetComponent<Text>().text, Does.Contain("5.5"));
+            FindRect("ChapterInformationPanel").GetComponent<Button>().onClick.Invoke();
             var chapterOneAction = FindChildRect(
                     FindRect("ChapterRow1"),
                     "ChapterActionButton")
@@ -498,10 +531,9 @@ namespace PocketForge.Tests.Editor
 
                     var surface = FindRect("OfflineRewardSurface");
                     var text = FindRect("OfflineReward").GetComponent<Text>();
-                    Assert.That(surface.sizeDelta, Is.EqualTo(new Vector2(410f, 82f)));
-                    Assert.That(text.rectTransform.sizeDelta, Is.EqualTo(new Vector2(380f, 58f)));
-                    Assert.That(text.text, Does.Contain("123"));
-                    Assert.That(text.text, Does.Contain("+456 C"));
+                    Assert.That(surface.sizeDelta, Is.EqualTo(new Vector2(230f, 236f)));
+                    Assert.That(text.rectTransform.sizeDelta, Is.EqualTo(new Vector2(192f, 64f)));
+                    Assert.That(text.text, Does.Contain("+456"));
                     Assert.That(text.text, Does.Contain("\n"));
                     Assert.That(text.text, Does.Not.Contain("offline_"));
                 }

@@ -118,6 +118,17 @@ namespace PocketForge.Tests.Editor
             Assert.That(LanguageService.Get("blueprint_cores"), Does.Not.Contain("blueprint_cores"));
             Assert.That(LanguageService.Get("research_core_output"), Does.Not.Contain("research_core_output"));
             Assert.That(LanguageService.Get("research_complete"), Does.Not.Contain("research_complete"));
+            Assert.That(LanguageService.Get("stage"), Does.Not.Contain("stage"));
+            Assert.That(LanguageService.Get("power"), Does.Not.Contain("power"));
+            Assert.That(LanguageService.Get("recommended"), Does.Not.Contain("recommended"));
+            Assert.That(LanguageService.Get("ore_health"), Does.Not.Contain("ore_health"));
+            Assert.That(LanguageService.Get("boss_in_stages"), Does.Not.Contain("boss_in_stages"));
+            Assert.That(LanguageService.Get("offline_rewards"), Does.Not.Contain("offline_rewards"));
+            Assert.That(LanguageService.Get("home"), Does.Not.Contain("home"));
+            Assert.That(LanguageService.Get("coming_soon"), Does.Not.Contain("coming_soon"));
+            Assert.That(LanguageService.Get("mine_crystal_cavern"), Does.Not.Contain("mine_crystal_cavern"));
+            Assert.That(LanguageService.Get("mine_magma_depths"), Does.Not.Contain("mine_magma_depths"));
+            Assert.That(LanguageService.Get("mine_ancient_city"), Does.Not.Contain("mine_ancient_city"));
         }
     }
 }

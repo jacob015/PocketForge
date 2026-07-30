@@ -15,10 +15,10 @@ using UnityEngine.UI;
 
 namespace PocketForge.Mining
 {
-    public sealed class MineHudView : MonoBehaviour
+    public sealed partial class MineHudView : MonoBehaviour
     {
-        private const float OreProgressWidth = 572f;
-        private const float MinerExperienceProgressWidth = 210f;
+        private const float OreProgressWidth = 488f;
+        private const float MinerExperienceProgressWidth = 160f;
 
         private sealed class ChapterRowView
         {
@@ -277,7 +277,15 @@ namespace PocketForge.Mining
                 RectTransform.Axis.Horizontal,
                 MinerExperienceProgressWidth * minerExperienceRatio);
             var oreProgressRatio = Mathf.Clamp01(ore.Health / ore.Durability);
-            oreProgress.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, OreProgressWidth * oreProgressRatio);
+            oreProgress.rectTransform.SetSizeWithCurrentAnchors(
+                RectTransform.Axis.Horizontal,
+                oreProgress.type == Image.Type.Filled
+                    ? OreProgressWidth
+                    : OreProgressWidth * oreProgressRatio);
+            if (oreProgress.type == Image.Type.Filled)
+            {
+                oreProgress.fillAmount = oreProgressRatio;
+            }
             oreProgress.color = oreProgress.sprite != null
                 ? Color.white
                 : ore.IsRare ? new Color(0.52f, 0.83f, 1f) : new Color(0.16f, 0.84f, 1f);
@@ -303,6 +311,7 @@ namespace PocketForge.Mining
             UpdatePips(pickaxePips, player.pickaxeLevel, new Color(0.28f, 0.72f, 1f));
             UpdatePips(drillPips, player.drillLevel, new Color(0.78f, 0.38f, 1f));
             UpdatePips(robotPips, player.robotLevel, new Color(1f, 0.7f, 0.16f));
+            RenderV5Hud(state, service);
             RenderResearch();
         }
 
@@ -317,6 +326,7 @@ namespace PocketForge.Mining
                 CompactNumberFormatter.Format(result.ProcessedOres),
                 CompactNumberFormatter.Format(result.RewardCredits),
                 CompactNumberFormatter.Format(result.Progression.ExperienceGained));
+            RenderV5OfflineReward(result);
         }
 
         private static string FormatOfflineDuration(long totalSeconds)
@@ -559,6 +569,7 @@ namespace PocketForge.Mining
             pickaxePips = CreateUpgradeDetails(pickaxeButton.transform, new Color(0.28f, 0.72f, 1f));
             drillPips = CreateUpgradeDetails(drillButton.transform, new Color(0.78f, 0.38f, 1f));
             robotPips = CreateUpgradeDetails(robotButton.transform, new Color(1f, 0.7f, 0.16f));
+            BuildV5Hud(hudRoot);
             positiveFeedback = safeAreaRoot.gameObject.AddComponent<PositiveFeedbackBurst>();
             positiveFeedback.Initialize(safeAreaRoot);
             CreateSettingsPanel();
@@ -738,6 +749,7 @@ namespace PocketForge.Mining
             ApplyLanguageIcon(SupportedLanguage.English, "IconFlagEnglish");
             ApplyLanguageIcon(SupportedLanguage.Japanese, "IconFlagJapanese");
             ApplyLanguageIcon(SupportedLanguage.ChineseSimplified, "IconFlagChinese");
+            ApplyV5HudSkin();
 
             DisableOutline(mineButton);
             DisableOutline(pickaxeButton);
@@ -1736,7 +1748,13 @@ namespace PocketForge.Mining
             }
 
             rewardedAdButton.interactable = rewardedAdState is RewardedAdState.Ready or RewardedAdState.Failed;
-            rewardedAdButton.GetComponentInChildren<Text>().text = rewardedAdState switch
+            var rewardedAdLabel = rewardedAdButton.GetComponentInChildren<Text>(true);
+            if (rewardedAdLabel == null)
+            {
+                return;
+            }
+
+            rewardedAdLabel.text = rewardedAdState switch
             {
                 RewardedAdState.Ready => $"+{CompactNumberFormatter.Format(rewardedAdCredits)} C",
                 RewardedAdState.Failed => LanguageService.Get("ad_retry").ToUpper(),
@@ -1781,8 +1799,23 @@ namespace PocketForge.Mining
                 return;
             }
 
-            safeAreaRoot.anchorMin = new Vector2(safeArea.xMin / Screen.width, safeArea.yMin / Screen.height);
-            safeAreaRoot.anchorMax = new Vector2(safeArea.xMax / Screen.width, safeArea.yMax / Screen.height);
+            // Device Simulator and Game View can report the previous frame's safe area
+            // immediately after a resolution change. Clamp it to the current screen so
+            // transient stale values can never create anchors outside the 0..1 range.
+            var xMin = Mathf.Clamp(safeArea.xMin, 0f, Screen.width);
+            var yMin = Mathf.Clamp(safeArea.yMin, 0f, Screen.height);
+            var xMax = Mathf.Clamp(safeArea.xMax, xMin, Screen.width);
+            var yMax = Mathf.Clamp(safeArea.yMax, yMin, Screen.height);
+            if (xMax <= xMin || yMax <= yMin)
+            {
+                xMin = 0f;
+                yMin = 0f;
+                xMax = Screen.width;
+                yMax = Screen.height;
+            }
+
+            safeAreaRoot.anchorMin = new Vector2(xMin / Screen.width, yMin / Screen.height);
+            safeAreaRoot.anchorMax = new Vector2(xMax / Screen.width, yMax / Screen.height);
             safeAreaRoot.offsetMin = Vector2.zero;
             safeAreaRoot.offsetMax = Vector2.zero;
             appliedSafeArea = safeArea;

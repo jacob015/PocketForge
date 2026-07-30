@@ -49,7 +49,12 @@ namespace PocketForge.Localization
                 ["research_prerequisite_short"] = "\uC120\uD589 \uD544\uC694", ["research_max_level"] = "\uCD5C\uB300",
                 ["not_enough_cores"] = "\uC124\uACC4\uB3C4 \uCF54\uC5B4 \uBD80\uC871", ["research_unavailable"] = "\uC5F0\uAD6C\uB97C \uC774\uC6A9\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4",
                 ["research_core_output"] = "\uCF54\uC5B4 \uCD9C\uB825", ["research_precision_tools"] = "\uC815\uBC00 \uACF5\uAD6C",
-                ["research_deep_automation"] = "\uC2EC\uBD80 \uC790\uB3D9\uD654"
+                ["research_deep_automation"] = "\uC2EC\uBD80 \uC790\uB3D9\uD654",
+                ["stage"] = "\uC2A4\uD14C\uC774\uC9C0", ["power"] = "\uC804\uD22C\uB825", ["recommended"] = "\uAD8C\uC7A5",
+                ["ore_health"] = "\uAD11\uC11D \uB0B4\uAD6C\uB3C4", ["boss_in_stages"] = "\uBCF4\uC2A4\uAE4C\uC9C0 {0} \uC2A4\uD14C\uC774\uC9C0",
+                ["offline_rewards"] = "\uBC29\uCE58 \uBCF4\uC0C1", ["home"] = "\uD648", ["coming_soon"] = "\uC900\uBE44 \uC911",
+                ["mine_crystal_cavern"] = "\uC218\uC815 \uB3D9\uAD74", ["mine_magma_depths"] = "\uB9C8\uADF8\uB9C8 \uC2EC\uCE35",
+                ["mine_ancient_city"] = "\uACE0\uB300 \uB3C4\uC2DC"
             },
             [SupportedLanguage.English] = new()
             {
@@ -80,7 +85,12 @@ namespace PocketForge.Localization
                 ["research_prerequisite_short"] = "Requires prior", ["research_max_level"] = "Max",
                 ["not_enough_cores"] = "Not enough Blueprint Cores", ["research_unavailable"] = "Research unavailable",
                 ["research_core_output"] = "Core Output", ["research_precision_tools"] = "Precision Tools",
-                ["research_deep_automation"] = "Deep Automation"
+                ["research_deep_automation"] = "Deep Automation",
+                ["stage"] = "Stage", ["power"] = "Power", ["recommended"] = "Recommended",
+                ["ore_health"] = "Ore Health", ["boss_in_stages"] = "Boss in {0} stages",
+                ["offline_rewards"] = "Offline Rewards", ["home"] = "Home", ["coming_soon"] = "Coming Soon",
+                ["mine_crystal_cavern"] = "Crystal Cavern", ["mine_magma_depths"] = "Magma Depths",
+                ["mine_ancient_city"] = "Ancient City"
             },
             [SupportedLanguage.Japanese] = new()
             {
@@ -114,7 +124,12 @@ namespace PocketForge.Localization
                 ["research_prerequisite_short"] = "\u5148\u884C\u5FC5\u8981", ["research_max_level"] = "\u6700\u5927",
                 ["not_enough_cores"] = "\u8A2D\u8A08\u30B3\u30A2\u304C\u8DB3\u308A\u307E\u305B\u3093", ["research_unavailable"] = "\u7814\u7A76\u3092\u5229\u7528\u3067\u304D\u307E\u305B\u3093",
                 ["research_core_output"] = "\u30B3\u30A2\u51FA\u529B", ["research_precision_tools"] = "\u7CBE\u5BC6\u5DE5\u5177",
-                ["research_deep_automation"] = "\u6DF1\u5C64\u81EA\u52D5\u5316"
+                ["research_deep_automation"] = "\u6DF1\u5C64\u81EA\u52D5\u5316",
+                ["stage"] = "\u30B9\u30C6\u30FC\u30B8", ["power"] = "\u6226\u529B", ["recommended"] = "\u63A8\u5968",
+                ["ore_health"] = "\u9271\u77F3\u8010\u4E45\u5EA6", ["boss_in_stages"] = "\u30DC\u30B9\u307E\u3067 {0} \u30B9\u30C6\u30FC\u30B8",
+                ["offline_rewards"] = "\u653E\u7F6E\u5831\u916C", ["home"] = "\u30DB\u30FC\u30E0", ["coming_soon"] = "\u6E96\u5099\u4E2D",
+                ["mine_crystal_cavern"] = "\u6C34\u6676\u306E\u6D1E\u7A9F", ["mine_magma_depths"] = "\u30DE\u30B0\u30DE\u6DF1\u5C64",
+                ["mine_ancient_city"] = "\u53E4\u4EE3\u90FD\u5E02"
             },
             [SupportedLanguage.ChineseSimplified] = new()
             {
@@ -146,7 +161,12 @@ namespace PocketForge.Localization
                 ["research_prerequisite_short"] = "\u9700\u5148\u884C", ["research_max_level"] = "\u5DF2\u6EE1\u7EA7",
                 ["not_enough_cores"] = "\u84DD\u56FE\u6838\u5FC3\u4E0D\u8DB3", ["research_unavailable"] = "\u7814\u7A76\u4E0D\u53EF\u7528",
                 ["research_core_output"] = "\u6838\u5FC3\u8F93\u51FA", ["research_precision_tools"] = "\u7CBE\u5BC6\u5DE5\u5177",
-                ["research_deep_automation"] = "\u6DF1\u5C42\u81EA\u52A8\u5316"
+                ["research_deep_automation"] = "\u6DF1\u5C42\u81EA\u52A8\u5316",
+                ["stage"] = "\u5173\u5361", ["power"] = "\u6218\u529B", ["recommended"] = "\u63A8\u8350",
+                ["ore_health"] = "\u77FF\u77F3\u8010\u4E45\u5EA6", ["boss_in_stages"] = "\u8DDD\u9996\u9886\u8FD8\u6709 {0} \u5173",
+                ["offline_rewards"] = "\u79BB\u7EBF\u5956\u52B1", ["home"] = "\u4E3B\u9875", ["coming_soon"] = "\u656C\u8BF7\u671F\u5F85",
+                ["mine_crystal_cavern"] = "\u6C34\u6676\u6D1E\u7A9F", ["mine_magma_depths"] = "\u7194\u5CA9\u6DF1\u5904",
+                ["mine_ancient_city"] = "\u53E4\u4EE3\u57CE\u5E02"
             }
         };
 

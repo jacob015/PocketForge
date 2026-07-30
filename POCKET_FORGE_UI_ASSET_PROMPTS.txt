@@ -1,0 +1,504 @@
+POCKET FORGE UI ASSET IMAGE GENERATION PROMPTS
+================================================
+
+목적
+----
+
+승인된 보랏빛 캐주얼 Pocket Forge 메인 화면 가스샷을 기준으로
+UI 요소를 하나씩 독립 이미지로 생성하기 위한 통합 프롬프트 문서다.
+
+각 이미지는 기능을 식별할 수 있는 형태와 아이콘만 포함한다.
+레벨, 가격, 재화량, 진행도, 챕터명처럼 변경되거나 번역되는 정보는
+이미지에 굽지 않고 Unity의 TextMeshPro와 런타임 데이터로 표시한다.
+
+
+1. 제작 원칙
+-------------
+
+1. 하나의 생성 요청에서는 정확히 한 개의 UI 요소만 생성한다.
+2. 생성 이미지에는 글자, 숫자, 단어, 약어, 재화 기호를 넣지 않는다.
+3. 반드시 플레이어가 알아야 하는 정보도 이미지에 굽지 않는다.
+   Unity TextMeshPro 또는 별도 런타임 UI 레이어로 표시한다.
+4. 버튼의 기능은 가능한 한 곡괭이, 깨진 광석, 상자, 플라스크 같은
+   아이콘과 버튼의 색·형태만으로 구분한다.
+5. 번역되거나 수치가 변하는 모든 정보가 들어갈 공간은 비워 둔다.
+6. 패널, 버튼, 카드, 아이콘은 각각 별도 이미지로 만든다.
+7. 생성 결과는 #00FF00 단색 크로마키 배경에서 추출해 투명 PNG로 변환한다.
+8. 크로마키 제거를 위해 실제 UI 요소에는 녹색을 사용하지 않는다.
+9. 승인된 캐주얼 가스샷은 스타일 참고용이며 화면 전체를 복제하지 않는다.
+10. 무거운 금속, 사실적인 오염, 두꺼운 검정 테두리, 과도한 금장,
+    해골, 위협적인 RPG 분위기는 사용하지 않는다.
+
+
+2. 공통 고정 프롬프트
+---------------------
+
+아래 프롬프트를 모든 생성 요청에 공통으로 사용한다.
+각 요청에서는 [INSERT ONE ASSET DESCRIPTION HERE] 부분만
+3장의 개별 요소 프롬프트 중 하나로 교체한다.
+
+------------------------------------------------------------
+
+Use case: ui-mockup
+Asset type: isolated production-ready mobile game UI sprite
+
+Input image:
+Use the approved casual purple Pocket Forge main-screen concept only as a visual style reference.
+Match its soft rounded geometry, border thickness, lighting direction, material treatment, and casual 3D rendering.
+Do not recreate the entire screen.
+
+Primary request:
+[INSERT ONE ASSET DESCRIPTION HERE]
+
+Style/medium:
+Polished casual mobile idle-game UI.
+Soft toy-like 3D rendering, rounded shapes, thin lavender borders, subtle depth, restrained highlights, and clean readable silhouettes.
+Friendly and lightweight, not realistic, metallic, gritty, or intimidating.
+
+Color palette:
+Deep indigo and muted navy surfaces, lavender edge highlights, soft cyan accents, cream highlights, restrained sunny yellow, and limited coral-red for warnings.
+Do not use green anywhere in the asset.
+
+Composition:
+Generate exactly one isolated UI asset.
+Straight-on front view with no perspective distortion.
+Centered with generous empty padding around every edge.
+Perfectly symmetrical where appropriate.
+Do not crop any part of the asset.
+No surrounding screen, environment, mockup, or additional UI elements.
+
+Text:
+Absolutely no text.
+No letters, numbers, words, labels, abbreviations, currency signs, pseudo-text, decorative writing, or unreadable glyphs.
+Do not bake player information into the image.
+All labels, values, levels, prices, timers, progress values, and localized information will be added separately in Unity.
+
+Background:
+Place the asset on a perfectly flat solid #00FF00 chroma-key background for later background removal.
+The background must be one uniform color with no gradient, texture, lighting variation, shadow, floor, or reflection.
+Do not use #00FF00 anywhere in the asset.
+
+Technical constraints:
+Crisp clean silhouette suitable for PNG alpha extraction.
+No cast shadow outside the asset boundary.
+No watermark.
+No logo.
+No glow extending far beyond the silhouette.
+No extra decorative particles outside the asset.
+No duplicated objects.
+No purple crystal cave background.
+No phone frame.
+
+------------------------------------------------------------
+
+
+3. 개별 요소용 PRIMARY REQUEST
+------------------------------
+
+3.1 상단 통합 HUD 패널
+
+Create one wide, low-height, rounded resource HUD panel.
+Use a soft navy-to-indigo surface with a thin lavender rim and subtle inner highlight.
+Include several visually separated but completely empty counter areas.
+Leave a circular empty attachment area on the far left for the player portrait.
+Leave a small circular attachment area on the far right for the settings button.
+The center of every counter area must remain plain and empty for Unity icons and dynamic text.
+Make the border compatible with Unity 9-slicing.
+
+
+3.2 플레이어 초상 프레임
+
+Create one circular player portrait frame.
+Use a friendly lavender outer ring, a thin cream highlight, and a dark navy inner opening.
+Leave the entire central portrait area empty and flat.
+Do not include a character, level plate, text, numbers, or badge.
+
+
+3.3 플레이어 캐릭터 초상
+
+Create one friendly young casual-game miner avatar bust.
+Round face, small mining goggles, simple brown hair, navy work jacket, and a warm cheerful expression.
+Toy-like polished 3D style matching Pocket Forge.
+Show only the head and upper shoulders, facing forward.
+Do not include a frame, helmet text, tools, badge, letters, or numbers.
+
+
+3.4 Credits 재화 아이콘
+
+Create one simple round golden credit coin icon with a small embossed forge-anvil symbol in the center.
+No letters, numbers, currency signs, or surrounding frame.
+
+
+3.5 Gem 재화 아이콘
+
+Create one faceted cyan-blue premium gem icon.
+Friendly chunky shape, broad readable facets, and minimal reflections.
+No surrounding frame, spark particles, text, or numbers.
+
+
+3.6 설계도 코어 아이콘
+
+Create one compact blueprint-core icon shaped like a small rolled technical scroll combined with a glowing cyan mechanical core.
+No letters, diagrams, text, or surrounding frame.
+
+
+3.7 광부 경험치 아이콘
+
+Create one miner experience icon shaped like a small cyan starburst medal.
+Use a simple upward-progress chevron symbol instead of letters.
+No text, numbers, or surrounding frame.
+
+
+3.8 설정 버튼
+
+Create one compact circular settings button.
+Dark navy rounded base, thin lavender rim, and a large simple cream-colored gear icon.
+No text, notification badge, or additional symbols.
+
+
+3.9 챕터 정보 패널
+
+Create one wide rounded chapter-information panel.
+Soft translucent navy-indigo surface, thin lavender rim, and subtle cyan upper highlight.
+Include a small decorative mineral cluster attachment on the left edge.
+Keep the entire central and right interior empty for chapter, stage, and mine-name text added in Unity.
+Make the border clean and compatible with Unity 9-slicing.
+No embedded text or numbers.
+
+
+3.10 채굴력 비교 패널
+
+Create one compact rounded power-comparison panel.
+Dark navy-indigo surface with a thin lavender border.
+Include a small friendly flexed-arm or upward-power icon in the upper-left area.
+Keep the remaining interior completely empty for current power and recommended power values.
+No text, numbers, meter, or warning color baked into the panel.
+
+
+3.11 보스 접근 경고 패널
+
+Create one small horizontal rounded warning panel.
+Use a navy-indigo body with a restrained coral-lavender rim.
+Include one friendly cracked-boulder warning icon on the left.
+Keep the right side empty for dynamic boss-distance information.
+Do not use a skull, monster face, text, numbers, or aggressive imagery.
+
+
+3.12 광석 체력바 프레임
+
+Create one wide rounded progress-bar frame.
+Dark navy outer shell, thin lavender rim, and an empty recessed inner track.
+The inner track must be plain, uniform, and fully empty so Unity can render a separate cyan fill image.
+Do not include fill amount, tick marks, text, numbers, icons, or shine crossing the empty track.
+Compatible with Unity 9-slicing.
+
+
+3.13 광석 체력바 Fill
+
+Create one plain cyan rounded progress-bar fill sprite.
+Smooth cyan-to-light-cyan vertical shading only.
+No border, text, particles, ticks, symbols, or background decoration.
+Perfect horizontal capsule shape compatible with Unity filled-image cropping.
+
+NOTE:
+체력바 Fill은 생성 이미지보다 Unity의 단색 Image Filled로 구현하는 편이
+변형과 진행률 표시가 안정적이다. 생성 이미지는 표면 질감이 꼭 필요할 때만 사용한다.
+
+
+3.14 오프라인 보상 숏컷 카드
+
+Create one small vertical rounded shortcut card.
+Soft navy-indigo surface, thin lavender rim, and an empty central area.
+Reserve a small empty lower area for an optional Unity button overlay.
+No chest, icon, text, timer, number, or label.
+
+
+3.15 오프라인 보상 상자 아이콘
+
+Create one cute compact offline-reward chest icon.
+Rounded lavender and navy chest with one cyan gem-shaped latch.
+Front-facing toy-like 3D style.
+No text, clock, coins, glow particles, or surrounding card.
+
+
+3.16 연구 완료 아이콘
+
+Create one friendly research icon shaped like a round glass potion flask containing bright cyan liquid.
+Simplified toy-like 3D form with a lavender stopper and soft internal glow.
+No text, completion mark, particles, surrounding card, or background.
+
+
+3.17 완료 상태 체크 배지
+
+Create one small circular completion-status badge.
+Cyan-blue circle with a simple cream checkmark.
+No text, glow particles, or surrounding UI.
+
+
+3.18 메인 채굴 버튼
+
+Create one large wide rounded primary action button.
+Friendly sunny-yellow to warm-gold surface, soft orange lower shading, cream top highlight, and a thin lavender outer separation rim.
+Keep the entire center empty for an icon or optional Unity text.
+Minimal bevel and no heavy metallic frame.
+Make the border compatible with Unity 9-slicing.
+No text, letters, numbers, progress bar, or icon.
+
+
+3.19 메인 채굴 곡괭이 아이콘
+
+Create one simple friendly pickaxe action icon.
+Rounded wooden handle, soft silver-lavender pickaxe head, and a broad readable silhouette angled diagonally upward.
+No surrounding button, text, particles, rocks, or background.
+
+
+3.20 보스 도전 버튼
+
+Create one compact wide rounded secondary action button.
+Soft coral-red surface with restrained warm highlights and a thin lavender separation rim.
+Keep the center and right side empty for an optional Unity overlay.
+Minimal bevel, playful rather than aggressive.
+Make it compatible with Unity 9-slicing.
+No text, skull, numbers, icon, fire, or particles.
+
+
+3.21 보스 도전 아이콘
+
+Create one friendly boss-challenge icon shaped like a large cracked boulder with a small coral warning diamond behind it.
+Bold simple silhouette with toy-like 3D rendering.
+No skull, monster face, text, exclamation mark, particles, or surrounding button.
+
+
+3.22 시설 강화 카드
+
+Create one medium vertical rounded upgrade card frame.
+Soft navy-indigo surface, thin lavender border, subtle inner cyan highlight, and a clean empty center.
+Reserve a large empty upper-middle area for an equipment icon.
+Reserve empty areas for Unity-rendered level and price information.
+Include no icon, text, numbers, currency, arrow, badge, or button.
+The lower area should visually support a separate price-button overlay.
+Compatible with Unity 9-slicing.
+
+
+3.23 추천 장비 별 배지
+
+Create one small recommendation badge shaped like a soft yellow five-point star inside a lavender-edged rounded medallion.
+No ribbon, text, letters, numbers, or particles.
+
+
+3.24 강화 가능 화살표
+
+Create one compact upward-upgrade arrow icon.
+Bright cyan arrow with a cream highlight and soft navy underside.
+No green, text, numbers, surrounding button, or particles.
+
+
+3.25 곡괭이 시설 아이콘
+
+Create one casual mining pickaxe equipment icon.
+Rounded wooden handle and broad silver-lavender metal head.
+Three-quarter front view, centered, toy-like polished 3D style.
+No background, card, text, levels, price, arrow, or particles.
+
+
+3.26 드릴 시설 아이콘
+
+Create one compact automatic drill equipment icon.
+Short chunky cylindrical drill with a silver cone, navy body, yellow casing accents, and a small cyan energy window.
+Three-quarter front view, toy-like polished 3D style.
+No vehicle tracks, background, card, text, levels, price, arrow, or particles.
+
+
+3.27 로봇 시설 아이콘
+
+Create one cute compact helper robot equipment icon.
+White and navy rounded body, cyan face display with two simple friendly eyes, small arms and feet.
+Front-facing toy-like polished 3D style.
+No background, card, text, levels, price, arrow, or particles.
+
+
+3.28 하단 내비게이션 바
+
+Create one wide, low-height, rounded bottom navigation dock.
+Soft translucent navy-indigo body, thin lavender rim, subtle inner highlight, and five evenly divided empty icon zones.
+The center zone may be slightly wider for a raised home-tab attachment.
+All zones must remain empty.
+No icons, text, labels, locks, badges, letters, or numbers.
+Compatible with Unity 9-slicing.
+
+
+3.29 선택된 하단 탭
+
+Create one softly raised rounded-square selected navigation tab.
+Lavender-to-indigo surface with a cream upper highlight and subtle cyan inner glow.
+Keep the center completely empty for a separate navigation icon.
+No text, icon, number, badge, or surrounding navigation bar.
+
+
+3.30 장비 메뉴 아이콘
+
+Create one equipment navigation icon using a crossed pickaxe and small wrench.
+Simple cream and lavender materials with a bold friendly silhouette.
+No text, card, badge, or background.
+
+
+3.31 연구 메뉴 아이콘
+
+Create one research navigation icon using a compact cyan potion flask.
+Simple bold silhouette with minimal internal detail.
+No text, card, badge, particles, or background.
+
+
+3.32 홈 메뉴 아이콘
+
+Create one home navigation icon shaped like a tiny friendly forge workshop with a rounded roof and a small anvil silhouette in the doorway.
+No text, smoke, card, badge, or background.
+
+
+3.33 박물관 메뉴 아이콘
+
+Create one museum navigation icon shaped like a small classical display building containing a single crystal silhouette.
+Use friendly rounded geometry rather than realistic architecture.
+No text, lock, badge, or background.
+
+
+3.34 미션 메뉴 아이콘
+
+Create one mission navigation icon shaped like a clipboard with three simple circular check marks.
+Do not include writing, lines resembling text, letters, numbers, badge, or background.
+
+
+3.35 상점 메뉴 아이콘
+
+Create one shop navigation icon shaped like a compact rounded shopping cart containing one small gem shape.
+No text, currency sign, badge, or background.
+
+
+3.36 알림 배지
+
+Create one small circular notification badge.
+Bright coral-red circle with a tiny cream diamond-shaped sparkle in the center.
+Do not use an exclamation mark, number, letter, text, or surrounding icon.
+
+
+3.37 잠금 상태 아이콘
+
+Create one simple locked-state overlay icon.
+Rounded lavender-gray padlock with a dark navy keyhole.
+Front-facing, clear silhouette.
+No text, number, chain, card, or background.
+
+
+3.38 추가 행동 아이콘
+
+Create one small add-action icon.
+Cream plus symbol inside a rounded lavender circle.
+No text, number, shadow outside the circle, or surrounding panel.
+
+
+4. 이미지에 넣지 않을 정보
+--------------------------
+
+아래 정보는 전부 Unity의 런타임 UI와 TextMeshPro로 표시한다.
+
+- 광부 레벨
+- 광부 경험치와 다음 레벨 진행도
+- Credits 수량
+- Gem 수량
+- 설계도 코어 수량
+- 챕터 번호
+- 스테이지 번호
+- 현재 광맥 이름
+- 현재 총 채굴력
+- 보스 권장 채굴력
+- 보스까지 남은 스테이지
+- 광석 현재 HP
+- 광석 최대 HP
+- 광석 HP 진행률
+- 오프라인 경과 시간
+- 오프라인 보상량
+- 연구 완료 상태 설명
+- 시설 이름
+- 시설 레벨
+- 시설 강화 가격
+- 메뉴 이름
+- 기능 해금 레벨
+- MINE 문구
+- BOSS 문구
+- CLAIM 문구
+- RECOMMENDED 문구
+- 번역될 가능성이 있는 모든 문구
+- 플레이 도중 달라질 수 있는 모든 숫자
+
+버튼 기능은 이미지에 글자를 넣지 않고 아래 형태로 구분한다.
+
+- 채굴: 곡괭이 아이콘 + 넓은 노란색 버튼
+- 보스 도전: 깨진 광석 아이콘 + 작은 코랄색 버튼
+- 오프라인 보상: 상자 아이콘
+- 연구: 플라스크 아이콘
+- 장비: 교차한 곡괭이와 렌치
+- 박물관: 전시 건물과 광물
+- 미션: 체크 표시가 있는 클립보드
+- 상점: 보석이 담긴 카트
+- 설정: 톱니바퀴
+
+사용자 접근성을 위해 버튼 명칭이 필요해지면 이미지를 다시 만들지 않고
+Unity의 현지화 TextMeshPro 레이어를 선택적으로 표시한다.
+
+
+5. 권장 생성 순서
+-----------------
+
+스타일 차이를 줄이기 위해 다음 순서로 생성한다.
+
+1. 상단 통합 HUD 패널
+2. 챕터 정보 패널
+3. 채굴력 비교 패널
+4. 보스 접근 경고 패널
+5. 광석 체력바 프레임
+6. 메인 채굴 버튼
+7. 보스 도전 버튼
+8. 시설 강화 카드
+9. 하단 내비게이션 바
+10. 선택된 하단 탭
+11. 공통 재화 아이콘
+12. 행동·시설 아이콘
+13. 하단 메뉴 아이콘
+14. 상태 배지와 잠금 아이콘
+15. 플레이어 초상 프레임과 캐릭터
+
+처음 생성한 패널과 버튼 중 승인된 이미지를 이후 요청의 추가 스타일
+참조 이미지로 계속 사용하면 테두리, 광택, 색상, 두께가 더 일관된다.
+
+
+6. 생성 결과 검수 기준
+----------------------
+
+- 한 이미지에 정확히 한 요소만 있는가
+- 글자, 숫자, 가짜 문자, 장식 문자가 없는가
+- UI 요소 내부에 Unity 텍스트를 배치할 빈 공간이 충분한가
+- 이미지의 모든 외곽이 잘리지 않았는가
+- 정면 시점이며 원근 왜곡이 없는가
+- #00FF00 배경이 완전히 균일한가
+- 실제 UI 요소 안에 녹색이 없는가
+- 크로마키 제거 후 외곽에 녹색 테두리가 남지 않는가
+- 보랏빛 캐주얼 가스샷과 테두리·재질·조명이 일치하는가
+- 무거운 금속, 두꺼운 검정 테두리, 과한 금장, 해골이 없는가
+- 아이콘이 작은 모바일 화면에서도 형태만으로 구분되는가
+- 패널과 버튼이 Unity 9-slice 또는 Simple 이미지로 사용 가능한가
+- 변경되는 정보가 이미지에 고정되어 있지 않은가
+
+
+7. Unity 적용 메모
+------------------
+
+- 패널과 버튼의 글자·수치는 TextMeshPro로 분리한다.
+- 재화 아이콘과 수량도 서로 다른 GameObject로 구성한다.
+- 진행 바는 Frame, Track, Fill을 분리한다.
+- Fill은 가능하면 Unity Image의 Filled 또는 폭 조절 방식으로 구현한다.
+- 버튼 배경과 기능 아이콘을 분리해 눌림·비활성·잠금 상태에 재사용한다.
+- 알림 배지, 잠금 아이콘, 추천 별은 독립 Overlay 이미지로 사용한다.
+- 패널 가장자리가 늘어나는 자산은 9-slice 경계를 직접 검수한다.
+- 그림 자체의 비율을 보존해야 하는 아이콘은 정사각형 투명 캔버스에 배치한다.
+- 모든 생성 원본은 투명 PNG 변환본과 구분해 보관한다.
+
