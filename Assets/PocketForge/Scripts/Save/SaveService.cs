@@ -28,7 +28,9 @@ namespace PocketForge.Save
         {
             try
             {
-                data.lastSavedUnixSeconds = Math.Max(0, savedAtUnixSeconds);
+                data.lastSavedUnixSeconds = Math.Max(
+                    data.lastSavedUnixSeconds,
+                    Math.Max(0, savedAtUnixSeconds));
                 PlayerPrefs.SetString(SaveKey, JsonUtility.ToJson(GameSaveMigrator.Normalize(data)));
                 PlayerPrefs.Save();
                 return true;

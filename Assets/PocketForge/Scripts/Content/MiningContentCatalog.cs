@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using PocketForge.Economy;
+using PocketForge.Progression;
 using UnityEngine;
 
 namespace PocketForge.Content
@@ -10,11 +12,48 @@ namespace PocketForge.Content
     {
         [SerializeField] private OreDefinition[] ores = Array.Empty<OreDefinition>();
         [SerializeField] private UpgradeDefinition[] upgrades = Array.Empty<UpgradeDefinition>();
+        [SerializeField] private ChapterDefinition[] chapters = Array.Empty<ChapterDefinition>();
+        [SerializeField] private ResearchNodeDefinition[] researchNodes = Array.Empty<ResearchNodeDefinition>();
         [SerializeField, Min(60)] private int maxOfflineRewardSeconds = 14400;
         [SerializeField, Min(1)] private int rewardedAdRewardMultiplier = 5;
+        [SerializeField, Min(0.01f)] private float baseAutoPowerPerSecond = 0.5f;
+        [SerializeField, Min(0.01f)] private float baseTapDamage = 1f;
+        [SerializeField, Min(0.001f)] private float baseTapAssistSeconds = 0.05f;
+        [SerializeField, Min(0f)] private float tapAssistSecondsPerPickaxeLevel = 0.005f;
+        [SerializeField, Min(0.001f)] private float maxTapAssistSeconds = 0.1f;
+        [SerializeField, Min(1f)] private float referenceTapsPerSecond = 5f;
+        [Header("Miner Progression")]
+        [SerializeField, Min(1)] private int baseExperienceToLevel = 20;
+        [SerializeField, Min(0)] private int experienceGrowthPerLevel = 15;
+        [SerializeField, Min(1)] private int normalOreExperiencePerChapter = 1;
+        [SerializeField, Min(1)] private int bossExperiencePerChapter = 10;
+        [SerializeField, Min(0f)] private float minerRankPowerBonusPerLevel = 0.02f;
+        [SerializeField, Min(0)] private int levelRewardCreditsPerLevel = 25;
+        [SerializeField, Min(1)] private int milestoneLevelInterval = 5;
+        [SerializeField, Min(0)] private int milestoneRewardGems = 1;
+        [SerializeField] private FeatureUnlockDefinition[] featureUnlocks = Array.Empty<FeatureUnlockDefinition>();
+
+        private static readonly ChapterDefinition RuntimeDefaultChapter = ChapterDefinition.CreateRuntimeDefault();
+        private static readonly ResearchNodeDefinition[] RuntimeDefaultResearchNodes =
+            ResearchNodeDefinition.CreateRuntimeDefaults();
 
         public int MaxOfflineRewardSeconds => maxOfflineRewardSeconds;
         public int RewardedAdRewardMultiplier => rewardedAdRewardMultiplier;
+        public float BaseAutoPowerPerSecond => baseAutoPowerPerSecond;
+        public float BaseTapDamage => baseTapDamage;
+        public float BaseTapAssistSeconds => baseTapAssistSeconds;
+        public float TapAssistSecondsPerPickaxeLevel => tapAssistSecondsPerPickaxeLevel;
+        public float MaxTapAssistSeconds => maxTapAssistSeconds;
+        public float ReferenceTapsPerSecond => referenceTapsPerSecond;
+        public float TapCooldownSeconds => 1f / Mathf.Max(1f, referenceTapsPerSecond);
+        public int BaseExperienceToLevel => baseExperienceToLevel;
+        public int ExperienceGrowthPerLevel => experienceGrowthPerLevel;
+        public int NormalOreExperiencePerChapter => normalOreExperiencePerChapter;
+        public int BossExperiencePerChapter => bossExperiencePerChapter;
+        public float MinerRankPowerBonusPerLevel => minerRankPowerBonusPerLevel;
+        public int LevelRewardCreditsPerLevel => levelRewardCreditsPerLevel;
+        public int MilestoneLevelInterval => milestoneLevelInterval;
+        public int MilestoneRewardGems => milestoneRewardGems;
 
         public OreDefinition GetOreForStage(int stage)
         {
@@ -32,6 +71,48 @@ namespace PocketForge.Content
             return upgrade != null ? upgrade : CreateRuntimeUpgrade(type);
         }
 
+        public ChapterDefinition GetChapterForStage(int stage)
+        {
+            var chapter = chapters
+                .Where(candidate => candidate != null && candidate.StartStage <= stage)
+                .OrderByDescending(candidate => candidate.StartStage)
+                .FirstOrDefault();
+
+            return chapter ?? RuntimeDefaultChapter;
+        }
+
+        public IReadOnlyList<ChapterDefinition> GetChapters()
+        {
+            return chapters
+                .Where(candidate => candidate != null)
+                .OrderBy(candidate => candidate.ChapterNumber)
+                .ToArray();
+        }
+
+        public IReadOnlyList<FeatureUnlockDefinition> GetFeatureUnlocks()
+        {
+            var configured = featureUnlocks
+                .Where(candidate => candidate != null && candidate.RequiredLevel > 1)
+                .OrderBy(candidate => candidate.RequiredLevel)
+                .ToArray();
+            return configured.Length > 0
+                ? configured
+                : FeatureUnlockDefinition.CreateRuntimeDefaults();
+        }
+
+        public IReadOnlyList<ResearchNodeDefinition> GetResearchNodes()
+        {
+            var configured = researchNodes
+                .Where(candidate => candidate != null && !string.IsNullOrWhiteSpace(candidate.NodeId))
+                .ToArray();
+            return configured.Length > 0 ? configured : RuntimeDefaultResearchNodes;
+        }
+
+        public ResearchNodeDefinition GetResearchNode(string nodeId)
+        {
+            return GetResearchNodes().FirstOrDefault(candidate => candidate.NodeId == nodeId);
+        }
+
         public static MiningContentCatalog CreateRuntimeDefault()
         {
             var catalog = CreateInstance<MiningContentCatalog>();
@@ -43,6 +124,8 @@ namespace PocketForge.Content
                 UpgradeDefinition.CreateRuntimeDefault(UpgradeType.Drill, 25, 0.5f),
                 UpgradeDefinition.CreateRuntimeDefault(UpgradeType.Robot, 50, 0.1f)
             };
+            catalog.chapters = new[] { ChapterDefinition.CreateRuntimeDefault() };
+            catalog.researchNodes = ResearchNodeDefinition.CreateRuntimeDefaults();
             return catalog;
         }
 

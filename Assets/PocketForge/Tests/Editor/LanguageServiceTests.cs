@@ -59,5 +59,65 @@ namespace PocketForge.Tests.Editor
             LanguageService.SetLanguage(language);
             Assert.AreEqual(expected, LanguageService.Get("music"));
         }
+
+        [TestCase(SupportedLanguage.Korean, "\uC2DC\uAC04 \uCD08\uACFC! \uC774\uC804 \uC2A4\uD14C\uC774\uC9C0\uB97C \uC790\uB3D9 \uCC44\uAD74\uD569\uB2C8\uB2E4")]
+        [TestCase(SupportedLanguage.English, "Time up! Auto-mining the previous stage")]
+        [TestCase(SupportedLanguage.Japanese, "\u30BF\u30A4\u30E0\u30A2\u30C3\u30D7! \u524D\u306E\u30B9\u30C6\u30FC\u30B8\u3092\u81EA\u52D5\u63A1\u6398\u4E2D")]
+        [TestCase(SupportedLanguage.ChineseSimplified, "\u65F6\u95F4\u5230! \u6B63\u5728\u81EA\u52A8\u5F00\u91C7\u4E0A\u4E00\u5173")]
+        public void SelectedLanguage_ResolvesBossFarmFeedback(SupportedLanguage language, string expected)
+        {
+            LanguageService.SetLanguage(language);
+            Assert.AreEqual(expected, LanguageService.Get("boss_time_up"));
+        }
+
+        [TestCase(SupportedLanguage.Korean, "\uB3C4\uC804")]
+        [TestCase(SupportedLanguage.English, "Challenge")]
+        [TestCase(SupportedLanguage.Japanese, "\u6311\u6226")]
+        [TestCase(SupportedLanguage.ChineseSimplified, "\u6311\u6218")]
+        public void SelectedLanguage_ResolvesBossChallengeAction(SupportedLanguage language, string expected)
+        {
+            LanguageService.SetLanguage(language);
+            Assert.AreEqual(expected, LanguageService.Get("challenge"));
+        }
+
+        [TestCase(SupportedLanguage.Korean, "\uAD11\uC11D")]
+        [TestCase(SupportedLanguage.English, "ore")]
+        [TestCase(SupportedLanguage.Japanese, "\u9271\u77F3")]
+        [TestCase(SupportedLanguage.ChineseSimplified, "\u77FF\u77F3")]
+        public void SelectedLanguage_ResolvesOfflineProgressSummary(
+            SupportedLanguage language,
+            string expectedOreLabel)
+        {
+            LanguageService.SetLanguage(language);
+            var summary = string.Format(
+                LanguageService.Get("offline_summary"),
+                string.Format(LanguageService.Get("offline_duration_hm"), 1, 2),
+                3,
+                4,
+                5);
+
+            Assert.That(summary, Does.Contain(expectedOreLabel));
+            Assert.That(summary, Does.Contain("3"));
+            Assert.That(summary, Does.Contain("+4 C"));
+            Assert.That(summary, Does.Contain("+5 XP"));
+            Assert.That(summary, Does.Contain("\n"));
+        }
+
+        [TestCase(SupportedLanguage.Korean)]
+        [TestCase(SupportedLanguage.English)]
+        [TestCase(SupportedLanguage.Japanese)]
+        [TestCase(SupportedLanguage.ChineseSimplified)]
+        public void SelectedLanguage_ResolvesMinerProgressionLabels(SupportedLanguage language)
+        {
+            LanguageService.SetLanguage(language);
+
+            Assert.That(LanguageService.Get("miner_rank_short"), Does.Not.Contain("miner_rank_short"));
+            Assert.That(LanguageService.Get("miner_level_up"), Does.Not.Contain("miner_level_up"));
+            Assert.That(LanguageService.Get("feature_research"), Does.Not.Contain("feature_research"));
+            Assert.That(LanguageService.Get("next_unlock"), Does.Not.Contain("next_unlock"));
+            Assert.That(LanguageService.Get("blueprint_cores"), Does.Not.Contain("blueprint_cores"));
+            Assert.That(LanguageService.Get("research_core_output"), Does.Not.Contain("research_core_output"));
+            Assert.That(LanguageService.Get("research_complete"), Does.Not.Contain("research_complete"));
+        }
     }
 }

@@ -21,5 +21,94 @@ MonoBehaviour:
   - {fileID: 11400000, guid: e608e0f596f70c444a324418b8ded2d5, type: 2}
   - {fileID: 11400000, guid: 20fecb499bd34694ea70f1f5a8c045d6, type: 2}
   - {fileID: 11400000, guid: 7aa6de0641faebf4fa7cc27dacdcfb2a, type: 2}
+  chapters:
+  - contentId: crystal_cavern
+    chapterNumber: 1
+    startStage: 1
+    stagesPerChapter: 10
+    firstClearCredits: 100
+    firstClearGems: 5
+    firstClearBlueprintCores: 3
+    repeatClearBlueprintCores: 1
+    bossDurabilityMultiplier: 3
+    bossRewardMultiplier: 5
+    bossVisualScaleMultiplier: 1.2
+    bossTimeLimitSeconds: 30
+  - contentId: magma_depths
+    chapterNumber: 2
+    startStage: 11
+    stagesPerChapter: 10
+    firstClearCredits: 250
+    firstClearGems: 10
+    firstClearBlueprintCores: 6
+    repeatClearBlueprintCores: 2
+    bossDurabilityMultiplier: 3.5
+    bossRewardMultiplier: 6
+    bossVisualScaleMultiplier: 1.25
+    bossTimeLimitSeconds: 30
+  - contentId: ancient_city
+    chapterNumber: 3
+    startStage: 21
+    stagesPerChapter: 10
+    firstClearCredits: 500
+    firstClearGems: 15
+    firstClearBlueprintCores: 9
+    repeatClearBlueprintCores: 3
+    bossDurabilityMultiplier: 4
+    bossRewardMultiplier: 7
+    bossVisualScaleMultiplier: 1.3
+    bossTimeLimitSeconds: 30
+  researchNodes:
+  - nodeId: core_output
+    nameLocalizationKey: research_core_output
+    prerequisiteNodeId:
+    prerequisiteLevel: 0
+    maxLevel: 5
+    baseCost: 1
+    costStep: 1
+    powerBonusPerLevel: 0.05
+  - nodeId: precision_tools
+    nameLocalizationKey: research_precision_tools
+    prerequisiteNodeId: core_output
+    prerequisiteLevel: 2
+    maxLevel: 4
+    baseCost: 2
+    costStep: 2
+    powerBonusPerLevel: 0.07
+  - nodeId: deep_automation
+    nameLocalizationKey: research_deep_automation
+    prerequisiteNodeId: precision_tools
+    prerequisiteLevel: 2
+    maxLevel: 3
+    baseCost: 4
+    costStep: 4
+    powerBonusPerLevel: 0.1
   maxOfflineRewardSeconds: 14400
   rewardedAdRewardMultiplier: 5
+  baseAutoPowerPerSecond: 0.5
+  baseTapDamage: 1
+  baseTapAssistSeconds: 0.05
+  tapAssistSecondsPerPickaxeLevel: 0.005
+  maxTapAssistSeconds: 0.1
+  referenceTapsPerSecond: 5
+  baseExperienceToLevel: 20
+  experienceGrowthPerLevel: 15
+  normalOreExperiencePerChapter: 1
+  bossExperiencePerChapter: 10
+  minerRankPowerBonusPerLevel: 0.02
+  levelRewardCreditsPerLevel: 25
+  milestoneLevelInterval: 5
+  milestoneRewardGems: 1
+  featureUnlocks:
+  - feature: 0
+    requiredLevel: 2
+  - feature: 1
+    requiredLevel: 3
+  - feature: 2
+    requiredLevel: 4
+  - feature: 3
+    requiredLevel: 5
+  - feature: 4
+    requiredLevel: 6
+  - feature: 5
+    requiredLevel: 7

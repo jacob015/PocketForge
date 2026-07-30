@@ -9,7 +9,7 @@ namespace PocketForge.Economy
 
     public static class MiningBalance
     {
-        public static int GetUpgradeCost(UpgradeType type, int currentLevel)
+        public static long GetUpgradeCost(UpgradeType type, int currentLevel)
         {
             var baseCost = type switch
             {
@@ -19,7 +19,10 @@ namespace PocketForge.Economy
                 _ => 10
             };
 
-            return UnityEngine.Mathf.CeilToInt(baseCost * UnityEngine.Mathf.Pow(1.65f, currentLevel));
+            var value = baseCost * System.Math.Pow(1.65d, System.Math.Max(0, currentLevel));
+            return value >= long.MaxValue
+                ? long.MaxValue
+                : System.Math.Max(1L, (long)System.Math.Ceiling(value));
         }
 
         public static float GetTapPower(int pickaxeLevel) => 1f + pickaxeLevel;
@@ -30,10 +33,13 @@ namespace PocketForge.Economy
 
         public static float GetOreDurability(int stage) => 10f + (stage - 1) * 5f;
 
-        public static int GetOreReward(int stage, bool isRare, int robotLevel)
+        public static long GetOreReward(int stage, bool isRare, int robotLevel)
         {
-            var baseReward = stage * (isRare ? 5 : 2);
-            return UnityEngine.Mathf.CeilToInt(baseReward * GetRewardMultiplier(robotLevel));
+            var baseReward = (long)stage * (isRare ? 5 : 2);
+            var value = baseReward * (double)GetRewardMultiplier(robotLevel);
+            return value >= long.MaxValue
+                ? long.MaxValue
+                : System.Math.Max(1L, (long)System.Math.Ceiling(value));
         }
     }
 }

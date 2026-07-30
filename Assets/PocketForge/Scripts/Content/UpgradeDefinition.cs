@@ -14,7 +14,16 @@ namespace PocketForge.Content
         public UpgradeType Type => type;
         public float EffectPerLevel => effectPerLevel;
 
-        public int GetCost(int currentLevel) => Mathf.CeilToInt(baseCost * Mathf.Pow(costGrowth, currentLevel));
+        public long GetCost(int currentLevel)
+        {
+            var value = baseCost * System.Math.Pow(costGrowth, System.Math.Max(0, currentLevel));
+            if (double.IsInfinity(value) || value >= long.MaxValue)
+            {
+                return long.MaxValue;
+            }
+
+            return System.Math.Max(1L, (long)System.Math.Ceiling(value));
+        }
 
         public static UpgradeDefinition CreateRuntimeDefault(UpgradeType type, int baseCost, float effectPerLevel)
         {

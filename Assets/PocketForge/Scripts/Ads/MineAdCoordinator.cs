@@ -1,6 +1,7 @@
 using System;
 using PocketForge.Localization;
 using PocketForge.Mining;
+using PocketForge.Presentation;
 using UnityEngine;
 
 namespace PocketForge.Ads
@@ -82,7 +83,7 @@ namespace PocketForge.Ads
             var result = gameService.GrantRewardedAdCredits(gameState);
             view.Render(gameState, gameService);
             view.ShowFeedback(
-                $"{LanguageService.Get("ad_rewarded").ToUpper()}  +{result.RewardCredits:N0} C",
+                $"{LanguageService.Get("ad_rewarded").ToUpper()}  +{CompactNumberFormatter.Format(result.RewardCredits)} C",
                 new Color(0.45f, 0.95f, 0.7f));
             SaveRequested?.Invoke();
         }

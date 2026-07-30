@@ -31,6 +31,7 @@ namespace PocketForge.Mining
         [SerializeField] private MiningContentCatalog contentCatalog;
 
         private MiningGameState gameState;
+        private MiningGameService gameService;
         private MineHudPresenter hudPresenter;
         private MineAdCoordinator adCoordinator;
         private MineIapCoordinator iapCoordinator;
@@ -44,6 +45,7 @@ namespace PocketForge.Mining
         private Mesh backdropMesh;
         private Transform backdropVisual;
         private float backdropAspect = -1f;
+        private bool wasApplicationPaused;
 
         // Keep CreatePrimitive dependencies in stripped player builds.
         private MeshFilter PrimitiveMeshFilterReference { get; set; }
@@ -58,7 +60,7 @@ namespace PocketForge.Mining
             GameSettingsService.Initialize();
             audioController = GameAudioController.Create(backgroundMusic, uiClickSound, upgradeSuccessSound, rewardSound);
             var catalog = contentCatalog != null ? contentCatalog : MiningContentCatalog.CreateRuntimeDefault();
-            var gameService = new MiningGameService(catalog);
+            gameService = new MiningGameService(catalog);
             var saveData = SaveService.Load();
             gameState = gameService.CreateInitialState(saveData, UnityEngine.Random.value);
             CreateQuarryBackdrop();
@@ -79,13 +81,15 @@ namespace PocketForge.Mining
             iapCoordinator.DisplayChanged += view.SetIapState;
             view.BindIap(iapCoordinator.PurchaseRemoveAds, iapCoordinator.RestorePurchases);
 
+            var offlineProgress = gameService.ClaimOfflineProgress(
+                gameState,
+                DateTimeOffset.UtcNow.ToUnixTimeSeconds());
             CreateOreVisual();
             hudPresenter.Render();
+            hudPresenter.ShowOfflineReward(offlineProgress);
             adCoordinator.Initialize();
             iapCoordinator.Initialize();
-            var offlineReward = gameService.ApplyOfflineReward(gameState, DateTimeOffset.UtcNow.ToUnixTimeSeconds() - saveData.lastSavedUnixSeconds);
-            hudPresenter.ShowOfflineReward(offlineReward);
-            if (offlineReward > 0)
+            if (offlineProgress.CheckpointAdvanced)
             {
                 SaveGame();
             }
@@ -93,6 +97,11 @@ namespace PocketForge.Mining
 
         private void Update()
         {
+            if (hudPresenter == null || adCoordinator == null)
+            {
+                return;
+            }
+
             hudPresenter.Tick(Time.deltaTime);
             adCoordinator.Tick(Time.unscaledDeltaTime);
             AnimateOreVisual();
@@ -103,8 +112,16 @@ namespace PocketForge.Mining
         {
             if (paused)
             {
+                wasApplicationPaused = true;
                 GameSettingsService.Flush();
                 SaveGame();
+                return;
+            }
+
+            if (wasApplicationPaused)
+            {
+                wasApplicationPaused = false;
+                ApplyOfflineProgress();
             }
         }
 
@@ -152,6 +169,26 @@ namespace PocketForge.Mining
             }
         }
 
+        private void ApplyOfflineProgress()
+        {
+            if (gameService == null || gameState == null || hudPresenter == null)
+            {
+                return;
+            }
+
+            var result = gameService.ClaimOfflineProgress(
+                gameState,
+                DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+            if (!result.CheckpointAdvanced)
+            {
+                return;
+            }
+
+            hudPresenter.Render();
+            hudPresenter.ShowOfflineReward(result);
+            SaveGame();
+        }
+
         private bool SaveEntitlement()
         {
             return gameState != null && SaveService.Save(gameState.Player);
@@ -170,7 +207,7 @@ namespace PocketForge.Mining
             if (usesGeneratedOreModel)
             {
                 ore.transform.rotation = Quaternion.Euler(0f, 25f, 0f);
-                oreBaseScale = Vector3.one * ResolveOreScale() * orePresentationScale;
+                oreBaseScale = ResolvePresentationScale();
                 ore.transform.localScale = oreBaseScale;
             }
             else
@@ -192,6 +229,8 @@ namespace PocketForge.Mining
                     billboard.GetComponent<Renderer>().sharedMaterial = oreBillboardMaterial;
                     Destroy(billboard.GetComponent<Collider>());
                 }
+
+                oreBaseScale = Vector3.one * ResolveBossVisualScale();
             }
 
             oreVisual = ore.transform;
@@ -302,8 +341,11 @@ namespace PocketForge.Mining
 
             if (usesGeneratedOreModel)
             {
+                oreBaseScale = ResolvePresentationScale();
                 return;
             }
+
+            oreBaseScale = Vector3.one * ResolveBossVisualScale();
 
             var baseColor = gameState.Ore.Definition.GetVisualColor(gameState.Ore.IsRare);
             foreach (var renderer in oreRenderers)
@@ -336,6 +378,18 @@ namespace PocketForge.Mining
             return gameState?.Ore?.Definition?.VisualPrefab != null
                 ? gameState.Ore.Definition.VisualScale
                 : generatedOreScale;
+        }
+
+        private Vector3 ResolvePresentationScale()
+        {
+            return Vector3.one * ResolveOreScale() * orePresentationScale * ResolveBossVisualScale();
+        }
+
+        private float ResolveBossVisualScale()
+        {
+            return gameState?.Ore?.IsBoss == true
+                ? gameState.Ore.Chapter.BossVisualScaleMultiplier
+                : 1f;
         }
     }
 }

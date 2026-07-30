@@ -6,6 +6,7 @@ using PocketForge.Economy;
 using PocketForge.Iap;
 using PocketForge.Localization;
 using PocketForge.Presentation;
+using PocketForge.Progression;
 using PocketForge.Settings;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -16,8 +17,35 @@ namespace PocketForge.Mining
 {
     public sealed class MineHudView : MonoBehaviour
     {
+        private const float OreProgressWidth = 572f;
+        private const float MinerExperienceProgressWidth = 210f;
+
+        private sealed class ChapterRowView
+        {
+            public int ChapterNumber;
+            public Image Surface;
+            public Text Title;
+            public Text StageRange;
+            public Text Status;
+            public Button ActionButton;
+        }
+
+        private sealed class ResearchRowView
+        {
+            public string NodeId;
+            public Image Surface;
+            public Text Name;
+            public Text Level;
+            public Text Bonus;
+            public Button PurchaseButton;
+        }
+
         private Text creditsText;
         private Text depthText;
+        private Text minerRankText;
+        private Text minerExperienceText;
+        private Image minerExperienceProgress;
+        private Button minerRankButton;
         private Image oreProgress;
         private Button mineButton;
         private Button pickaxeButton;
@@ -27,25 +55,22 @@ namespace PocketForge.Mining
         private RawImage drillIcon;
         private RawImage robotIcon;
         private RawImage mineIcon;
-        private Image headerCoin;
-        private Image headerCounterSlot;
         private Image topSurface;
         private Image upgradeSurface;
         private Image actionSurface;
         private Image progressBackground;
         private Image progressTrack;
+        private Text chapterStatusText;
+        private Button chapterStatusButton;
         private Text offlineRewardText;
         private Image offlineRewardSurface;
         private Button settingsButton;
-        private Button creditsRewardButton;
         private Button rewardedAdButton;
         private Image creditsCurrencyIcon;
         private Image depthCurrencyIcon;
         private Image settingsIcon;
-        private Image creditsPlusIcon;
         private Image rewardedVideoIcon;
         private Image rewardedPlusIcon;
-        private Image progressShine;
         private GameObject settingsPanel;
         private Text settingsTitle;
         private Text audioLabel;
@@ -75,6 +100,41 @@ namespace PocketForge.Mining
         private Image removeAdsIcon;
         private Image restorePurchasesIcon;
         private Image closeSettingsIcon;
+        private GameObject chapterCompletePanel;
+        private Image chapterCompleteCard;
+        private Image chapterCompleteTitleSurface;
+        private Image chapterCompleteCreditsRow;
+        private Image chapterCompleteGemsRow;
+        private Image chapterCompleteCreditsIcon;
+        private Image chapterCompleteGemsIcon;
+        private Text chapterCompleteTitle;
+        private Text chapterCompleteRewardLabel;
+        private Text chapterCompleteCreditsValue;
+        private Text chapterCompleteGemsValue;
+        private Button chapterCompleteContinueButton;
+        private GameObject chapterSelectionPanel;
+        private Image chapterSelectionCard;
+        private Image chapterSelectionTitleSurface;
+        private Text chapterSelectionTitle;
+        private RectTransform chapterSelectionRowsRoot;
+        private Button closeChapterSelectionButton;
+        private readonly List<ChapterRowView> chapterRows = new();
+        private IReadOnlyList<ChapterSelectionOption> chapterSelectionOptions = Array.Empty<ChapterSelectionOption>();
+        private Action<int> chapterSelectionAction;
+        private GameObject researchPanel;
+        private Image researchCard;
+        private Image researchTitleSurface;
+        private Text researchTitle;
+        private Text researchSummary;
+        private Text researchCores;
+        private RectTransform researchRowsRoot;
+        private Button closeResearchButton;
+        private readonly List<ResearchRowView> researchRows = new();
+        private Action<string> researchPurchaseAction;
+        private int completedChapterNumber;
+        private long completedChapterCredits;
+        private long completedChapterGems;
+        private long completedChapterBlueprintCores;
         private readonly Dictionary<SupportedLanguage, Button> languageButtons = new();
         private readonly Dictionary<SupportedLanguage, Image> languageIcons = new();
         private readonly List<Image> languageButtonSurfaces = new();
@@ -96,7 +156,7 @@ namespace PocketForge.Mining
         private Rect appliedSafeArea = new(-1f, -1f, -1f, -1f);
         private Vector2Int appliedScreenSize = new(-1, -1);
         private RewardedAdState rewardedAdState = RewardedAdState.Initializing;
-        private int rewardedAdCredits;
+        private long rewardedAdCredits;
         private IapState iapState = IapState.Initializing;
         private string removeAdsPrice = string.Empty;
         private bool adsRemoved;
@@ -133,18 +193,28 @@ namespace PocketForge.Mining
             return view;
         }
 
-        public void Bind(Action mineAction, Action<UpgradeType> upgradeAction)
+        public void Bind(
+            Action mineAction,
+            Action<UpgradeType> upgradeAction,
+            Action openChapterSelectionAction,
+            Action<int> selectChapterAction)
         {
             mineButton.onClick.AddListener(() => mineAction());
             pickaxeButton.onClick.AddListener(() => upgradeAction(UpgradeType.Pickaxe));
             drillButton.onClick.AddListener(() => upgradeAction(UpgradeType.Drill));
             robotButton.onClick.AddListener(() => upgradeAction(UpgradeType.Robot));
+            chapterStatusButton.onClick.AddListener(() => openChapterSelectionAction());
+            chapterSelectionAction = selectChapterAction;
         }
 
         public void BindRewardedAd(Action rewardedAdAction)
         {
             rewardedAdButton.onClick.AddListener(() => rewardedAdAction());
-            creditsRewardButton.onClick.AddListener(() => rewardedAdAction());
+        }
+
+        public void BindResearch(Action<string> purchaseAction)
+        {
+            researchPurchaseAction = purchaseAction;
         }
 
         public void BindIap(Action purchaseRemoveAdsAction, Action restorePurchasesAction)
@@ -193,23 +263,102 @@ namespace PocketForge.Mining
             lastService = service;
             var player = state.Player;
             var ore = state.Ore;
-            creditsText.text = $"<color=#FFFFFF>{player.credits:N0}</color>";
-            depthText.text = $"<color=#FFFFFF>{player.stage:N0}</color>";
-            oreProgress.fillAmount = Mathf.Clamp01(ore.Health / ore.Durability);
-            oreProgress.color = ore.IsRare ? new Color(0.52f, 0.83f, 1f) : new Color(0.16f, 0.84f, 1f);
+            creditsText.text = $"<color=#FFFFFF>{CompactNumberFormatter.Format(player.credits)}</color>";
+            depthText.text = $"<color=#FFFFFF>{player.stage}</color>";
+            var requiredMinerExperience = service.GetRequiredMinerExperience(player.minerLevel);
+            var minerExperienceRatio = Mathf.Clamp01(
+                player.minerExperience / (float)Mathf.Max(1, requiredMinerExperience));
+            minerRankText.text = string.Format(
+                LanguageService.Get("miner_rank_short"),
+                player.minerLevel);
+            minerExperienceText.text =
+                $"{CompactNumberFormatter.Format(player.minerExperience)} / {CompactNumberFormatter.Format(requiredMinerExperience)} XP";
+            minerExperienceProgress.rectTransform.SetSizeWithCurrentAnchors(
+                RectTransform.Axis.Horizontal,
+                MinerExperienceProgressWidth * minerExperienceRatio);
+            var oreProgressRatio = Mathf.Clamp01(ore.Health / ore.Durability);
+            oreProgress.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, OreProgressWidth * oreProgressRatio);
+            oreProgress.color = oreProgress.sprite != null
+                ? Color.white
+                : ore.IsRare ? new Color(0.52f, 0.83f, 1f) : new Color(0.16f, 0.84f, 1f);
+            var chapterStage = ore.Chapter.GetStageNumber(player.stage);
+            var chapterPrefix = $"{LanguageService.Get("chapter").ToUpper()} {ore.Chapter.ChapterNumber}";
+            var power = service.GetMiningPower(state);
+            var requiredPower = service.GetBossRecommendedPower(state);
+            var isBossChallengeReady = service.IsBossChallengeReady(state);
+            var powerStatus = requiredPower > 0f
+                ? $"{CompactNumberFormatter.Format(power.AutoPowerPerSecond)}/{CompactNumberFormatter.Format(requiredPower)}"
+                : $"{CompactNumberFormatter.Format(power.AutoPowerPerSecond)}/s";
+            chapterStatusText.text = (ore.IsBoss
+                ? $"{chapterPrefix}  \u2022  {LanguageService.Get("boss").ToUpper()} {FormatTime(ore.BossTimeRemaining)}  \u2022  {powerStatus}"
+                : isBossChallengeReady
+                    ? $"{chapterPrefix}  \u2022  {LanguageService.Get("boss_ready").ToUpper()}  \u2022  {powerStatus}"
+                    : $"{chapterPrefix}  \u2022  {chapterStage:00}/{ore.Chapter.StagesPerChapter:00}  \u2022  {powerStatus}") + "  \u25BE";
+            chapterStatusText.color = ore.IsBoss
+                ? new Color(1f, 0.55f, 0.24f)
+                : Color.white;
             SetUpgradeText(pickaxeButton, player.pickaxeLevel, service.GetUpgradeCost(UpgradeType.Pickaxe, player.pickaxeLevel));
             SetUpgradeText(drillButton, player.drillLevel, service.GetUpgradeCost(UpgradeType.Drill, player.drillLevel));
             SetUpgradeText(robotButton, player.robotLevel, service.GetUpgradeCost(UpgradeType.Robot, player.robotLevel));
             UpdatePips(pickaxePips, player.pickaxeLevel, new Color(0.28f, 0.72f, 1f));
             UpdatePips(drillPips, player.drillLevel, new Color(0.78f, 0.38f, 1f));
             UpdatePips(robotPips, player.robotLevel, new Color(1f, 0.7f, 0.16f));
+            RenderResearch();
         }
 
-        public void ShowOfflineReward(int credits)
+        public void ShowOfflineReward(OfflineProgressResult result)
         {
             offlineRewardSurface.gameObject.SetActive(true);
             offlineRewardText.gameObject.SetActive(true);
-            offlineRewardText.text = $"{LanguageService.Get("reward").ToUpper()}  +{credits:N0} C";
+            var duration = FormatOfflineDuration(result.RewardedSeconds);
+            offlineRewardText.text = string.Format(
+                LanguageService.Get("offline_summary"),
+                duration,
+                CompactNumberFormatter.Format(result.ProcessedOres),
+                CompactNumberFormatter.Format(result.RewardCredits),
+                CompactNumberFormatter.Format(result.Progression.ExperienceGained));
+        }
+
+        private static string FormatOfflineDuration(long totalSeconds)
+        {
+            var safeSeconds = Math.Max(0L, totalSeconds);
+            var hours = safeSeconds / 3600L;
+            var minutes = safeSeconds % 3600L / 60L;
+            if (hours > 0)
+            {
+                return string.Format(LanguageService.Get("offline_duration_hm"), hours, minutes);
+            }
+
+            if (minutes > 0)
+            {
+                return string.Format(LanguageService.Get("offline_duration_m"), minutes);
+            }
+
+            return string.Format(LanguageService.Get("offline_duration_s"), safeSeconds);
+        }
+
+        public void ShowChapterComplete(
+            int chapterNumber,
+            long credits,
+            long gems,
+            long blueprintCores = 0)
+        {
+            completedChapterNumber = Mathf.Max(1, chapterNumber);
+            completedChapterCredits = Math.Max(0L, credits);
+            completedChapterGems = Math.Max(0L, gems);
+            completedChapterBlueprintCores = Math.Max(0L, blueprintCores);
+            RenderChapterComplete();
+            chapterCompletePanel.SetActive(true);
+            chapterCompletePanel.transform.SetAsLastSibling();
+        }
+
+        public void ShowChapterSelection(IReadOnlyList<ChapterSelectionOption> options)
+        {
+            chapterSelectionOptions = options ?? Array.Empty<ChapterSelectionOption>();
+            EnsureChapterRows(chapterSelectionOptions.Count);
+            RenderChapterSelection();
+            chapterSelectionPanel.SetActive(true);
+            chapterSelectionPanel.transform.SetAsLastSibling();
         }
 
         public void ShowFeedback(string message, Color color)
@@ -218,6 +367,42 @@ namespace PocketForge.Mining
             feedbackText.color = color;
             feedbackSurface.gameObject.SetActive(false);
             feedbackPopup.Show();
+        }
+
+        private void ShowMinerRankSummary()
+        {
+            if (lastState == null || lastService == null)
+            {
+                return;
+            }
+
+            var player = lastState.Player;
+            if (lastService.IsFeatureUnlocked(player.minerLevel, ProgressionFeature.Research))
+            {
+                RenderResearch();
+                researchPanel.SetActive(true);
+                researchPanel.transform.SetAsLastSibling();
+                return;
+            }
+
+            var powerBonus = (lastService.GetMinerRankPowerMultiplier(player.minerLevel) - 1f) * 100f;
+            var message = string.Format(
+                LanguageService.Get("miner_rank_summary"),
+                player.minerLevel,
+                powerBonus);
+            if (lastService.TryGetNextFeatureUnlock(player.minerLevel, out var nextUnlock))
+            {
+                message += "\n" + string.Format(
+                    LanguageService.Get("next_unlock"),
+                    LanguageService.Get(nextUnlock.Feature.LocalizationKey()),
+                    nextUnlock.RequiredLevel);
+            }
+            else
+            {
+                message += $"\n{LanguageService.Get("all_features_unlocked")}";
+            }
+
+            ShowFeedback(message, new Color(0.45f, 0.9f, 1f));
         }
 
         public void PlayUpgradeSuccess(UpgradeType type)
@@ -239,7 +424,7 @@ namespace PocketForge.Mining
             positiveFeedback?.Play(button.GetComponent<RectTransform>(), accent);
         }
 
-        public void SetRewardedAdState(RewardedAdState state, int rewardCredits)
+        public void SetRewardedAdState(RewardedAdState state, long rewardCredits)
         {
             rewardedAdState = state;
             rewardedAdCredits = rewardCredits;
@@ -266,6 +451,13 @@ namespace PocketForge.Mining
             RenderSettings();
             RenderRewardedAdState();
             RenderIapState();
+            RenderChapterComplete();
+            RenderResearch();
+            if (chapterSelectionPanel != null && chapterSelectionPanel.activeSelf && lastState != null && lastService != null)
+            {
+                chapterSelectionOptions = lastService.GetChapterSelectionOptions(lastState);
+            }
+            RenderChapterSelection();
         }
 
         private void Build()
@@ -282,12 +474,16 @@ namespace PocketForge.Mining
             upgradeSurface.raycastTarget = false;
             actionSurface.raycastTarget = false;
 
-            headerCoin = CreatePanel("HeaderCoin", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-405f, -123f), new Vector2(80f, 88f), Color.white);
-            headerCoin.GetComponent<Shadow>().enabled = false;
-            headerCounterSlot = CreatePanel("HeaderCounterSlot", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-286f, -123f), new Vector2(132f, 62f), new Color(0.025f, 0.07f, 0.16f, 0.96f));
-            creditsRewardButton = CreateButton("CreditsRewardButton", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-181f, -123f), new Vector2(66f, 66f), new Color(0.42f, 0.84f, 0.14f));
-            creditsRewardButton.GetComponentInChildren<Text>().gameObject.SetActive(false);
-            creditsPlusIcon = CreateSimpleImage("PlusIcon", creditsRewardButton.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-4f, -4f), Color.white);
+            minerRankButton = CreateButton("MinerRankButton", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-321f, -123f), new Vector2(260f, 94f), new Color(0.06f, 0.16f, 0.3f, 0.98f));
+            minerRankButton.GetComponentInChildren<Text>().gameObject.SetActive(false);
+            minerRankButton.onClick.AddListener(ShowMinerRankSummary);
+            minerRankText = CreateText("MinerRank", minerRankButton.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 21f), new Vector2(226f, 38f), 26, TextAnchor.MiddleCenter);
+            minerRankText.font = UiFontProvider.GetCasual();
+            minerExperienceText = CreateText("MinerExperience", minerRankButton.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -9f), new Vector2(226f, 26f), 17, TextAnchor.MiddleCenter);
+            var minerExperienceTrack = CreateSimpleImage("MinerExperienceTrack", minerRankButton.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, -34f), new Vector2(220f, 14f), new Color(0.01f, 0.04f, 0.1f, 0.95f));
+            minerExperienceProgress = CreateSimpleImage("MinerExperienceProgress", minerExperienceTrack.transform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(5f, 0f), new Vector2(MinerExperienceProgressWidth, 8f), new Color(0.12f, 0.84f, 1f));
+            minerExperienceProgress.rectTransform.pivot = new Vector2(0f, 0.5f);
+            minerExperienceProgress.raycastTarget = false;
             creditsCurrencyIcon = CreateSimpleImage("CreditsCurrencyIcon", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(-52f, -123f), new Vector2(52f, 52f), Color.white);
             creditsText = CreateText("Credits", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(31f, -117f), new Vector2(104f, 78f), 38, TextAnchor.MiddleLeft);
             depthCurrencyIcon = CreateSimpleImage("DepthCurrencyIcon", hudRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(151f, -123f), new Vector2(54f, 54f), Color.white);
@@ -332,14 +528,21 @@ namespace PocketForge.Mining
             feedbackSurface.gameObject.SetActive(false);
             feedbackText.gameObject.SetActive(false);
 
-            progressBackground = CreatePanel("ProgressBackground", hudRoot, new Vector2(0.5f, 0.405f), new Vector2(0.5f, 0.405f), new Vector2(0f, 22f), new Vector2(638f, 64f), new Color(0.05f, 0.1f, 0.24f, 0.98f));
-            progressTrack = CreateSimpleImage("ProgressTrack", progressBackground.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(608f, 32f), new Color(0.015f, 0.04f, 0.11f, 1f));
-            oreProgress = CreatePanel("ProgressFill", progressTrack.transform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(304f, 0f), new Vector2(600f, 24f), new Color(0.16f, 0.84f, 1f));
+            progressBackground = CreatePanel("ProgressBackground", hudRoot, new Vector2(0.5f, 0.405f), new Vector2(0.5f, 0.405f), new Vector2(0f, 29f), new Vector2(638f, 78f), new Color(0.05f, 0.1f, 0.24f, 0.98f));
+            chapterStatusText = CreateText("ChapterStatus", progressBackground.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 66f), new Vector2(600f, 52f), 30, TextAnchor.MiddleCenter);
+            chapterStatusText.font = UiFontProvider.GetCasual();
+            chapterStatusText.resizeTextForBestFit = true;
+            chapterStatusText.resizeTextMinSize = 21;
+            chapterStatusText.resizeTextMaxSize = 30;
+            chapterStatusButton = chapterStatusText.gameObject.AddComponent<Button>();
+            chapterStatusButton.targetGraphic = chapterStatusText;
+            chapterStatusButton.transition = Selectable.Transition.None;
+            progressTrack = CreateSimpleImage("ProgressTrack", progressBackground.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(604f, 50f), new Color(0.015f, 0.04f, 0.11f, 1f));
+            oreProgress = CreatePanel("ProgressFill", progressTrack.transform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(16f, 0f), new Vector2(OreProgressWidth, 36f), Color.white);
             oreProgress.GetComponent<Shadow>().enabled = false;
-            oreProgress.type = Image.Type.Filled;
-            oreProgress.fillMethod = Image.FillMethod.Horizontal;
-            oreProgress.fillOrigin = (int)Image.OriginHorizontal.Left;
-            progressShine = CreateSimpleImage("ProgressShine", oreProgress.transform, new Vector2(0f, 0.55f), new Vector2(1f, 1f), Vector2.zero, Vector2.zero, new Color(1f, 1f, 1f, 0.22f));
+            oreProgress.rectTransform.pivot = new Vector2(0f, 0.5f);
+            oreProgress.type = Image.Type.Simple;
+            oreProgress.raycastTarget = false;
 
             mineButton = CreateButton("MineButton", hudRoot, new Vector2(0.5f, 0.33f), new Vector2(0.5f, 0.33f), new Vector2(0f, 14f), new Vector2(504f, 232f), new Color(1f, 0.48f, 0.12f));
             mineButton.GetComponentInChildren<Text>().gameObject.SetActive(false);
@@ -359,6 +562,9 @@ namespace PocketForge.Mining
             positiveFeedback = safeAreaRoot.gameObject.AddComponent<PositiveFeedbackBurst>();
             positiveFeedback.Initialize(safeAreaRoot);
             CreateSettingsPanel();
+            CreateChapterCompletePanel();
+            CreateChapterSelectionPanel();
+            CreateResearchPanel();
             RenderSettings();
         }
 
@@ -375,8 +581,6 @@ namespace PocketForge.Mining
             actionSurface.color = Color.clear;
             ApplySlicedSprite(progressBackground, panelSprite, new Color(0.72f, 0.82f, 1f, 0.96f));
             ApplySlicedSprite(offlineRewardSurface, panelSprite, new Color(0.55f, 1f, 0.72f, 0.98f));
-            headerCoin.sprite = coinSprite;
-            headerCoin.type = Image.Type.Simple;
             creditsCurrencyIcon.sprite = coinSprite;
             creditsCurrencyIcon.type = Image.Type.Simple;
             ApplySlicedSprite(mineButton.image, buttonSprite, Color.white);
@@ -390,9 +594,7 @@ namespace PocketForge.Mining
             robotButton.GetComponent<Outline>().enabled = false;
             ApplySlicedSprite(settingsButton.image, cardSprite, new Color(0.74f, 0.84f, 1f));
             ApplySlicedSprite(rewardedAdButton.image, panelSprite, Color.white);
-            ApplySlicedSprite(creditsRewardButton.image, buttonSprite, new Color(0.72f, 1f, 0.7f));
             rewardedAdButton.GetComponent<Outline>().enabled = false;
-            creditsRewardButton.GetComponent<Outline>().enabled = false;
             foreach (var costIcon in upgradeCostIcons)
             {
                 costIcon.sprite = coinSprite;
@@ -420,7 +622,6 @@ namespace PocketForge.Mining
             var crystal = CreateAtlasSprite(atlas, new Rect(0.5f, 0f, 0.5f, 0.5f), Vector4.zero);
 
             ApplySimpleSprite(settingsIcon, gear);
-            ApplySimpleSprite(creditsPlusIcon, plus);
             ApplySimpleSprite(rewardedPlusIcon, plus);
             ApplySimpleSprite(rewardedVideoIcon, video);
             ApplySimpleSprite(depthCurrencyIcon, crystal);
@@ -436,13 +637,13 @@ namespace PocketForge.Mining
             }
 
             ApplyStretchedSimpleSprite(topSurface, finalSkin.Simple("HudHeader"), Color.white);
-            ApplyStretchedSimpleSprite(headerCounterSlot, finalSkin.Simple("HudCounterSlot"), Color.white);
+            ApplyStretchedSimpleSprite(minerRankButton.image, finalSkin.Simple("HudCounterSlot"), Color.white);
             ApplyStretchedSimpleSprite(settingsButton.image, finalSkin.Simple("HudSettingsButton"), Color.white);
             ApplyStretchedSimpleSprite(rewardedAdButton.image, finalSkin.Simple("HudRewardPill"), Color.white);
-            ApplyStretchedSimpleSprite(progressBackground, finalSkin.Simple("HudProgressFrame"), Color.white);
-            ApplyStretchedSimpleSprite(progressTrack, finalSkin.Simple("HudProgressTrack"), Color.white);
+            ApplyStretchedSimpleSprite(progressBackground, finalSkin.Simple("HudOreHealthFrame"), Color.white);
+            ApplyStretchedSimpleSprite(progressTrack, finalSkin.Simple("HudOreHealthTrack"), Color.white);
+            ApplyStretchedSimpleSprite(oreProgress, finalSkin.Simple("HudOreHealthFill"), Color.white);
             ApplyStretchedSimpleSprite(mineButton.image, finalSkin.Simple("HudMineButton"), Color.white);
-            ApplyStretchedSimpleSprite(creditsRewardButton.image, finalSkin.Simple("HudPlusButton"), Color.white);
 
             ApplyStretchedSimpleSprite(pickaxeButton.image, finalSkin.Simple("HudUpgradeCard"), Color.white);
             ApplyStretchedSimpleSprite(drillButton.image, finalSkin.Simple("HudUpgradeCard"), Color.white);
@@ -463,11 +664,9 @@ namespace PocketForge.Mining
                 ApplySimpleSprite(icon, finalSkin.Simple("IconUpgradeArrow"));
             }
 
-            ApplySimpleSprite(headerCoin, finalSkin.Simple("IconGoldBadge"));
             ApplySimpleSprite(creditsCurrencyIcon, finalSkin.Simple("IconGoldCoin"));
             ApplySimpleSprite(depthCurrencyIcon, finalSkin.Simple("IconPurpleGem"));
             ApplySimpleSprite(settingsIcon, finalSkin.Simple("IconGear"));
-            ApplySimpleSprite(creditsPlusIcon, finalSkin.Simple("IconPlus"));
             ApplySimpleSprite(rewardedVideoIcon, finalSkin.Simple("IconVideo"));
             ApplySimpleSprite(rewardedPlusIcon, finalSkin.Simple("IconPlus"));
             ApplyRawTexture(mineIcon, finalSkin.Texture("IconPickaxe"), new Vector2(178f, 158f), 8f);
@@ -512,6 +711,29 @@ namespace PocketForge.Mining
             ApplySimpleSprite(restorePurchasesIcon, finalSkin.Simple("IconRestore"));
             ApplySimpleSprite(closeSettingsIcon, finalSkin.Simple("IconClose"));
 
+            ApplyStretchedSimpleSprite(chapterCompleteCard, finalSkin.Simple("SettingsModal"), Color.white);
+            ApplyStretchedSimpleSprite(chapterCompleteTitleSurface, finalSkin.Simple("SettingsTitlePlaque"), Color.white);
+            ApplyStretchedSimpleSprite(chapterCompleteCreditsRow, finalSkin.Simple("SettingsRow"), Color.white);
+            ApplyStretchedSimpleSprite(chapterCompleteGemsRow, finalSkin.Simple("SettingsRow"), Color.white);
+            ApplyStretchedSimpleSprite(chapterCompleteContinueButton.image, finalSkin.Simple("SettingsActionButton"), Color.white);
+            ApplySimpleSprite(chapterCompleteCreditsIcon, finalSkin.Simple("IconGoldCoin"));
+            ApplySimpleSprite(chapterCompleteGemsIcon, finalSkin.Simple("IconPurpleGem"));
+            ApplyStretchedSimpleSprite(chapterSelectionCard, finalSkin.Simple("SettingsModal"), Color.white);
+            ApplyStretchedSimpleSprite(chapterSelectionTitleSurface, finalSkin.Simple("SettingsTitlePlaque"), Color.white);
+            ApplyStretchedSimpleSprite(closeChapterSelectionButton.image, finalSkin.Simple("SettingsCloseButton"), Color.white);
+            foreach (var row in chapterRows)
+            {
+                ApplyChapterRowSkin(row);
+            }
+
+            ApplyStretchedSimpleSprite(researchCard, finalSkin.Simple("SettingsModal"), Color.white);
+            ApplyStretchedSimpleSprite(researchTitleSurface, finalSkin.Simple("SettingsTitlePlaque"), Color.white);
+            ApplyStretchedSimpleSprite(closeResearchButton.image, finalSkin.Simple("SettingsCloseButton"), Color.white);
+            foreach (var row in researchRows)
+            {
+                ApplyResearchRowSkin(row);
+            }
+
             ApplyLanguageIcon(SupportedLanguage.Korean, "IconFlagKorean");
             ApplyLanguageIcon(SupportedLanguage.English, "IconFlagEnglish");
             ApplyLanguageIcon(SupportedLanguage.Japanese, "IconFlagJapanese");
@@ -523,10 +745,39 @@ namespace PocketForge.Mining
             DisableOutline(robotButton);
             DisableOutline(settingsButton);
             DisableOutline(rewardedAdButton);
-            DisableOutline(creditsRewardButton);
             DisableOutline(removeAdsButton);
             DisableOutline(restorePurchasesButton);
             DisableOutline(closeSettingsButton);
+            DisableOutline(chapterCompleteContinueButton);
+            DisableOutline(closeChapterSelectionButton);
+            DisableOutline(closeResearchButton);
+        }
+
+        private void ApplyChapterRowSkin(ChapterRowView row)
+        {
+            if (finalSkin == null || row == null)
+            {
+                return;
+            }
+
+            ApplyStretchedSimpleSprite(row.Surface, finalSkin.Simple("SettingsRow"), Color.white);
+            ApplyStretchedSimpleSprite(row.ActionButton.image, finalSkin.Simple("SettingsActionButton"), Color.white);
+            DisableOutline(row.ActionButton);
+        }
+
+        private void ApplyResearchRowSkin(ResearchRowView row)
+        {
+            if (finalSkin == null || row == null)
+            {
+                return;
+            }
+
+            ApplyStretchedSimpleSprite(row.Surface, finalSkin.Simple("SettingsRow"), Color.white);
+            ApplyStretchedSimpleSprite(
+                row.PurchaseButton.image,
+                finalSkin.Simple("SettingsActionButton"),
+                Color.white);
+            DisableOutline(row.PurchaseButton);
         }
 
         private void ApplySettingSliderSkin(Slider slider)
@@ -625,6 +876,585 @@ namespace PocketForge.Mining
             feedbackSurface.sprite = null;
             feedbackSurface.color = Color.clear;
             feedbackSurface.gameObject.SetActive(false);
+        }
+
+        private void CreateChapterCompletePanel()
+        {
+            var backdrop = CreatePanel(
+                "ChapterCompleteBackdrop",
+                transform,
+                Vector2.zero,
+                Vector2.one,
+                Vector2.zero,
+                Vector2.zero,
+                new Color(0.005f, 0.012f, 0.04f, 0.82f));
+            chapterCompletePanel = backdrop.gameObject;
+            chapterCompleteCard = CreatePanel(
+                "ChapterCompleteCard",
+                chapterCompletePanel.transform,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0f, 24f),
+                new Vector2(780f, 720f),
+                new Color(0.035f, 0.075f, 0.15f, 0.99f));
+            chapterCompleteTitleSurface = CreatePanel(
+                "ChapterCompleteTitleSurface",
+                chapterCompleteCard.transform,
+                new Vector2(0.5f, 1f),
+                new Vector2(0.5f, 1f),
+                new Vector2(0f, -42f),
+                new Vector2(620f, 132f),
+                Color.white);
+            chapterCompleteTitle = CreateText(
+                "ChapterCompleteTitle",
+                chapterCompleteTitleSurface.transform,
+                Vector2.zero,
+                Vector2.one,
+                Vector2.zero,
+                new Vector2(-44f, -18f),
+                44,
+                TextAnchor.MiddleCenter);
+            chapterCompleteTitle.font = UiFontProvider.GetCasual();
+            chapterCompleteTitle.resizeTextForBestFit = true;
+            chapterCompleteTitle.resizeTextMinSize = 24;
+            chapterCompleteTitle.resizeTextMaxSize = 44;
+
+            chapterCompleteRewardLabel = CreateText(
+                "ChapterCompleteRewardLabel",
+                chapterCompleteCard.transform,
+                new Vector2(0.5f, 1f),
+                new Vector2(0.5f, 1f),
+                new Vector2(0f, -176f),
+                new Vector2(620f, 54f),
+                30,
+                TextAnchor.MiddleCenter);
+            chapterCompleteRewardLabel.font = UiFontProvider.GetCasual();
+            chapterCompleteRewardLabel.color = new Color(1f, 0.82f, 0.3f);
+
+            chapterCompleteCreditsRow = CreatePanel(
+                "ChapterCompleteCreditsRow",
+                chapterCompleteCard.transform,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0f, 76f),
+                new Vector2(580f, 112f),
+                new Color(0.055f, 0.12f, 0.23f, 0.98f));
+            chapterCompleteCreditsIcon = CreateSimpleImage(
+                "ChapterCompleteCreditsIcon",
+                chapterCompleteCreditsRow.transform,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(-176f, 0f),
+                new Vector2(72f, 72f),
+                Color.white);
+            chapterCompleteCreditsValue = CreateText(
+                "ChapterCompleteCreditsValue",
+                chapterCompleteCreditsRow.transform,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(48f, 0f),
+                new Vector2(300f, 74f),
+                38,
+                TextAnchor.MiddleCenter);
+
+            chapterCompleteGemsRow = CreatePanel(
+                "ChapterCompleteGemsRow",
+                chapterCompleteCard.transform,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0f, -62f),
+                new Vector2(580f, 112f),
+                new Color(0.055f, 0.12f, 0.23f, 0.98f));
+            chapterCompleteGemsIcon = CreateSimpleImage(
+                "ChapterCompleteGemsIcon",
+                chapterCompleteGemsRow.transform,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(-176f, 0f),
+                new Vector2(72f, 72f),
+                Color.white);
+            chapterCompleteGemsValue = CreateText(
+                "ChapterCompleteGemsValue",
+                chapterCompleteGemsRow.transform,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(48f, 0f),
+                new Vector2(300f, 74f),
+                38,
+                TextAnchor.MiddleCenter);
+
+            chapterCompleteContinueButton = CreateButton(
+                "ChapterCompleteContinueButton",
+                chapterCompleteCard.transform,
+                new Vector2(0.5f, 0f),
+                new Vector2(0.5f, 0f),
+                new Vector2(0f, 88f),
+                new Vector2(420f, 104f),
+                new Color(1f, 0.48f, 0.12f));
+            var continueLabel = chapterCompleteContinueButton.GetComponentInChildren<Text>();
+            continueLabel.font = UiFontProvider.GetCasual();
+            continueLabel.fontSize = 34;
+            chapterCompleteContinueButton.onClick.AddListener(CloseChapterComplete);
+            chapterCompletePanel.SetActive(false);
+        }
+
+        private void RenderChapterComplete()
+        {
+            if (chapterCompletePanel == null || completedChapterNumber <= 0)
+            {
+                return;
+            }
+
+            chapterCompleteTitle.text = string.Format(
+                LanguageService.Get("chapter_clear"),
+                completedChapterNumber).ToUpper();
+            chapterCompleteRewardLabel.text = LanguageService.Get("first_clear_reward").ToUpper();
+            if (completedChapterBlueprintCores > 0)
+            {
+                chapterCompleteRewardLabel.text +=
+                    $"  \u2022  +{CompactNumberFormatter.Format(completedChapterBlueprintCores)} {LanguageService.Get("blueprint_core").ToUpper()}";
+            }
+
+            chapterCompleteCreditsValue.text =
+                $"+{CompactNumberFormatter.Format(completedChapterCredits)}";
+            chapterCompleteGemsValue.text =
+                $"+{CompactNumberFormatter.Format(completedChapterGems)}";
+            chapterCompleteContinueButton.GetComponentInChildren<Text>().text = LanguageService.Get("continue").ToUpper();
+        }
+
+        private void CloseChapterComplete()
+        {
+            chapterCompletePanel.SetActive(false);
+        }
+
+        private void CreateChapterSelectionPanel()
+        {
+            var backdrop = CreatePanel(
+                "ChapterSelectionBackdrop",
+                transform,
+                Vector2.zero,
+                Vector2.one,
+                Vector2.zero,
+                Vector2.zero,
+                new Color(0.005f, 0.012f, 0.04f, 0.82f));
+            chapterSelectionPanel = backdrop.gameObject;
+            chapterSelectionCard = CreatePanel(
+                "ChapterSelectionCard",
+                chapterSelectionPanel.transform,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0f, 24f),
+                new Vector2(820f, 900f),
+                new Color(0.035f, 0.075f, 0.15f, 0.99f));
+            chapterSelectionTitleSurface = CreatePanel(
+                "ChapterSelectionTitleSurface",
+                chapterSelectionCard.transform,
+                new Vector2(0.5f, 1f),
+                new Vector2(0.5f, 1f),
+                new Vector2(0f, -42f),
+                new Vector2(650f, 132f),
+                Color.white);
+            chapterSelectionTitle = CreateText(
+                "ChapterSelectionTitle",
+                chapterSelectionTitleSurface.transform,
+                Vector2.zero,
+                Vector2.one,
+                Vector2.zero,
+                new Vector2(-44f, -18f),
+                44,
+                TextAnchor.MiddleCenter);
+            chapterSelectionTitle.font = UiFontProvider.GetCasual();
+            chapterSelectionTitle.resizeTextForBestFit = true;
+            chapterSelectionTitle.resizeTextMinSize = 24;
+            chapterSelectionTitle.resizeTextMaxSize = 44;
+
+            var rowsRoot = CreatePanel(
+                "ChapterSelectionRows",
+                chapterSelectionCard.transform,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0f, -12f),
+                new Vector2(700f, 620f),
+                Color.clear);
+            rowsRoot.raycastTarget = false;
+            rowsRoot.GetComponent<Shadow>().enabled = false;
+            chapterSelectionRowsRoot = rowsRoot.rectTransform;
+
+            closeChapterSelectionButton = CreateButton(
+                "CloseChapterSelectionButton",
+                chapterSelectionCard.transform,
+                new Vector2(0.5f, 0f),
+                new Vector2(0.5f, 0f),
+                new Vector2(0f, 68f),
+                new Vector2(360f, 92f),
+                new Color(0.95f, 0.47f, 0.08f));
+            var closeLabel = closeChapterSelectionButton.GetComponentInChildren<Text>();
+            closeLabel.font = UiFontProvider.GetCasual();
+            closeLabel.fontSize = 30;
+            closeChapterSelectionButton.onClick.AddListener(CloseChapterSelection);
+            chapterSelectionPanel.SetActive(false);
+        }
+
+        private void EnsureChapterRows(int count)
+        {
+            while (chapterRows.Count < count)
+            {
+                chapterRows.Add(CreateChapterRow(chapterRows.Count));
+            }
+
+            for (var index = 0; index < chapterRows.Count; index++)
+            {
+                chapterRows[index].Surface.gameObject.SetActive(index < count);
+            }
+        }
+
+        private ChapterRowView CreateChapterRow(int index)
+        {
+            var row = new ChapterRowView();
+            row.Surface = CreatePanel(
+                $"ChapterRow{index + 1}",
+                chapterSelectionRowsRoot,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0f, 196f - index * 190f),
+                new Vector2(680f, 160f),
+                new Color(0.055f, 0.12f, 0.23f, 0.98f));
+            row.Title = CreateText(
+                "ChapterTitle",
+                row.Surface.transform,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(-175f, 28f),
+                new Vector2(280f, 54f),
+                32,
+                TextAnchor.MiddleLeft);
+            row.Title.font = UiFontProvider.GetCasual();
+            row.StageRange = CreateText(
+                "StageRange",
+                row.Surface.transform,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(-175f, -29f),
+                new Vector2(300f, 42f),
+                21,
+                TextAnchor.MiddleLeft);
+            row.StageRange.color = new Color(0.68f, 0.78f, 0.92f);
+            row.Status = CreateText(
+                "ChapterState",
+                row.Surface.transform,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(42f, 0f),
+                new Vector2(150f, 52f),
+                22,
+                TextAnchor.MiddleCenter);
+            row.Status.font = UiFontProvider.GetCasual();
+            row.Status.resizeTextForBestFit = true;
+            row.Status.resizeTextMinSize = 15;
+            row.Status.resizeTextMaxSize = 22;
+            row.ActionButton = CreateButton(
+                "ChapterActionButton",
+                row.Surface.transform,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(236f, 0f),
+                new Vector2(190f, 86f),
+                new Color(0.2f, 0.62f, 0.28f));
+            var actionLabel = row.ActionButton.GetComponentInChildren<Text>();
+            actionLabel.font = UiFontProvider.GetCasual();
+            actionLabel.fontSize = 24;
+            ApplyChapterRowSkin(row);
+            return row;
+        }
+
+        private void RenderChapterSelection()
+        {
+            if (chapterSelectionPanel == null)
+            {
+                return;
+            }
+
+            chapterSelectionTitle.text = LanguageService.Get("chapter_select").ToUpper();
+            closeChapterSelectionButton.GetComponentInChildren<Text>().text = LanguageService.Get("close").ToUpper();
+            EnsureChapterRows(chapterSelectionOptions.Count);
+            for (var index = 0; index < chapterSelectionOptions.Count; index++)
+            {
+                var option = chapterSelectionOptions[index];
+                var row = chapterRows[index];
+                row.ChapterNumber = option.ChapterNumber;
+                row.Title.text = $"{LanguageService.Get("chapter").ToUpper()} {option.ChapterNumber}";
+                row.StageRange.text = string.Format(
+                    LanguageService.Get("stage_range"),
+                    option.StartStage,
+                    option.EndStage).ToUpper();
+
+                string statusKey;
+                string actionKey;
+                if (option.IsLocked)
+                {
+                    statusKey = "locked";
+                    actionKey = "locked";
+                    row.Status.color = new Color(0.55f, 0.6f, 0.68f);
+                }
+                else if (option.IsBossChallenge)
+                {
+                    statusKey = "boss_ready";
+                    actionKey = "challenge";
+                    row.Status.color = new Color(1f, 0.62f, 0.22f);
+                }
+                else if (option.IsCurrent)
+                {
+                    statusKey = "current";
+                    actionKey = "current";
+                    row.Status.color = new Color(0.3f, 0.86f, 1f);
+                }
+                else if (option.IsCleared)
+                {
+                    statusKey = "cleared";
+                    actionKey = "retry";
+                    row.Status.color = new Color(1f, 0.78f, 0.22f);
+                }
+                else
+                {
+                    statusKey = option.TargetStage > option.StartStage ? "resume" : "enter";
+                    actionKey = statusKey;
+                    row.Status.color = new Color(0.4f, 0.95f, 0.62f);
+                }
+
+                row.Status.text = LanguageService.Get(statusKey).ToUpper();
+                row.ActionButton.GetComponentInChildren<Text>().text = LanguageService.Get(actionKey).ToUpper();
+                row.ActionButton.interactable =
+                    !option.IsLocked &&
+                    (!option.IsCurrent || option.IsBossChallenge);
+                row.ActionButton.onClick.RemoveAllListeners();
+                if (row.ActionButton.interactable)
+                {
+                    var chapterNumber = option.ChapterNumber;
+                    row.ActionButton.onClick.AddListener(() =>
+                    {
+                        chapterSelectionAction?.Invoke(chapterNumber);
+                        CloseChapterSelection();
+                    });
+                }
+            }
+        }
+
+        private void CloseChapterSelection()
+        {
+            chapterSelectionPanel.SetActive(false);
+        }
+
+        private void CreateResearchPanel()
+        {
+            var backdrop = CreatePanel(
+                "ResearchBackdrop",
+                transform,
+                Vector2.zero,
+                Vector2.one,
+                Vector2.zero,
+                Vector2.zero,
+                new Color(0.005f, 0.012f, 0.04f, 0.82f));
+            researchPanel = backdrop.gameObject;
+            researchCard = CreatePanel(
+                "ResearchCard",
+                researchPanel.transform,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0f, 20f),
+                new Vector2(850f, 1120f),
+                new Color(0.035f, 0.075f, 0.15f, 0.99f));
+            researchTitleSurface = CreatePanel(
+                "ResearchTitleSurface",
+                researchCard.transform,
+                new Vector2(0.5f, 1f),
+                new Vector2(0.5f, 1f),
+                new Vector2(0f, -46f),
+                new Vector2(610f, 130f),
+                Color.white);
+            researchTitle = CreateText(
+                "ResearchTitle",
+                researchTitleSurface.transform,
+                Vector2.zero,
+                Vector2.one,
+                Vector2.zero,
+                new Vector2(-40f, -16f),
+                43,
+                TextAnchor.MiddleCenter);
+            researchTitle.font = UiFontProvider.GetCasual();
+            researchSummary = CreateText(
+                "ResearchSummary",
+                researchCard.transform,
+                new Vector2(0.5f, 1f),
+                new Vector2(0.5f, 1f),
+                new Vector2(0f, -160f),
+                new Vector2(700f, 54f),
+                27,
+                TextAnchor.MiddleCenter);
+            researchSummary.font = UiFontProvider.GetCasual();
+            researchSummary.color = new Color(0.55f, 0.92f, 1f);
+            researchCores = CreateText(
+                "ResearchCores",
+                researchCard.transform,
+                new Vector2(0.5f, 1f),
+                new Vector2(0.5f, 1f),
+                new Vector2(0f, -218f),
+                new Vector2(700f, 50f),
+                29,
+                TextAnchor.MiddleCenter);
+            researchCores.color = new Color(1f, 0.78f, 0.28f);
+
+            researchRowsRoot = CreateRect(
+                "ResearchRows",
+                researchCard.transform,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0f, -72f),
+                new Vector2(740f, 660f));
+            EnsureResearchRows(3);
+
+            closeResearchButton = CreateButton(
+                "CloseResearchButton",
+                researchCard.transform,
+                new Vector2(0.5f, 0f),
+                new Vector2(0.5f, 0f),
+                new Vector2(0f, 72f),
+                new Vector2(360f, 100f),
+                new Color(1f, 0.48f, 0.12f));
+            closeResearchButton.GetComponentInChildren<Text>().font = UiFontProvider.GetCasual();
+            closeResearchButton.onClick.AddListener(CloseResearch);
+            researchPanel.SetActive(false);
+        }
+
+        private void EnsureResearchRows(int count)
+        {
+            while (researchRows.Count < count)
+            {
+                researchRows.Add(CreateResearchRow(researchRows.Count));
+            }
+
+            for (var index = 0; index < researchRows.Count; index++)
+            {
+                researchRows[index].Surface.gameObject.SetActive(index < count);
+            }
+        }
+
+        private ResearchRowView CreateResearchRow(int index)
+        {
+            var row = new ResearchRowView();
+            row.Surface = CreatePanel(
+                $"ResearchRow{index + 1}",
+                researchRowsRoot,
+                new Vector2(0.5f, 1f),
+                new Vector2(0.5f, 1f),
+                new Vector2(0f, -108f - index * 204f),
+                new Vector2(720f, 180f),
+                new Color(0.055f, 0.12f, 0.23f, 0.98f));
+            row.Name = CreateText(
+                "ResearchName",
+                row.Surface.transform,
+                new Vector2(0f, 0.5f),
+                new Vector2(0f, 0.5f),
+                new Vector2(190f, 44f),
+                new Vector2(340f, 50f),
+                28,
+                TextAnchor.MiddleLeft);
+            row.Name.font = UiFontProvider.GetCasual();
+            row.Level = CreateText(
+                "ResearchLevel",
+                row.Surface.transform,
+                new Vector2(0f, 0.5f),
+                new Vector2(0f, 0.5f),
+                new Vector2(190f, -8f),
+                new Vector2(340f, 42f),
+                24,
+                TextAnchor.MiddleLeft);
+            row.Bonus = CreateText(
+                "ResearchBonus",
+                row.Surface.transform,
+                new Vector2(0f, 0.5f),
+                new Vector2(0f, 0.5f),
+                new Vector2(190f, -50f),
+                new Vector2(340f, 38f),
+                21,
+                TextAnchor.MiddleLeft);
+            row.Bonus.color = new Color(0.45f, 0.92f, 1f);
+            row.PurchaseButton = CreateButton(
+                "ResearchPurchaseButton",
+                row.Surface.transform,
+                new Vector2(1f, 0.5f),
+                new Vector2(1f, 0.5f),
+                new Vector2(-126f, 0f),
+                new Vector2(220f, 104f),
+                new Color(0.35f, 0.75f, 0.16f));
+            row.PurchaseButton.GetComponentInChildren<Text>().font = UiFontProvider.GetCasual();
+            row.PurchaseButton.GetComponentInChildren<Text>().fontSize = 23;
+            ApplyResearchRowSkin(row);
+            return row;
+        }
+
+        private void RenderResearch()
+        {
+            if (researchPanel == null || lastState == null || lastService == null)
+            {
+                return;
+            }
+
+            var states = lastService.GetResearchNodeStates(lastState);
+            EnsureResearchRows(states.Count);
+            researchTitle.text = LanguageService.Get("feature_research").ToUpper();
+            var researchPowerBonus =
+                (lastService.GetResearchPowerMultiplier(lastState) - 1f) * 100f;
+            researchSummary.text = string.Format(
+                LanguageService.Get("research_summary"),
+                lastState.Player.minerLevel,
+                researchPowerBonus);
+            researchCores.text = string.Format(
+                LanguageService.Get("blueprint_cores"),
+                CompactNumberFormatter.Format(lastState.Player.blueprintCores));
+            closeResearchButton.GetComponentInChildren<Text>().text =
+                LanguageService.Get("close").ToUpper();
+
+            for (var index = 0; index < states.Count; index++)
+            {
+                var state = states[index];
+                var row = researchRows[index];
+                row.NodeId = state.Definition.NodeId;
+                row.Name.text =
+                    LanguageService.Get(state.Definition.NameLocalizationKey).ToUpper();
+                row.Level.text = string.Format(
+                    LanguageService.Get("research_level"),
+                    state.CurrentLevel,
+                    state.Definition.MaxLevel);
+                row.Bonus.text = string.Format(
+                    LanguageService.Get("research_power_bonus"),
+                    state.Definition.PowerBonusPerLevel * 100f);
+                row.PurchaseButton.GetComponentInChildren<Text>().text =
+                    state.PurchaseStatus switch
+                    {
+                        ResearchPurchaseStatus.FeatureLocked =>
+                            LanguageService.Get("locked").ToUpper(),
+                        ResearchPurchaseStatus.PrerequisiteMissing =>
+                            LanguageService.Get("research_prerequisite_short").ToUpper(),
+                        ResearchPurchaseStatus.MaxLevel =>
+                            LanguageService.Get("research_max_level").ToUpper(),
+                        _ => string.Format(
+                            LanguageService.Get("research_cost"),
+                            CompactNumberFormatter.Format(state.Cost)).ToUpper()
+                    };
+                row.PurchaseButton.interactable = state.CanPurchase;
+                row.PurchaseButton.onClick.RemoveAllListeners();
+                if (state.CanPurchase)
+                {
+                    var nodeId = state.Definition.NodeId;
+                    row.PurchaseButton.onClick.AddListener(
+                        () => researchPurchaseAction?.Invoke(nodeId));
+                }
+            }
+        }
+
+        private void CloseResearch()
+        {
+            researchPanel.SetActive(false);
         }
 
         private static Sprite CreateAtlasSprite(Texture2D atlas, Rect normalizedRect, Vector4 normalizedBorder)
@@ -906,10 +1736,9 @@ namespace PocketForge.Mining
             }
 
             rewardedAdButton.interactable = rewardedAdState is RewardedAdState.Ready or RewardedAdState.Failed;
-            creditsRewardButton.interactable = rewardedAdButton.interactable;
             rewardedAdButton.GetComponentInChildren<Text>().text = rewardedAdState switch
             {
-                RewardedAdState.Ready => $"+{rewardedAdCredits:N0} C",
+                RewardedAdState.Ready => $"+{CompactNumberFormatter.Format(rewardedAdCredits)} C",
                 RewardedAdState.Failed => LanguageService.Get("ad_retry").ToUpper(),
                 RewardedAdState.Showing => LanguageService.Get("ad_showing").ToUpper(),
                 _ => LanguageService.Get("ad_loading").ToUpper()
@@ -1081,10 +1910,17 @@ namespace PocketForge.Mining
             label.alignment = TextAnchor.MiddleCenter;
         }
 
-        private static void SetUpgradeText(Button button, int level, int cost)
+        private static void SetUpgradeText(Button button, int level, long cost)
         {
             button.transform.Find("Label").GetComponent<Text>().text = $"<color=#FFFFFF>Lv. {level}</color>";
-            button.transform.Find("CostText").GetComponent<Text>().text = $"<color=#FFD75A>{cost:N0}</color>";
+            button.transform.Find("CostText").GetComponent<Text>().text =
+                $"<color=#FFD75A>{CompactNumberFormatter.Format(cost)}</color>";
+        }
+
+        private static string FormatTime(float seconds)
+        {
+            var totalSeconds = Mathf.Max(0, Mathf.CeilToInt(seconds));
+            return $"{totalSeconds / 60:00}:{totalSeconds % 60:00}";
         }
 
         private Image[] CreateUpgradeDetails(Transform parent, Color activeColor)
