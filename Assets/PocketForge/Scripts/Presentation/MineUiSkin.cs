@@ -11,11 +11,13 @@ namespace PocketForge.Presentation
     {
         private const string ResourceRoot = "PocketForge/UI/Final/";
         private const string V5ResourceRoot = "PocketForge/UI/V5/";
+        private const string Task13ResourceRoot = "PocketForge/UI/Task13/";
 
         private static MineUiSkin shared;
 
         private readonly Dictionary<string, Texture2D> textures = new();
         private readonly Dictionary<string, Texture2D> v5Textures = new();
+        private readonly Dictionary<string, Texture2D> task13Textures = new();
         private readonly Dictionary<string, Sprite> sprites = new();
         private readonly HashSet<string> missingAssets = new();
 
@@ -86,6 +88,52 @@ namespace PocketForge.Presentation
         public Sprite V5Simple(string assetName)
         {
             return CreateV5(assetName);
+        }
+
+        public Texture2D Task13Texture(string assetName)
+        {
+            if (task13Textures.TryGetValue(assetName, out var cached) && cached != null)
+            {
+                return cached;
+            }
+
+            task13Textures.Remove(assetName);
+
+            var texture = Resources.Load<Texture2D>(Task13ResourceRoot + assetName);
+            task13Textures[assetName] = texture;
+            if (texture == null && missingAssets.Add("Task13/" + assetName))
+            {
+                Debug.LogWarning($"Pocket Forge UI asset is missing: {Task13ResourceRoot}{assetName}");
+            }
+
+            return texture;
+        }
+
+        public Sprite Task13Simple(string assetName)
+        {
+            var cacheKey = "Task13/" + assetName + ":simple";
+            if (sprites.TryGetValue(cacheKey, out var cached) && cached != null)
+            {
+                return cached;
+            }
+
+            sprites.Remove(cacheKey);
+
+            var texture = Task13Texture(assetName);
+            if (texture == null)
+            {
+                return null;
+            }
+
+            var sprite = Sprite.Create(
+                texture,
+                new Rect(0f, 0f, texture.width, texture.height),
+                new Vector2(0.5f, 0.5f),
+                100f,
+                0,
+                SpriteMeshType.FullRect);
+            sprites[cacheKey] = sprite;
+            return sprite;
         }
 
         public Sprite Sliced(string assetName, Vector4 normalizedBorder)

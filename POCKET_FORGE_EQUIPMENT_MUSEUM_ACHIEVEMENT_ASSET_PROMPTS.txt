@@ -1,0 +1,1080 @@
+POCKET FORGE — 장비·박물관·업적 UI 요소별 이미지 생성 프롬프트
+=================================================================
+
+문서 목적
+---------
+
+승인된 장비·박물관·업적 가스샷을 실제 Unity UI 자산으로 분해하기 위한 통합 프롬프트 문서다.
+각 결과물은 가스샷의 색, 외곽 형태, 비율, 테두리, 광택, 그림자를 최대한 그대로 유지해야 한다.
+이 문서에서 말하는 "유사"는 같은 분위기의 재디자인이 아니라 승인 가스샷에 다시 겹쳤을 때
+원래 요소를 거의 덮을 수 있는 수준의 재현을 뜻한다.
+
+단, 이미지 생성만으로 픽셀 단위 100% 동일성을 보장할 수는 없다.
+따라서 아래의 A 방식인 "원본 크롭 제한 편집"을 항상 먼저 사용하고,
+원본에서 분리할 수 없는 요소에만 B 방식인 "참조 기반 재생성"을 사용한다.
+
+
+1. 승인 원본과 사용 역할
+------------------------
+
+[장비 화면 — 절대 기준]
+E:\Unity Projects\DrillProject\Assets\PocketForge\Art\Generated\UI\Task13GasShot\Task13_4_Equipment_GasShot_v2.png
+
+[박물관 화면 — 절대 기준]
+E:\Unity Projects\DrillProject\Assets\PocketForge\Art\Generated\UI\Task13GasShot\Task13_5_Museum_GasShot_v2.png
+
+[업적 화면 — 절대 기준]
+E:\Unity Projects\DrillProject\Assets\PocketForge\Art\Generated\UI\Task13GasShot\Task13_5_Achievements_GasShot_v2.png
+
+[메인 화면 스타일 — 보조 기준]
+E:\Unity Projects\DrillProject\Assets\PocketForge\Art\Generated\UI\Task13GasShot\Task13_4_Equipment_GasShot_v2.png
+위 파일에 함께 보이는 메인 HUD와 보랏빛 광산 배경은 색감·재질의 보조 기준일 뿐이다.
+요소의 형태와 비율은 반드시 각 대상 화면의 가스샷을 우선한다.
+
+원본 해상도는 모두 1440×3088 세로 화면이다.
+생성 전에 원본을 확대·리샘플링하지 말고 원본 해상도에서 대상 요소를 잘라 사용한다.
+
+
+2. 절대 규칙
+-------------
+
+1. 한 번의 생성 또는 편집 요청에는 정확히 하나의 UI 요소만 넣는다.
+2. 승인 가스샷을 "스타일 참고"가 아니라 형태·재질·색상의 절대 기준으로 사용한다.
+3. 원본에서 대상 요소를 24~48px의 안전 여백과 함께 잘라 편집 입력 이미지로 사용한다.
+4. 대상 요소의 외곽 실루엣, 가로세로 비율, 모서리 곡률, 테두리 두께, 그라데이션,
+   하이라이트 위치, 내부 그림자, 외부 그림자를 임의로 바꾸지 않는다.
+5. 화면 전체를 다시 그리지 않는다. 주변 카드, 배경, 다른 아이콘을 결과에 넣지 않는다.
+6. 실제 자산에는 글자, 숫자, 가격, 수량, 레벨, 퍼센트, 진행도, 보상 수치,
+   화폐 기호, 한글, 영문, 가짜 글자, 읽을 수 없는 장식 문자를 넣지 않는다.
+7. 제목·설명·수치가 있던 영역은 깨끗하고 균일한 빈 표면으로 복원한다.
+8. X, 체크, 잠금, 화살표, 트로피처럼 기능을 형태만으로 알아야 하는 고정 아이콘은 허용한다.
+9. 텍스트와 동적 수치는 Unity TextMeshPro와 런타임 데이터로 올린다.
+10. 반복 카드의 기본 표면은 하나만 만든다. 선택, 희귀도, 장착, 완료, 잠금은 별도 오버레이로 만든다.
+11. 정면 직교 시점만 사용한다. 원근, 기울임, 회전된 UI 판, 사선 카메라는 금지한다.
+12. 자산의 모든 끝과 광택이 캔버스 안에 들어와야 한다. 잘림과 과도한 외곽 발광은 금지한다.
+13. 화면 적용용 패널과 카드는 좌우 대칭과 9-slice 가능한 중앙 영역을 유지한다.
+14. 원본에 없는 나사, 보석, 금속 장식, 리본, 날개, 입자, 문양을 추가하지 않는다.
+15. 탕탕특공대 또는 다른 게임의 고유 아이콘과 레이아웃을 복제하지 않는다.
+
+
+3. 출력 배경과 투명화 규칙
+--------------------------
+
+생성 도구가 직접 투명 PNG를 안정적으로 만들 수 있으면 투명 배경을 사용한다.
+그렇지 않으면 아래 키 컬러 중 대상 자산에 들어 있지 않은 색을 하나만 선택한다.
+
+- 기본 키: 완전한 #00FF00. 녹색 완료 표시나 녹색 보너스가 없는 자산에 사용한다.
+- 녹색 자산용 키: 완전한 #FF00FF. 단, 자산에 자홍·보라 외곽광이 있으면 사용하지 않는다.
+- 녹색과 보라가 함께 있는 자산용 키: 완전한 #FF0000. 빨간 알림 배지에는 사용하지 않는다.
+
+키 배경은 단색이어야 하며 그라데이션, 조명, 바닥, 반사, 그림자, 텍스처가 없어야 한다.
+배경색은 자산 내부에 절대 쓰지 않는다. 투명화 후 1px 가장자리에 키 컬러가 남지 않도록 despill한다.
+
+
+4. 공통 프롬프트 A — 원본 크롭 제한 편집용, 최우선
+--------------------------------------------------
+
+아래 블록 뒤에 6~8장의 개별 요소 프롬프트 중 하나를 이어 붙여 사용한다.
+
+------------------------------------------------------------
+Use case: precise object edit for a production mobile game UI sprite.
+
+The attached input crop comes directly from an approved final Pocket Forge gas shot.
+Treat the input crop as the authoritative source image and editing target, not as loose inspiration.
+Preserve the target UI asset's exact outer silhouette, width-to-height ratio, corner radius,
+border thickness, bevel profile, navy and violet color values, gradient direction,
+highlight placement, internal shading, and compact soft shadow as closely as possible.
+
+Perform a targeted cleanup only.
+Do not redesign, reinterpret, beautify, simplify, widen, narrow, rotate, or add decoration.
+Remove only the baked text, numbers, dynamic values, neighboring UI fragments,
+and the original screen background specified in the asset request.
+Reconstruct erased areas as clean uninterrupted material sampled from the same asset.
+
+Generate exactly one isolated UI asset in a straight-on orthographic front view.
+Keep generous empty padding around the complete silhouette.
+Do not crop any border, glow, icon, or shadow.
+No screen mockup, phone frame, cave scene, additional cards, duplicated objects, watermark, or logo.
+
+Absolutely no text, letters, digits, words, pseudo-text, currency signs, percentage marks,
+prices, levels, quantities, progress values, or unreadable glyphs.
+All localized labels and dynamic values will be rendered separately in Unity.
+
+Use a perfectly uniform chroma-key background color that does not occur in the asset,
+or true transparency if supported. No floor shadow or lighting variation on the background.
+------------------------------------------------------------
+
+
+5. 공통 프롬프트 B — 분리가 불가능할 때만 사용하는 재생성용
+--------------------------------------------------------
+
+------------------------------------------------------------
+Use case: isolated production-ready mobile game UI sprite.
+
+Use the attached approved Pocket Forge gas shot as the authoritative visual reference.
+Recreate exactly one specified UI asset, matching the reference asset as closely as possible.
+This is not a redesign and not a general style study.
+
+Match the reference asset's silhouette, proportions, corner radius, border width,
+lavender edge treatment, deep navy-to-indigo surface, cyan or orange state accent,
+soft toy-like 3D bevel, highlight direction, internal shading, and compact shadow.
+Use the same casual, lightweight material language as the approved purple cave main screen.
+
+Straight-on orthographic front view, centered, isolated, and complete.
+No perspective distortion. No extra ornaments. No environment. No adjacent UI.
+Leave every text-safe area perfectly plain and empty.
+
+Absolutely no text, letters, digits, words, labels, pseudo-text, currency signs,
+prices, levels, quantities, percentages, progress values, or unreadable glyphs.
+All labels and values will be added in Unity.
+
+Use a flat chroma-key background color absent from the asset, or true transparency if supported.
+Keep all edges, bevels, and shadows inside the canvas. No watermark or logo.
+------------------------------------------------------------
+
+
+6. 장비 화면 — 요소별 PRIMARY REQUEST
+======================================
+
+각 항목은 공통 프롬프트 A 뒤에 붙인다. 크롭이 불가능할 때만 공통 프롬프트 B 뒤에 붙인다.
+
+6.1 장비 모달 본체
+------------------
+
+Primary request:
+Isolate the complete large equipment modal body from the equipment gas shot.
+Keep its tall rounded rectangular silhouette, deep navy interior, violet side depth,
+thin lavender outer rim, restrained cyan top highlight, and compact shadow exactly aligned to the reference.
+Remove the title text, all content cards, buttons, icons, labels, and values.
+Restore the entire inner content area as one clean empty dark navy surface.
+Preserve a broad stretchable center and clean corners suitable for Unity 9-slicing.
+Do not include the separate title plaque or close button.
+
+권장 파일명: UiEquipmentModalBody.png
+
+
+6.2 장비 타이틀 플라크
+---------------------
+
+Primary request:
+Isolate the wide rounded equipment title plaque at the top of the modal.
+Preserve its exact shallow height, curved shoulders, navy-to-indigo gradient,
+lavender rim, cyan inner highlight, and lower violet shadow.
+Remove the Korean title completely and restore a perfectly empty centered title-safe area.
+Do not include the modal body or any close icon.
+
+권장 파일명: UiEquipmentTitlePlaque.png
+
+
+6.3 닫기 원형 버튼 표면
+----------------------
+
+Primary request:
+Isolate one circular close-button surface matching the equipment modal.
+Preserve the exact dark navy face, lavender outer ring, subtle inner bevel, and small compact shadow.
+Remove the X symbol and leave the circular center clean and empty.
+
+권장 파일명: UiModalCloseButtonSurface.png
+
+
+6.4 닫기 X 아이콘
+-----------------
+
+Primary request:
+Isolate only the small fixed X close icon from the equipment modal.
+Preserve its exact cream-lavender material, rounded stroke ends, thickness, and highlight.
+No circular button background and no text.
+
+권장 파일명: IconCloseX.png
+
+
+6.5 장비 종합 채굴력 캡슐
+-------------------------
+
+Primary request:
+Isolate the wide compact summary capsule used beneath the equipment title area.
+Preserve the gas shot's cyan-violet rim, dark navy center, rounded pill silhouette,
+and subtle inward glow. Remove all labels and percentage values.
+Leave one clean uninterrupted text-safe center with equal left and right padding.
+
+권장 파일명: UiEquipmentPowerSummary.png
+
+
+6.6 장비 보유량 캡슐
+--------------------
+
+Primary request:
+Isolate the small rounded inventory capacity capsule from the equipment screen.
+Keep its reference width, low height, dark navy face, lavender edge, and slight cyan highlight.
+Remove every number and separator and leave the center blank.
+
+권장 파일명: UiEquipmentCapacityCapsule.png
+
+
+6.7 장착 슬롯 카드 기본 표면
+----------------------------
+
+Primary request:
+Isolate one equipped-slot card base from the four-slot equipment row.
+Preserve the exact vertical card proportions, rounded corners, deep navy interior,
+thin lavender frame, subtle cyan top edge, and compact violet shadow.
+Remove the item icon, item name, rarity, bonus, level, and equipped indicator.
+Leave a square empty icon-safe zone in the upper portion and a plain empty label-safe zone below it.
+Do not include any state glow or rarity color; those will be separate overlays.
+Make the central surface compatible with 9-slice scaling without changing the reference ratio.
+
+권장 파일명: UiEquipmentSlotCardBase.png
+
+
+6.8 인벤토리 카드 기본 표면
+---------------------------
+
+Primary request:
+Isolate one item card base from the 2-by-3 equipment inventory grid.
+Preserve its exact reference dimensions, corner radius, navy surface, lavender border,
+upper icon zone, lower information zone, and compact shadow.
+Remove the item art, text, numbers, rarity marks, equipped mark, duplicate count, and notification.
+Keep all internal zones empty and evenly aligned so every inventory item can reuse this same base.
+
+권장 파일명: UiEquipmentInventoryCardBase.png
+
+
+6.9 희귀 등급 테두리 오버레이
+----------------------------
+
+Primary request:
+Isolate only the cyan rare-rarity border and restrained edge glow from one equipment card.
+Preserve the exact card outline and border thickness from the gas shot.
+The entire card interior must be transparent and empty.
+No card fill, item, text, particles, or extra decoration.
+
+권장 파일명: OverlayEquipmentRarityRare.png
+
+
+6.10 영웅 등급 테두리 오버레이
+-----------------------------
+
+Primary request:
+Isolate only the violet-purple epic-rarity border and compact edge glow from one equipment card.
+Match the exact silhouette and thickness of the common equipment card base.
+Keep the entire center transparent. No card surface, item, text, or particles.
+
+권장 파일명: OverlayEquipmentRarityEpic.png
+
+
+6.11 일반 등급 테두리 오버레이
+-----------------------------
+
+Primary request:
+Create only the muted silver-lavender common-rarity border matching the exact equipment card outline.
+Use a quiet low-contrast edge with no glow. Keep the entire interior transparent.
+No surface fill, item, text, or extra marks.
+
+권장 파일명: OverlayEquipmentRarityCommon.png
+
+
+6.12 전설 등급 테두리 오버레이
+-----------------------------
+
+Primary request:
+Create only a restrained warm gold legendary-rarity border using the exact equipment card outline.
+Match the border width and bevel depth of the approved gas shot and keep the glow compact.
+The entire card interior must remain transparent. No crown, stars, particles, text, or item.
+
+권장 파일명: OverlayEquipmentRarityLegendary.png
+
+
+6.13 선택 카드 광택 오버레이
+----------------------------
+
+Primary request:
+Isolate only the selected-card emphasis from the equipment inventory.
+Create a thin cyan inner rim and compact soft outer glow that follows the exact inventory card silhouette.
+Keep the entire center transparent and do not add a card fill, item, check, text, or particles.
+
+권장 파일명: OverlayEquipmentSelected.png
+
+
+6.14 장착 완료 체크 배지
+-------------------------
+
+Primary request:
+Isolate one small equipped-state badge from the equipment gas shot.
+Preserve the exact rounded badge silhouette, cyan-to-teal face, lavender rim,
+and cream check mark. No text or number. Keep the badge compact and readable at small size.
+
+권장 파일명: BadgeEquipmentEquipped.png
+
+
+6.15 합성 가능 3다이아 표시
+---------------------------
+
+Primary request:
+Isolate the merge-ready indicator used on equipment cards.
+Show exactly three small connected diamond pips with the same violet and cyan material,
+spacing, scale, and highlight as the reference. No card background, text, number, sparkle cloud, or glow beyond the pips.
+
+권장 파일명: BadgeEquipmentMergeReady.png
+
+
+6.16 중복 수량 빈 배지
+-----------------------
+
+Primary request:
+Isolate one small rounded duplicate-count badge surface from an equipment card.
+Preserve its compact navy face, lavender rim, and reference proportions.
+Remove the number completely and leave the center empty for a Unity quantity label.
+
+권장 파일명: BadgeEquipmentCountBlank.png
+
+
+6.17 신규 장비 알림 배지
+------------------------
+
+Primary request:
+Isolate one small coral-red circular notification badge matching the equipment gas shot.
+Preserve the rounded toy-like bevel, cream highlight, and compact violet shadow.
+Leave its center completely blank; no exclamation mark, number, or text.
+
+권장 파일명: BadgeNotificationBlank.png
+
+
+6.18 인벤토리 구분 장식
+----------------------
+
+Primary request:
+Isolate the thin inventory-section divider ornament from the equipment screen.
+Preserve the horizontal cyan-lavender line, small central diamond accent, exact length,
+line thickness, and restrained glow. Remove all labels and keep the surrounding area transparent.
+
+권장 파일명: DividerEquipmentInventory.png
+
+
+6.19 장비 비교 트레이
+--------------------
+
+Primary request:
+Isolate the complete comparison tray below the inventory grid.
+Preserve its wide rounded silhouette, navy material, lavender frame, cyan separator,
+and the reference division between the current-item side and selected-item side.
+Remove both item icons, names, rarity labels, bonuses, arrows, and all values.
+Leave two balanced empty icon-safe areas and two empty text-safe areas.
+Do not include action buttons.
+
+권장 파일명: UiEquipmentComparisonTray.png
+
+
+6.20 비교 상승 화살표
+--------------------
+
+Primary request:
+Isolate only the small upward comparison arrow used in the equipment comparison area.
+Preserve the exact friendly rounded silhouette, cyan-teal gradient, cream highlight, and compact shadow.
+No background, text, numbers, or particles.
+
+권장 파일명: IconComparisonUp.png
+
+
+6.21 비교 하락 화살표
+--------------------
+
+Primary request:
+Create the downward comparison arrow as the exact vertical counterpart of the approved upward arrow.
+Use the same size, rounded silhouette, border, highlight, and shadow, with a restrained coral-red fill.
+No background, text, numbers, or particles.
+
+권장 파일명: IconComparisonDown.png
+
+
+6.22 주황색 장착 버튼 표면
+--------------------------
+
+Primary request:
+Isolate one primary orange equipment action button surface.
+Preserve the exact wide rounded rectangle, orange-to-amber gradient, cream top highlight,
+thin violet outer edge, and compact lower shadow from the gas shot.
+Remove all text and icons. Leave a clean centered label-safe area.
+
+권장 파일명: ButtonEquipmentEquip.png
+
+
+6.23 남색 해제 버튼 표면
+------------------------
+
+Primary request:
+Isolate one secondary navy unequip button surface from the equipment gas shot.
+Preserve the same size and corner radius as the primary equipment button,
+with a deep navy face, lavender rim, subtle cyan highlight, and compact shadow.
+Remove all text and icons; keep the center blank.
+
+권장 파일명: ButtonEquipmentUnequip.png
+
+
+6.24 보라색 합성 버튼 표면
+--------------------------
+
+Primary request:
+Isolate one violet merge action button surface from the equipment screen.
+Preserve the exact action-button dimensions, rounded corners, violet-to-indigo gradient,
+lavender highlight, and compact shadow. Remove all words, numbers, and item marks.
+Leave the center blank for a Unity label.
+
+권장 파일명: ButtonEquipmentMerge.png
+
+
+6.25 청록색 자동 장착 버튼 표면
+-------------------------------
+
+Primary request:
+Isolate one cyan-teal auto-equip action button surface from the equipment screen.
+Match the exact reference dimensions, rounded shape, rim thickness, highlight, and shadow.
+Remove all text and icons, leaving a clean centered label-safe area.
+
+권장 파일명: ButtonEquipmentAutoEquip.png
+
+
+6.26 자동 장착 순환 아이콘
+-------------------------
+
+Primary request:
+Isolate only the small fixed circular refresh arrows used for auto-equip.
+Preserve the exact two-arrow silhouette, rounded stroke, cyan and cream material, and highlight.
+No button surface, text, number, or extra sparkle.
+
+권장 파일명: IconAutoEquipRefresh.png
+
+
+6.27 곡괭이 장비 아이콘
+----------------------
+
+Primary request:
+Isolate only the pickaxe equipment item from the approved equipment gas shot.
+Preserve the exact head shape, wooden handle proportions, violet-silver metal,
+toy-like bevel, lighting direction, and three-quarter item orientation.
+Remove every card, badge, text, number, and surrounding glow.
+Keep the complete item centered with generous transparent padding.
+
+권장 파일명: IconEquipmentPickaxe.png
+
+
+6.28 드릴 장비 아이콘
+-------------------
+
+Primary request:
+Isolate only the compact blue-and-orange drill equipment item from the approved gas shot.
+Preserve the exact conical drill bit, body proportions, base, colors, bevel, and orientation.
+Remove the card, labels, rarity frame, check badge, and all surrounding UI.
+
+권장 파일명: IconEquipmentDrill.png
+
+
+6.29 로봇 장비 아이콘
+--------------------
+
+Primary request:
+Isolate only the small white-and-navy helper robot equipment item from the approved gas shot.
+Preserve its exact friendly body proportions, cyan face display, orange antenna detail,
+toy-like 3D material, pose, lighting, and silhouette.
+Remove the card, labels, badge, and every surrounding UI element.
+
+권장 파일명: IconEquipmentRobot.png
+
+
+6.30 부적 물약 장비 아이콘
+-------------------------
+
+Primary request:
+Isolate only the small cyan potion charm from the approved equipment gas shot.
+Preserve the exact rounded glass bottle, violet stopper, cyan liquid, highlight,
+toy-like bevel, and reference orientation. Remove all cards, labels, badges, and surrounding glow.
+
+권장 파일명: IconEquipmentCharm.png
+
+
+7. 박물관 화면 — 요소별 PRIMARY REQUEST
+======================================
+
+7.1 수집 기록 공용 모달 본체
+---------------------------
+
+Primary request:
+Isolate the complete collection-record modal body from the museum gas shot.
+Preserve its exact tall rounded shape, navy interior, violet depth, lavender outer rim,
+cyan highlight, and shadow. Remove the title, tabs, summary, exhibit cards, milestones,
+buttons, icons, labels, and values. Restore one clean uninterrupted interior surface.
+Do not include the separate title plaque or close button.
+
+권장 파일명: UiCollectionModalBody.png
+
+
+7.2 수집 기록 타이틀 플라크
+--------------------------
+
+Primary request:
+Isolate the wide rounded collection-record title plaque from the museum gas shot.
+Preserve its exact silhouette, navy gradient, lavender rim, cyan inner highlight,
+and lower violet shadow. Remove the title text and leave the center empty.
+
+권장 파일명: UiCollectionTitlePlaque.png
+
+
+7.3 활성 탭 표면
+----------------
+
+Primary request:
+Isolate one active collection tab surface from the museum screen.
+Preserve its exact width, height, rounded corner radius, bright cyan-to-teal gradient,
+cream top highlight, lavender rim, and compact shadow.
+Remove the tab label and icon, leaving a clean centered area.
+
+권장 파일명: TabCollectionActive.png
+
+
+7.4 비활성 탭 표면
+------------------
+
+Primary request:
+Isolate one inactive collection tab surface from the museum screen.
+Use the exact same dimensions and corner radius as the active tab,
+with a deep navy-to-indigo face, lavender rim, restrained cyan highlight, and compact shadow.
+Remove all text and icons.
+
+권장 파일명: TabCollectionInactive.png
+
+
+7.5 박물관 탭 건물 아이콘
+-------------------------
+
+Primary request:
+Isolate only the small museum-building icon from the active museum tab.
+Preserve the exact friendly temple silhouette, violet columns, cyan crystal center,
+lavender border, toy-like bevel, and highlight. No tab surface, text, or badge.
+
+권장 파일명: IconMuseumTab.png
+
+
+7.6 업적 탭 트로피 아이콘
+-------------------------
+
+Primary request:
+Isolate only the small achievement trophy icon from the collection tabs.
+Preserve the exact compact gold cup silhouette, warm highlight, violet base,
+toy-like bevel, and shadow. No tab surface, text, number, or badge.
+
+권장 파일명: IconAchievementTab.png
+
+
+7.7 박물관 요약 카드
+--------------------
+
+Primary request:
+Isolate the museum summary card beneath the tabs.
+Preserve its exact wide rounded shape, navy surface, lavender edge, restrained cyan glow,
+and the left icon zone plus right information zone proportions.
+Remove the museum icon, labels, discovery count, bonus percentage, and every number.
+Leave one empty square icon-safe area on the left and clean empty text-safe bands on the right.
+
+권장 파일명: UiMuseumSummaryCard.png
+
+
+7.8 전시 카드 기본 표면
+----------------------
+
+Primary request:
+Isolate one mineral exhibit card base from the 2-by-2 museum grid.
+Preserve its exact dimensions, rounded corners, navy-to-indigo surface, lavender rim,
+upper exhibit zone, lower progress zone, and compact shadow.
+Remove the mineral, pedestal, name, discovery state, quantities, percentage, milestone marks, and lock.
+Keep every internal zone clean and empty so all four minerals share the same base.
+
+권장 파일명: UiMuseumExhibitCardBase.png
+
+
+7.9 광물 전시 받침대
+-------------------
+
+Primary request:
+Isolate only the small mineral display pedestal from one discovered museum card.
+Preserve its exact low plinth shape, navy-violet material, cyan rim light,
+front-facing perspective, bevel, and compact shadow. No mineral, card, text, or progress UI.
+
+권장 파일명: UiMuseumPedestal.png
+
+
+7.10 구리 광석 전시 아이콘
+--------------------------
+
+Primary request:
+Isolate only the discovered copper ore specimen from the museum gas shot.
+Preserve the exact faceted cluster silhouette, warm copper-orange color,
+lavender shadow facets, toy-like bevel, orientation, and highlight.
+No pedestal, card, text, badge, or surrounding glow.
+
+권장 파일명: IconMuseumCopperOre.png
+
+
+7.11 철 광석 전시 아이콘
+------------------------
+
+Primary request:
+Isolate only the discovered iron ore specimen from the museum gas shot.
+Preserve its exact compact faceted cluster, cool silver-blue faces,
+violet shadow facets, orientation, bevel, and highlight.
+No pedestal, card, text, badge, or surrounding glow.
+
+권장 파일명: IconMuseumIronOre.png
+
+
+7.12 금 광석 전시 아이콘
+------------------------
+
+Primary request:
+Isolate only the discovered gold ore specimen from the museum gas shot.
+Preserve the exact faceted cluster silhouette, warm gold faces,
+orange shadow facets, orientation, bevel, and highlight.
+No pedestal, card, text, badge, or surrounding glow.
+
+권장 파일명: IconMuseumGoldOre.png
+
+
+7.13 미발견 수정 실루엣
+----------------------
+
+Primary request:
+Isolate only the undiscovered crystal specimen silhouette from the locked museum card.
+Preserve its exact crystal-cluster contour and proportions while using a muted dark navy-violet material.
+Keep only a restrained lavender edge light so the shape remains readable.
+No lock, question mark, pedestal, card, text, or particles.
+
+권장 파일명: IconMuseumUnknownCrystal.png
+
+
+7.14 잠금 오버레이
+-----------------
+
+Primary request:
+Isolate one small museum lock overlay.
+Preserve the exact friendly rounded padlock silhouette, navy body, lavender rim,
+cream highlight, and compact shadow. No card background, text, number, chain, or extra glow.
+
+권장 파일명: OverlayMuseumLocked.png
+
+
+7.15 광물 카드 진행 트랙
+------------------------
+
+Primary request:
+Isolate only the empty mineral milestone progress track from one museum exhibit card.
+Preserve its exact width, low rounded pill height, dark navy recess,
+lavender rim, and subtle inner shadow. Remove the fill, markers, numbers, and text.
+
+권장 파일명: UiMuseumProgressTrack.png
+
+
+7.16 광물 카드 진행 채움
+------------------------
+
+Primary request:
+Isolate only the cyan-teal progress fill used inside a museum exhibit track.
+Preserve the exact low pill height, rounded left cap, gradient, cream top highlight,
+and subtle glow. No track, marker, text, or number.
+The result must be horizontally stretchable and suitable for Unity Image.Type.Filled.
+
+권장 파일명: UiMuseumProgressFill.png
+
+
+7.17 활성 마일스톤 다이아
+-------------------------
+
+Primary request:
+Isolate one active museum milestone diamond from the progress line.
+Preserve its exact tiny faceted cyan crystal shape, lavender rim, cream highlight, and compact glow.
+No line, number, text, or additional diamonds.
+
+권장 파일명: IconMilestoneDiamondActive.png
+
+
+7.18 비활성 마일스톤 다이아
+---------------------------
+
+Primary request:
+Isolate one inactive museum milestone diamond matching the active marker's exact size and silhouette.
+Use a muted navy-violet fill, lavender edge, and no glow.
+No line, number, text, or additional diamonds.
+
+권장 파일명: IconMilestoneDiamondInactive.png
+
+
+7.19 초록 보너스 빈 배지
+-------------------------
+
+Primary request:
+Isolate one small green bonus badge from a discovered museum exhibit.
+Preserve the exact rounded pill silhouette, fresh green-to-teal gradient,
+cream highlight, lavender rim, and compact shadow.
+Remove the percentage and all text, leaving a clean centered label-safe area.
+
+권장 파일명: BadgeMuseumBonusBlank.png
+
+
+7.20 전체 마일스톤 트레이
+------------------------
+
+Primary request:
+Isolate the complete wide collection milestone tray near the bottom of the museum gas shot.
+Preserve its exact rounded shape, navy surface, lavender border, cyan progress recess,
+and evenly spaced marker anchor positions.
+Remove the title, discovery count, milestone values, reward values, fill, diamonds, and icons.
+Leave the entire tray clean with stable empty zones for runtime elements.
+
+권장 파일명: UiMuseumCollectionMilestoneTray.png
+
+
+7.21 다음 수집 보상 스트립
+-------------------------
+
+Primary request:
+Isolate the compact next-collection-reward strip from the museum gas shot.
+Preserve its exact low rounded silhouette, dark navy material, violet rim,
+small left reward-icon zone, and wide empty information zone.
+Remove the reward icon, text, discovery target, and values.
+
+권장 파일명: UiMuseumNextRewardStrip.png
+
+
+7.22 미스터리 광물 아이콘
+------------------------
+
+Primary request:
+Isolate only the small mystery mineral reward icon from the museum gas shot.
+Preserve its exact faceted dark crystal silhouette, lavender rim light, and compact cyan question-symbol motif.
+The question symbol is an intrinsic fixed icon and is allowed.
+No card, text, number, or particles.
+
+권장 파일명: IconMuseumMysteryMineral.png
+
+
+8. 업적 화면 — 요소별 PRIMARY REQUEST
+====================================
+
+8.1 업적 요약 카드
+------------------
+
+Primary request:
+Isolate the wide achievement summary card beneath the collection tabs.
+Preserve its exact rounded navy surface, lavender rim, cyan highlight,
+left trophy zone, center information zone, and right progress zone proportions.
+Remove the trophy, title, completion count, claimable count, percentage, and every number.
+Leave all three zones clean and empty.
+
+권장 파일명: UiAchievementSummaryCard.png
+
+
+8.2 업적 행 기본 표면
+--------------------
+
+Primary request:
+Isolate one complete achievement row base from the approved achievements gas shot.
+Preserve its exact wide low-height rounded silhouette, navy-to-indigo surface,
+lavender rim, subtle cyan top edge, compact shadow, and fixed column spacing.
+Remove the category icon, title, description, progress values, progress fill,
+reward icons, reward quantities, claim button, progress state, completed check, and every label.
+Leave five clean zones: icon, objective text, progress, reward, and status action.
+All six achievement rows must reuse this identical base.
+
+권장 파일명: UiAchievementRowBase.png
+
+
+8.3 업적 아이콘 프레임
+---------------------
+
+Primary request:
+Isolate one achievement category icon frame from the achievements gas shot.
+Preserve its exact rounded-square silhouette, navy face, lavender rim,
+subtle cyan inner highlight, and compact shadow.
+Remove the category icon and leave the center transparent or uniformly empty.
+
+권장 파일명: UiAchievementIconFrame.png
+
+
+8.4 업적 진행 트랙
+------------------
+
+Primary request:
+Isolate only the empty achievement progress track from one row.
+Preserve its exact short rounded pill shape, dark navy recess, lavender rim,
+and subtle inner shadow. Remove the fill, values, markers, and text.
+
+권장 파일명: UiAchievementProgressTrack.png
+
+
+8.5 업적 진행 채움
+------------------
+
+Primary request:
+Isolate only the cyan-to-teal achievement progress fill.
+Preserve the exact low pill height, rounded left cap, highlight, and restrained glow.
+No track, text, numbers, or markers.
+Keep it horizontally stretchable for Unity Image.Type.Filled.
+
+권장 파일명: UiAchievementProgressFill.png
+
+
+8.6 보상 아이콘 받침 표면
+-------------------------
+
+Primary request:
+Isolate the small reward icon backing surface used in an achievement row.
+Preserve its exact compact rounded-square silhouette, dark violet face,
+lavender rim, and soft inner highlight. Remove the reward icon and quantity.
+
+권장 파일명: UiAchievementRewardSlot.png
+
+
+8.7 주황색 수령 버튼 표면
+-------------------------
+
+Primary request:
+Isolate one orange claim button surface from a claimable achievement row.
+Preserve its exact compact dimensions, rounded corners, orange-to-amber gradient,
+cream top highlight, violet rim, and lower shadow.
+Remove all text and symbols and leave the center blank.
+
+권장 파일명: ButtonAchievementClaim.png
+
+
+8.8 진행 중 상태 캡슐
+---------------------
+
+Primary request:
+Isolate one inactive progress-state capsule from an achievement row.
+Match the exact size and corner radius of the claim button,
+using a muted navy-violet face, lavender edge, low contrast, and no bright glow.
+Remove the status text and leave the center empty.
+
+권장 파일명: UiAchievementInProgressState.png
+
+
+8.9 완료 체크 배지
+------------------
+
+Primary request:
+Isolate one completed achievement badge from the gas shot.
+Preserve the exact rounded green-to-teal circular badge, lavender rim,
+cream check mark, highlight, and compact shadow.
+No text, number, row background, or particles.
+
+권장 파일명: BadgeAchievementComplete.png
+
+
+8.10 채굴 업적 아이콘
+---------------------
+
+Primary request:
+Isolate only the mining achievement category icon from the first row.
+Preserve the exact crossed pickaxe and small ore-cluster silhouette,
+violet-silver metal, warm handle, cyan highlight, toy-like bevel, and proportions.
+No icon frame, text, number, badge, or background.
+
+권장 파일명: IconAchievementMining.png
+
+
+8.11 챕터 정복 업적 아이콘
+--------------------------
+
+Primary request:
+Isolate only the chapter-conquest achievement icon from the gas shot.
+Preserve its exact compact mountain or mine flag silhouette, violet flag,
+cyan crystal accent, rounded toy-like bevel, highlight, and proportions.
+No frame, text, number, badge, or background.
+
+권장 파일명: IconAchievementChapter.png
+
+
+8.12 시설 강화 업적 아이콘
+--------------------------
+
+Primary request:
+Isolate only the facility-upgrade achievement icon from the gas shot.
+Preserve the exact compact drill-machine and small gear silhouette,
+blue-violet body, orange detail, cyan highlight, bevel, and proportions.
+No frame, text, number, badge, or background.
+
+권장 파일명: IconAchievementFacility.png
+
+
+8.13 광부 성장 업적 아이콘
+--------------------------
+
+Primary request:
+Isolate only the miner-growth achievement icon from the gas shot.
+Preserve the exact friendly miner portrait badge silhouette, brown hair and goggles,
+navy clothing, cyan rim light, toy-like 3D face, and compact proportions.
+No outer category frame, text, level, number, or background.
+
+권장 파일명: IconAchievementMiner.png
+
+
+8.14 연구 진행 업적 아이콘
+--------------------------
+
+Primary request:
+Isolate only the research achievement icon from the gas shot.
+Preserve the exact compact blueprint or flask-and-blueprint silhouette,
+cyan liquid, violet paper, cream highlight, toy-like bevel, and proportions.
+No frame, text, number, badge, or background.
+
+권장 파일명: IconAchievementResearch.png
+
+
+8.15 장비 수집 업적 아이콘
+--------------------------
+
+Primary request:
+Isolate only the equipment-collection achievement icon from the gas shot.
+Preserve the exact compact treasure chest with small equipment emblem,
+navy-violet body, warm gold trim, cyan highlight, toy-like bevel, and proportions.
+No frame, text, number, badge, or background.
+
+권장 파일명: IconAchievementEquipment.png
+
+
+9. 기존 공용 자산 재사용
+-----------------------
+
+다음 요소는 메인 HUD 또는 기존 V5 자산과 모양이 같다면 새로 생성하지 않는다.
+같은 의미의 아이콘을 화면마다 다시 생성하면 색과 비율이 달라져 전체 UI 통일성이 깨진다.
+
+- Credits 동전 아이콘
+- Gem 보석 아이콘
+- 설계도 코어 아이콘
+- 공용 닫기 버튼과 X 아이콘
+- 공용 알림 배지
+- 공용 주황색 버튼 표면
+- 공용 잠금 아이콘
+
+가스샷에서 크기만 다르면 동일 원본을 Unity RectTransform으로 축소해 사용한다.
+선 굵기나 형태가 실제로 다를 때만 해당 화면 크롭을 입력으로 하여 제한 편집한다.
+
+
+10. 조립 원칙
+-------------
+
+장비 카드 조립 순서:
+1. UiEquipmentInventoryCardBase
+2. 희귀도 테두리 오버레이 1종
+3. 장비 아이콘
+4. Unity 텍스트와 동적 값
+5. 선택·장착·합성 가능·수량·알림 오버레이 중 필요한 것만
+
+박물관 카드 조립 순서:
+1. UiMuseumExhibitCardBase
+2. UiMuseumPedestal
+3. 광물 아이콘 또는 미발견 실루엣
+4. Unity 텍스트와 동적 값
+5. 진행 트랙과 Filled 채움
+6. 마일스톤 다이아와 보너스 또는 잠금 오버레이
+
+업적 행 조립 순서:
+1. UiAchievementRowBase
+2. UiAchievementIconFrame과 카테고리 아이콘
+3. Unity 제목·설명·진행 수치
+4. 진행 트랙과 Filled 채움
+5. 보상 슬롯, 기존 재화 아이콘, Unity 수량
+6. 수령 버튼, 진행 상태 캡슐, 완료 배지 중 정확히 하나
+
+이미지에 상태 조합을 미리 구워 넣지 않는다.
+예: "희귀+장착+선택 곡괭이 카드"를 하나의 이미지로 만들지 않는다.
+
+
+11. 권장 생성 순서
+------------------
+
+1. 공용 모달 본체, 타이틀 플라크, 닫기 버튼
+2. 화면별 기본 카드와 행
+3. 공용 버튼·탭·진행 트랙
+4. 선택·희귀도·완료·잠금 상태 오버레이
+5. 장비·광물·업적 개별 아이콘
+6. 진행 채움과 작은 마일스톤
+7. 접촉 시트로 화면별 크기·테두리·광원 일치 검수
+8. Unity 조립 후 승인 가스샷 위에 같은 해상도로 겹쳐 배치 검수
+
+
+12. 생성 직후 개별 자산 검수
+--------------------------
+
+[형태]
+- 원본 크롭과 외곽 실루엣이 일치하는가?
+- 가로세로 비율, 모서리 반지름, 테두리 굵기가 달라지지 않았는가?
+- 원근, 기울임, 비대칭 왜곡이 없는가?
+- 캔버스 끝에서 테두리나 발광이 잘리지 않았는가?
+
+[색과 재질]
+- 원본의 남색·보라·라벤더·청록·주황색을 임의로 채도 상승시키지 않았는가?
+- 광원 방향과 하이라이트 위치가 같은 계열 자산끼리 일치하는가?
+- 과도한 금속광, 유리광, 먼지, 입자, 네온이 추가되지 않았는가?
+
+[텍스트]
+- 한글, 영문, 숫자, 퍼센트, 가격, 가짜 문자 잔상이 전혀 없는가?
+- 지운 글자 자리에 번짐이나 밝기 얼룩이 없는가?
+- Unity 텍스트가 올라갈 빈 영역이 충분하고 균일한가?
+
+[분리]
+- 대상 외의 카드, 아이콘, 배경 조각이 섞이지 않았는가?
+- 키 컬러가 자산 내부에 들어가지 않았는가?
+- 투명화 후 가장자리에 녹색·자홍색·빨간색 테두리가 남지 않았는가?
+
+
+13. 가스샷 근접도 검수 — 반드시 수행
+-----------------------------------
+
+1. 승인 가스샷과 동일한 1440×3088 빈 캔버스를 만든다.
+2. 분리된 자산을 원래 위치와 원래 표시 크기에 배치한다.
+3. 승인 가스샷을 그 위에 50% 투명도로 겹친다.
+4. Difference 또는 깜빡임 비교로 외곽선과 중심축을 확인한다.
+5. 아래 오차를 넘으면 승인하지 않고 다시 크롭 편집한다.
+
+- 큰 모달·타이틀: 외곽 기준 4px 초과 차이 금지
+- 카드·행·버튼: 외곽 기준 3px 초과 차이 금지
+- 작은 배지·아이콘: 표시 크기의 3% 초과 차이 금지
+- 반복 카드: 같은 계열끼리 너비·높이·곡률 100% 동일
+- 열 정렬: 아이콘·텍스트·진행·보상·상태 열의 중심축 흔들림 금지
+
+"분위기가 비슷하다" 또는 "눈으로 보기에는 괜찮다"는 통과 기준이 아니다.
+원본 외곽을 실제로 덮을 수 있고, 글자가 제거된 빈 영역이 깨끗해야 통과한다.
+
+
+14. Unity 임포트 메모
+--------------------
+
+- 패널·카드·버튼: Sprite (2D and UI), Image.Type.Simple을 기본으로 사용한다.
+- 실제로 늘려야 하는 공용 표면만 투명 여백을 정리한 뒤 9-slice border를 설정한다.
+- 진행 채움: Image.Type.Filled, Horizontal, Origin Left.
+- 아이콘: Preserve Aspect 활성화.
+- 배지·오버레이: 기본 카드의 자식으로 두고 카드 밖 발광이 잘리지 않도록 마스크 사용을 검토한다.
+- TMP 텍스트와 수치는 이미지보다 위 레이어에 놓고 Auto Size에만 의존하지 않는다.
+- 1440×3088 가스샷 비율 외에도 16:9, 19.5:9, 20:9 Safe Area에서 겹침과 잘림을 재검수한다.
+- 실제 RectTransform 배치는 `POCKET_FORGE_MAIN_UI_LAYOUT_CORRECTION_PROMPT.txt`와
+  `pocket-forge-ui-layout-guard`의 비겹침·앵커 규칙을 함께 적용한다.
+
+
+15. 금지 프롬프트
+-----------------
+
+다음 표현만으로 생성하지 않는다.
+
+- "Pocket Forge 스타일의 장비 카드 만들어줘"
+- "비슷한 캐주얼 RPG UI"
+- "더 예쁘게 재디자인"
+- "보라색 판타지 UI 세트"
+- "화면 전체를 참고해서 알아서 분리"
+
+이런 요청은 원본의 비율·곡률·색·광택을 고정하지 못하고 요소마다 디자인이 달라진다.
+항상 승인 가스샷의 실제 대상 크롭과 공통 프롬프트 A를 먼저 사용한다.
+
+
+문서 종료
+---------
+
+이 TXT는 이미지 생성 요청문과 분해 규격이다.
+실제 이미지 생성, 배경 제거, Unity 임포트, RectTransform 배치는 별도 작업으로 수행한다.

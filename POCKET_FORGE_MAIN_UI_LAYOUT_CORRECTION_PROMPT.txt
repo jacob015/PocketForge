@@ -1,0 +1,279 @@
+POCKET FORGE MAIN UI LAYOUT CORRECTION PROMPT
+================================================
+
+작성 목적
+---------
+
+현재 Pocket Forge 메인 화면의 시각 스타일과 기능은 유지하면서
+겹침, 잘림, 비대칭, 불균일 간격, Safe Area 이탈만 교정하기 위한
+이미지 편집 프롬프트와 구현 검수 기준이다.
+
+중요:
+이미지 생성 모델은 픽셀 좌표를 완벽히 보장하지 않는다.
+이 프롬프트는 승인용 가스샷의 배치 정확도를 높이는 기준이며,
+실제 Unity 화면에서는 동일 규격의 RectTransform·앵커·오버레이 검수가 필요하다.
+
+
+1. 현재 화면에서 확인된 문제
+----------------------------
+
+- 플레이어 초상과 상단 자원 바가 겹치면서 XP 표시 영역을 침범한다.
+- XP, Credits, Gem, 설계도 코어와 + 버튼의 중심선·간격이 일정하지 않다.
+- 설정 버튼이 상단 바와 다른 높이·기준선에 놓여 있다.
+- 챕터 카드와 전투력 카드의 높이·상단선·내부 여백이 맞지 않는다.
+- 보스 준비 배너와 중앙 광석 사이 간격이 불안정하다.
+- 오프라인 보상, 채굴 버튼, 연구 완료 카드의 높이와 중심선이 다르다.
+- 보스 도전 버튼이 연구 카드와 로봇 강화 카드 위를 침범한다.
+- 곡괭이·드릴·로봇 강화 카드의 폭과 내부 아이콘 기준선이 흔들린다.
+- 강화 카드의 하단 가격·화살표가 카드 경계를 벗어난다.
+- 하단 내비게이션 첫 항목과 마지막 항목이 화면 밖으로 잘린다.
+- 강화 카드와 하단 내비게이션 사이에 독립 안전 여백이 없다.
+- 서로 다른 기능 영역이 장식적으로 연결되어 클릭 영역을 오해하게 만든다.
+
+
+2. 기준 캔버스와 공통 정렬선
+-----------------------------
+
+기준 해상도: 1440 × 3088 portrait
+화면비: Android 9:19.3~19.5 대응
+기준 좌표 원점: 좌측 상단
+
+공통 안전 영역:
+
+- 좌측 안전선: x = 72
+- 우측 안전선: x = 1368
+- 상단 콘텐츠 시작선: y = 144
+- 하단 콘텐츠 종료선: y = 3032
+- 중앙 정렬선: x = 720
+- 최소 형제 요소 간격: 24 px
+- 주요 그룹 간 수직 간격: 32~48 px
+- 텍스트와 아이콘 사이 최소 간격: 24 px
+- 카드 내부 최소 패딩: 28 px
+- 둥근 버튼 최소 터치 높이: 132 px
+
+모든 주요 요소는 24 px 기준 그리드에 맞춘다.
+의도적으로 돌출된 프로필 프레임을 제외하면 어떤 요소도 안전선을 넘지 않는다.
+돌출 장식은 클릭 영역이나 텍스트 영역을 침범하지 않는다.
+
+
+3. 화면 수직 밴드
+-----------------
+
+A. 상단 HUD: y = 144~360
+
+- 프로필 프레임: x = 48~250, y = 144~346
+- 통합 자원 바: x = 220~1264, y = 164~332
+- 설정 버튼: x = 1288~1392, y = 190~294
+- 프로필은 자원 바 앞에 시각적으로 부착할 수 있지만,
+  실제 불투명 영역이 XP 트랙·수치·아이콘을 가리지 않는다.
+- XP, Credits, Gem, 코어는 같은 중심선에 놓는다.
+- 네 카운터 구역의 높이, 내부 패딩, 아이콘 크기를 통일한다.
+- + 버튼은 해당 재화 구역 내부에만 존재하며 인접 재화 수치를 침범하지 않는다.
+
+B. 스테이지·전투력: y = 400~650
+
+- 스테이지 카드: x = 72~948, y = 400~650
+- 전투력 카드: x = 972~1368, y = 400~650
+- 두 카드의 상단선, 하단선, 모서리 반경, 테두리 두께를 일치시킨다.
+- 스테이지 카드 내부는 아이콘 영역과 텍스트 영역을 분리한다.
+- 전투력 카드는 아이콘, 현재 전투력, 권장치의 3단 구조를 유지한다.
+
+C. 보스 상태: y = 686~806
+
+- 보스 상태 배너: x = 420~1020, y = 686~806
+- 중앙선 x = 720에 정확히 정렬한다.
+- 스테이지 카드나 광석 영역에 닿지 않는다.
+- 보스 아이콘과 상태 문구는 각자의 안전 영역을 가진다.
+
+D. 중앙 광석: y = 842~1648
+
+- 광석 표시 최대 경계: x = 260~1180, y = 842~1648
+- 광석의 시각적 중심은 x = 720에 둔다.
+- 광석 모델은 HUD 카드 뒤로 들어가거나 체력 바를 가리지 않는다.
+- 배경 수정과 광석 실루엣이 겹칠 경우 약한 배경 명도 마스크로 분리한다.
+
+E. 광석 체력: y = 1680~1792
+
+- 체력 바 전체: x = 360~1080, y = 1680~1792
+- 제목, 트랙, Fill, 수치가 하나의 정렬 축을 공유한다.
+- Fill은 프레임 밖으로 나오지 않는다.
+- 중앙 광석과 행동 영역 사이에 최소 40 px의 독립 여백을 둔다.
+
+F. 핵심 행동: y = 1840~2088
+
+- 오프라인 보상 카드: x = 72~312, y = 1840~2088
+- 메인 채굴 버튼: x = 336~1104, y = 1840~2088
+- 연구 완료 카드: x = 1128~1368, y = 1840~2088
+- 좌우 보조 카드는 같은 폭과 높이를 사용한다.
+- 메인 채굴 버튼은 중앙에서 가장 크고 강한 CTA다.
+- 세 요소는 같은 수직 중심선을 공유한다.
+- 어느 카드의 장식이나 알림 배지도 인접 버튼 경계를 넘지 않는다.
+
+G. 보스 도전: y = 2112~2232
+
+- 보스 도전 버튼: x = 470~970, y = 2112~2232
+- 메인 채굴 버튼과 시각적으로 구분된 코랄색 보조 CTA다.
+- 연구 카드나 강화 카드 위로 겹쳐 띄우지 않는다.
+- 보스 도전이 잠긴 상태라면 같은 위치에서 낮은 채도로 표시한다.
+
+H. 시설 강화 카드: y = 2264~2728
+
+- 곡괭이 카드: x = 72~480
+- 드릴 카드: x = 516~924
+- 로봇 카드: x = 960~1368
+- 세 카드 공통 y = 2264~2728
+- 세 카드의 폭 408 px, 높이 464 px를 동일하게 유지한다.
+- 아이콘, 이름, 레벨, 가격, 강화 가능 화살표의 내부 기준선을 통일한다.
+- 아이콘은 카드 상단 55% 안에 완전히 들어간다.
+- 가격 행과 강화 화살표는 카드 하단 내부에서 끝난다.
+- 추천 카드는 외곽 발광만 추가하고 크기나 위치를 변경하지 않는다.
+
+I. 하단 내비게이션: y = 2800~3032
+
+- 내비게이션 전체: x = 72~1368, y = 2800~3032
+- 장비, 연구, 홈, 박물관, 미션, 상점 6개 항목을 동일 폭으로 분할한다.
+- 첫 항목과 마지막 항목의 아이콘·텍스트·터치 영역이 화면 밖으로 나가지 않는다.
+- 홈 선택 탭은 위로 돌출할 수 있지만 y = 2760보다 위로 올라가지 않는다.
+- 강화 카드와 내비게이션 사이 최소 72 px의 빈 영역을 유지한다.
+
+
+4. 절대 금지 교차 규칙
+----------------------
+
+- 프로필 프레임 ↔ XP 텍스트 교차 금지
+- 재화 아이콘 ↔ 재화 수치 교차 금지
+- + 버튼 ↔ 인접 재화 영역 교차 금지
+- 스테이지 카드 ↔ 전투력 카드 교차 금지
+- 보스 배너 ↔ 광석 실루엣 교차 금지
+- 체력 바 ↔ 광석 또는 행동 카드 교차 금지
+- 오프라인 보상 ↔ 채굴 버튼 교차 금지
+- 연구 완료 카드 ↔ 보스 버튼 교차 금지
+- 보스 버튼 ↔ 로봇 강화 카드 교차 금지
+- 강화 카드의 아이콘 ↔ 이름·레벨·가격 교차 금지
+- 강화 화살표 ↔ 카드 외곽 교차 금지
+- 강화 카드 ↔ 하단 내비게이션 교차 금지
+- 내비게이션 아이콘 ↔ 화면 좌우 가장자리 교차 금지
+- 알림 배지 ↔ 인접 컨트롤 교차 금지
+
+
+5. 이미지 편집용 완성 프롬프트
+------------------------------
+
+Use case: precise-object-edit
+Asset type: corrected high-fidelity Pocket Forge portrait mobile-game main-screen UI gas shot
+
+Input image roles:
+- Image 1 is the current implemented Pocket Forge main-screen screenshot and the edit target.
+- Optional Image 2 is the approved casual Pocket Forge UI concept and is a style reference only.
+
+Primary request:
+Correct only the layout, spacing, alignment, scale consistency, and safe-area compliance of the current Pocket Forge main screen.
+Preserve the existing purple crystal cave, central ore, UI art style, icons, palette, game functions, labels, resource types, and overall information hierarchy.
+Do not redesign the visual identity and do not add or remove gameplay systems.
+
+Canonical canvas:
+Treat the final screen as a 1440×3088 portrait Android composition.
+Use x=72 and x=1368 as the main left and right content-safe lines.
+Use y=144 and y=3032 as the top and bottom content-safe lines.
+Align all repeated elements to a 24 px design grid.
+
+Required vertical bands:
+- Top HUD: y 144–360.
+- Stage and power cards: y 400–650.
+- Boss-status banner: y 686–806.
+- Central ore stage: y 842–1648.
+- Ore-health bar: y 1680–1792.
+- Offline/Mine/Research action row: y 1840–2088.
+- Separate Boss Challenge button: y 2112–2232.
+- Three equal upgrade cards: y 2264–2728.
+- Bottom navigation: y 2800–3032.
+
+Top HUD geometry:
+Place the player portrait at x 48–250 and the resource bar at x 220–1264.
+The portrait may visually attach to the resource bar but must not cover the XP track, XP value, or any resource counter.
+Place the settings button at x 1288–1392 and vertically center it with the resource bar.
+Make XP, Credits, Gem, and Blueprint Core counters equal-height modules sharing one center baseline.
+Keep every plus button within its own counter module.
+
+Stage geometry:
+Place the stage card at x 72–948 and the power card at x 972–1368.
+Match their top edge, bottom edge, corner radius, and border thickness.
+Keep icon zones separate from text-safe zones.
+
+Center geometry:
+Center the boss-status banner at x 420–1020.
+Center the ore inside x 260–1180 without touching the boss banner or health bar.
+Center the health bar at x 360–1080.
+
+Action geometry:
+Place the offline-reward card at x 72–312, the primary Mine button at x 336–1104, and the research-complete card at x 1128–1368.
+Make the two side cards exactly equal in size.
+Place the Boss Challenge button separately at x 470–970 below this row.
+Never float the Boss button over the research card, robot card, or Mine button.
+
+Upgrade geometry:
+Place three equal upgrade cards at x 72–480, x 516–924, and x 960–1368.
+Use identical width, height, icon scale, title baseline, level baseline, and price baseline.
+Keep every upgrade arrow fully inside its card.
+
+Bottom navigation geometry:
+Fit all six navigation items completely inside x 72–1368.
+Use six equal-width cells.
+Keep the first and last icons away from screen edges.
+Leave at least 72 px between the upgrade-card row and the navigation dock.
+
+Spacing and collision constraints:
+No UI element may overlap another element’s content or touch area.
+Use at least 24 px between sibling controls, 32–48 px between groups, 24 px between icons and text, and 28 px inner card padding.
+Keep notification badges inside their owner bounds except for a maximum 12 px decorative overhang toward unused space.
+No decorative glow may obscure text.
+
+Style invariants:
+Keep the friendly toy-like 3D casual style, deep navy-violet panels, lavender borders, cyan information accents, warm yellow Mine CTA, and coral Boss CTA.
+Preserve the existing purple-blue crystal mine background and central ore.
+Do not introduce heavy black steel, realistic grime, skulls, excessive gold trim, or a new palette.
+
+Text constraints:
+Preserve the existing short labels and values where possible.
+Do not invent random numbers, pseudo-Korean, decorative writing, or additional labels.
+If exact text cannot be preserved, leave a clean text-safe area rather than generating broken glyphs.
+
+Final QA target:
+The final screen must look intentionally designed on a shared grid.
+All cards must have consistent baselines and gutters.
+The Boss button must not overlap Research or Robot.
+The leftmost and rightmost navigation items must be fully visible.
+No control may be cropped by the screen or Android safe area.
+No phone frame, watermark, annotations, red guide lines, or measurement labels in the final image.
+
+
+6. 생성 후 필수 검수 절차
+-------------------------
+
+1) 결과 이미지를 정확히 1440×3088로 맞춘다.
+2) x=72, x=1368, x=720 정렬선을 오버레이한다.
+3) 각 수직 밴드의 상단·하단선을 반투명 색으로 표시한다.
+4) 모든 UI 요소의 불투명 알파 경계를 사각형으로 검출한다.
+5) 금지 교차 규칙에 해당하는 경계 사각형이 겹치는지 확인한다.
+6) 세 강화 카드의 폭·높이·중심 y를 비교한다.
+7) 하단 6개 내비게이션 셀의 폭과 중심 간격을 비교한다.
+8) 최초 생성 결과가 실패하면 전체 재생성보다 문제가 있는 한 영역만 편집한다.
+9) 승인된 가스샷을 Unity 캡처와 같은 해상도로 맞춘다.
+10) 두 이미지를 50% 투명도로 겹쳐 외곽, 중심선, 카드 높이를 비교한다.
+11) 한국어·영어·일본어·중국어의 가장 긴 문자열로 텍스트 안전 영역을 확인한다.
+12) 16:9, 19.5:9, 20:9 Safe Area에서도 잘림과 겹침을 재확인한다.
+
+
+7. 실제 Unity 적용 원칙
+-----------------------
+
+- 생성된 완성 스크린샷을 하나의 UI 이미지로 사용하지 않는다.
+- 생성 이미지에서는 패널, 버튼, 아이콘 등 시각 자산만 분리한다.
+- 레이아웃은 RectTransform, Anchor, LayoutGroup과 런타임 텍스트로 구성한다.
+- 기준 캔버스 1440×3088 좌표를 실제 Canvas Scaler 기준으로 환산한다.
+- 반복 카드에는 동일 Prefab과 동일 LayoutElement 규격을 사용한다.
+- 진행 Fill만 Image.Type.Filled를 사용하고 나머지는 프로젝트 기준에 따라 Simple을 우선한다.
+- 버튼의 시각적 경계와 실제 터치 RectTransform을 따로 확인한다.
+- 이미지 비율을 강제로 늘려 맞추지 말고 투명 정사각형 캔버스로 아이콘 비율을 보존한다.
+- 적용 후 동일 해상도 Simulator 캡처와 승인 가스샷을 반투명 오버레이한다.
+- 좌표·Safe Area·비겹침 규칙을 EditMode 회귀 테스트로 고정한다.

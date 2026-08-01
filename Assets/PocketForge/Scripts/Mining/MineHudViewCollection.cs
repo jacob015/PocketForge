@@ -20,19 +20,30 @@ namespace PocketForge.Mining
         private sealed class MuseumRowView
         {
             public Image Surface;
+            public Image Pedestal;
             public Image Icon;
             public Text Name;
             public Text Details;
             public Text Bonus;
+            public Image ProgressTrack;
+            public Image ProgressFill;
+            public Image LockedOverlay;
         }
 
         private sealed class AchievementRowView
         {
             public Image Surface;
+            public Image IconFrame;
+            public Image Icon;
             public Text Name;
             public Text Progress;
+            public Image ProgressTrack;
+            public Image ProgressFill;
+            public Image RewardSlot;
+            public Image RewardIcon;
             public Text Reward;
             public Button ClaimButton;
+            public Image CompleteBadge;
             public string AchievementId = string.Empty;
         }
 
@@ -41,9 +52,15 @@ namespace PocketForge.Mining
         private Image collectionTitleSurface;
         private Text collectionTitle;
         private Text collectionSummary;
+        private Image collectionSummarySurface;
+        private Image collectionSummaryIcon;
+        private Image museumNextRewardSurface;
+        private Image museumNextRewardIcon;
+        private Text museumNextRewardText;
         private Button museumTabButton;
         private Button achievementsTabButton;
         private Button closeCollectionButton;
+        private Button closeCollectionCornerButton;
         private readonly List<MuseumRowView> museumRows = new();
         private readonly List<AchievementRowView> achievementRows = new();
         private Action<string> achievementClaimAction;
@@ -66,15 +83,15 @@ namespace PocketForge.Mining
                 new Vector2(0.5f, 0.5f),
                 new Vector2(0.5f, 0.5f),
                 new Vector2(0f, 24f),
-                new Vector2(920f, 1380f),
+                new Vector2(920f, 1400f),
                 new Color(0.035f, 0.075f, 0.15f, 0.995f));
             collectionTitleSurface = CreatePanel(
                 "CollectionTitleSurface",
                 collectionCard.transform,
                 new Vector2(0.5f, 1f),
                 new Vector2(0.5f, 1f),
-                new Vector2(0f, -44f),
-                new Vector2(650f, 132f),
+                new Vector2(0f, -38f),
+                new Vector2(650f, 126f),
                 new Color(0.12f, 0.17f, 0.42f, 1f));
             collectionTitle = CreateText(
                 "CollectionTitle",
@@ -82,22 +99,50 @@ namespace PocketForge.Mining
                 Vector2.zero,
                 Vector2.one,
                 Vector2.zero,
-                new Vector2(-42f, -14f),
+                new Vector2(0f, -8f),
                 44,
                 TextAnchor.MiddleCenter);
             collectionTitle.font = UiFontProvider.GetCasual();
+
+            closeCollectionCornerButton = CreateButton(
+                "CloseCollectionCorner",
+                collectionCard.transform,
+                new Vector2(1f, 1f),
+                new Vector2(1f, 1f),
+                new Vector2(-72f, -70f),
+                new Vector2(84f, 84f),
+                Color.white);
+            closeCollectionCornerButton.GetComponentInChildren<Text>().gameObject.SetActive(false);
+            var cornerCloseIcon = CreateSimpleImage(
+                "Icon",
+                closeCollectionCornerButton.transform,
+                Vector2.zero,
+                Vector2.one,
+                Vector2.zero,
+                new Vector2(-22f, -22f),
+                Color.white);
+            cornerCloseIcon.raycastTarget = false;
+            closeCollectionCornerButton.onClick.AddListener(() => collectionPanel.SetActive(false));
 
             museumTabButton = CreateCollectionButton("MuseumTab", -210f, 482f, 360f);
             museumTabButton.onClick.AddListener(() => SelectCollectionTab(CollectionTab.Museum));
             achievementsTabButton = CreateCollectionButton("AchievementsTab", 210f, 482f, 360f);
             achievementsTabButton.onClick.AddListener(() => SelectCollectionTab(CollectionTab.Achievements));
-            collectionSummary = CreateText(
-                "CollectionSummary",
+            collectionSummarySurface = CreatePanel(
+                "CollectionSummarySurface",
                 collectionCard.transform,
                 new Vector2(0.5f, 0.5f),
                 new Vector2(0.5f, 0.5f),
-                new Vector2(0f, 388f),
-                new Vector2(780f, 64f),
+                new Vector2(0f, 372f),
+                new Vector2(780f, 132f),
+                Color.white);
+            collectionSummary = CreateText(
+                "CollectionSummary",
+                collectionSummarySurface.transform,
+                Vector2.zero,
+                Vector2.one,
+                new Vector2(78f, 0f),
+                new Vector2(-130f, -24f),
                 27,
                 TextAnchor.MiddleCenter);
             collectionSummary.font = UiFontProvider.GetCasual();
@@ -105,8 +150,46 @@ namespace PocketForge.Mining
             collectionSummary.resizeTextForBestFit = true;
             collectionSummary.resizeTextMinSize = 20;
             collectionSummary.resizeTextMaxSize = 27;
+            collectionSummaryIcon = CreateSimpleImage(
+                "CollectionSummaryIcon",
+                collectionSummarySurface.transform,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(-300f, 0f),
+                new Vector2(88f, 88f),
+                Color.white);
+            collectionSummaryIcon.raycastTarget = false;
 
-            closeCollectionButton = CreateCollectionButton("CloseCollection", 0f, -610f, 360f);
+            museumNextRewardSurface = CreateSimpleImage(
+                "MuseumNextRewardSurface",
+                collectionCard.transform,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0f, -456f),
+                new Vector2(760f, 92f),
+                Color.white);
+            museumNextRewardSurface.raycastTarget = false;
+            museumNextRewardIcon = CreateSimpleImage(
+                "MuseumNextRewardIcon",
+                museumNextRewardSurface.transform,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(-170f, 0f),
+                new Vector2(68f, 68f),
+                Color.white);
+            museumNextRewardIcon.raycastTarget = false;
+            museumNextRewardText = CreateText(
+                "MuseumNextRewardProgress",
+                museumNextRewardSurface.transform,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(80f, 0f),
+                new Vector2(360f, 52f),
+                24,
+                TextAnchor.MiddleCenter);
+            museumNextRewardText.font = UiFontProvider.GetCasual();
+
+            closeCollectionButton = CreateCollectionButton("CloseCollection", 0f, -622f, 360f);
             closeCollectionButton.onClick.AddListener(() => collectionPanel.SetActive(false));
             collectionPanel.SetActive(false);
         }
@@ -135,54 +218,96 @@ namespace PocketForge.Mining
             while (museumRows.Count < count)
             {
                 var index = museumRows.Count;
+                var column = index % 2;
+                var line = index / 2;
                 var row = new MuseumRowView();
                 row.Surface = CreatePanel(
                     $"MuseumRow{index + 1}",
                     collectionCard.transform,
                     new Vector2(0.5f, 0.5f),
                     new Vector2(0.5f, 0.5f),
-                    new Vector2(0f, 270f - index * 190f),
-                    new Vector2(780f, 166f),
+                    new Vector2(-200f + column * 400f, 128f - line * 352f),
+                    new Vector2(360f, 324f),
                     new Color(0.055f, 0.12f, 0.23f, 0.98f));
                 row.Icon = CreateSimpleImage(
                     "OreIcon",
                     row.Surface.transform,
-                    new Vector2(0f, 0.5f),
-                    new Vector2(0f, 0.5f),
-                    new Vector2(86f, 0f),
-                    new Vector2(116f, 116f),
+                    new Vector2(0.5f, 0.5f),
+                    new Vector2(0.5f, 0.5f),
+                    new Vector2(0f, 35f),
+                    new Vector2(160f, 126f),
                     Color.white);
+                row.Pedestal = CreateSimpleImage(
+                    "Pedestal",
+                    row.Surface.transform,
+                    new Vector2(0.5f, 0.5f),
+                    new Vector2(0.5f, 0.5f),
+                    new Vector2(0f, 2f),
+                    new Vector2(205f, 86f),
+                    Color.white);
+                row.Pedestal.raycastTarget = false;
+                row.Pedestal.transform.SetAsFirstSibling();
                 row.Name = CreateText(
                     "OreName",
                     row.Surface.transform,
                     new Vector2(0.5f, 0.5f),
                     new Vector2(0.5f, 0.5f),
-                    new Vector2(-80f, 35f),
-                    new Vector2(420f, 50f),
-                    30,
-                    TextAnchor.MiddleLeft);
+                    new Vector2(0f, 124f),
+                    new Vector2(310f, 42f),
+                    26,
+                    TextAnchor.MiddleCenter);
                 row.Name.font = UiFontProvider.GetCasual();
                 row.Details = CreateText(
                     "OreDetails",
                     row.Surface.transform,
                     new Vector2(0.5f, 0.5f),
                     new Vector2(0.5f, 0.5f),
-                    new Vector2(-80f, -27f),
-                    new Vector2(420f, 58f),
-                    23,
-                    TextAnchor.MiddleLeft);
+                    new Vector2(0f, -58f),
+                    new Vector2(310f, 42f),
+                    20,
+                    TextAnchor.MiddleCenter);
                 row.Details.color = new Color(0.62f, 0.86f, 1f);
                 row.Bonus = CreateText(
                     "OreBonus",
                     row.Surface.transform,
-                    new Vector2(1f, 0.5f),
-                    new Vector2(1f, 0.5f),
-                    new Vector2(-108f, 0f),
-                    new Vector2(180f, 74f),
-                    26,
+                    new Vector2(0.5f, 0.5f),
+                    new Vector2(0.5f, 0.5f),
+                    new Vector2(0f, -137f),
+                    new Vector2(180f, 40f),
+                    22,
                     TextAnchor.MiddleCenter);
                 row.Bonus.font = UiFontProvider.GetCasual();
                 row.Bonus.color = new Color(0.52f, 1f, 0.58f);
+                row.ProgressTrack = CreateSimpleImage(
+                    "ProgressTrack",
+                    row.Surface.transform,
+                    new Vector2(0.5f, 0.5f),
+                    new Vector2(0.5f, 0.5f),
+                    new Vector2(0f, -98f),
+                    new Vector2(276f, 28f),
+                    Color.white);
+                row.ProgressTrack.raycastTarget = false;
+                row.ProgressFill = CreateSimpleImage(
+                    "ProgressFill",
+                    row.ProgressTrack.transform,
+                    Vector2.zero,
+                    Vector2.one,
+                    Vector2.zero,
+                    new Vector2(-8f, -8f),
+                    Color.white);
+                row.ProgressFill.type = Image.Type.Filled;
+                row.ProgressFill.fillMethod = Image.FillMethod.Horizontal;
+                row.ProgressFill.fillOrigin = 0;
+                row.ProgressFill.raycastTarget = false;
+                row.LockedOverlay = CreateSimpleImage(
+                    "LockedOverlay",
+                    row.Surface.transform,
+                    new Vector2(0.5f, 0.5f),
+                    new Vector2(0.5f, 0.5f),
+                    new Vector2(0f, 28f),
+                    new Vector2(112f, 112f),
+                    Color.white);
+                row.LockedOverlay.raycastTarget = false;
                 museumRows.Add(row);
                 ApplyMuseumRowSkin(row);
             }
@@ -199,17 +324,35 @@ namespace PocketForge.Mining
                     collectionCard.transform,
                     new Vector2(0.5f, 0.5f),
                     new Vector2(0.5f, 0.5f),
-                    new Vector2(0f, 292f - index * 142f),
-                    new Vector2(780f, 124f),
+                    new Vector2(0f, 242f - index * 132f),
+                    new Vector2(780f, 120f),
                     new Color(0.055f, 0.12f, 0.23f, 0.98f));
+                row.IconFrame = CreateSimpleImage(
+                    "IconFrame",
+                    row.Surface.transform,
+                    new Vector2(0f, 0.5f),
+                    new Vector2(0f, 0.5f),
+                    new Vector2(66f, 0f),
+                    new Vector2(88f, 88f),
+                    Color.white);
+                row.IconFrame.raycastTarget = false;
+                row.Icon = CreateSimpleImage(
+                    "Icon",
+                    row.IconFrame.transform,
+                    Vector2.zero,
+                    Vector2.one,
+                    Vector2.zero,
+                    new Vector2(-16f, -16f),
+                    Color.white);
+                row.Icon.raycastTarget = false;
                 row.Name = CreateText(
                     "AchievementName",
                     row.Surface.transform,
                     new Vector2(0f, 0.5f),
                     new Vector2(0f, 0.5f),
-                    new Vector2(192f, 26f),
-                    new Vector2(330f, 42f),
-                    25,
+                    new Vector2(258f, 26f),
+                    new Vector2(330f, 40f),
+                    23,
                     TextAnchor.MiddleLeft);
                 row.Name.font = UiFontProvider.GetCasual();
                 row.Progress = CreateText(
@@ -217,27 +360,66 @@ namespace PocketForge.Mining
                     row.Surface.transform,
                     new Vector2(0f, 0.5f),
                     new Vector2(0f, 0.5f),
-                    new Vector2(192f, -27f),
-                    new Vector2(330f, 38f),
-                    20,
+                    new Vector2(176f, -28f),
+                    new Vector2(150f, 34f),
+                    18,
                     TextAnchor.MiddleLeft);
                 row.Progress.color = new Color(0.62f, 0.86f, 1f);
+                row.ProgressTrack = CreateSimpleImage(
+                    "ProgressTrack",
+                    row.Surface.transform,
+                    new Vector2(0f, 0.5f),
+                    new Vector2(0f, 0.5f),
+                    new Vector2(356f, -28f),
+                    new Vector2(210f, 22f),
+                    Color.white);
+                row.ProgressTrack.raycastTarget = false;
+                row.ProgressFill = CreateSimpleImage(
+                    "ProgressFill",
+                    row.ProgressTrack.transform,
+                    Vector2.zero,
+                    Vector2.one,
+                    Vector2.zero,
+                    new Vector2(-6f, -6f),
+                    Color.white);
+                row.ProgressFill.type = Image.Type.Filled;
+                row.ProgressFill.fillMethod = Image.FillMethod.Horizontal;
+                row.ProgressFill.fillOrigin = 0;
+                row.ProgressFill.raycastTarget = false;
+                row.RewardSlot = CreateSimpleImage(
+                    "RewardSlot",
+                    row.Surface.transform,
+                    new Vector2(0f, 0.5f),
+                    new Vector2(0f, 0.5f),
+                    new Vector2(530f, 0f),
+                    new Vector2(68f, 68f),
+                    Color.white);
+                row.RewardSlot.raycastTarget = false;
+                row.RewardIcon = CreateSimpleImage(
+                    "RewardIcon",
+                    row.RewardSlot.transform,
+                    Vector2.zero,
+                    Vector2.one,
+                    Vector2.zero,
+                    new Vector2(-14f, -14f),
+                    Color.white);
+                row.RewardIcon.raycastTarget = false;
                 row.Reward = CreateText(
                     "AchievementReward",
                     row.Surface.transform,
                     new Vector2(0.5f, 0.5f),
                     new Vector2(0.5f, 0.5f),
-                    new Vector2(120f, 0f),
-                    new Vector2(180f, 64f),
-                    22,
+                    new Vector2(204f, 0f),
+                    new Vector2(86f, 58f),
+                    19,
                     TextAnchor.MiddleCenter);
                 row.ClaimButton = CreateButton(
                     "ClaimAchievement",
                     row.Surface.transform,
                     new Vector2(1f, 0.5f),
                     new Vector2(1f, 0.5f),
-                    new Vector2(-112f, 0f),
-                    new Vector2(196f, 78f),
+                    new Vector2(-94f, 0f),
+                    new Vector2(164f, 74f),
                     new Color(0.25f, 0.68f, 0.2f, 1f));
                 var label = row.ClaimButton.GetComponentInChildren<Text>();
                 label.font = UiFontProvider.GetCasual();
@@ -252,6 +434,15 @@ namespace PocketForge.Mining
                         achievementClaimAction?.Invoke(row.AchievementId);
                     }
                 });
+                row.CompleteBadge = CreateSimpleImage(
+                    "CompleteBadge",
+                    row.Surface.transform,
+                    new Vector2(1f, 0.5f),
+                    new Vector2(1f, 0.5f),
+                    new Vector2(-94f, 0f),
+                    new Vector2(74f, 74f),
+                    Color.white);
+                row.CompleteBadge.raycastTarget = false;
                 achievementRows.Add(row);
                 ApplyAchievementRowSkin(row);
             }
@@ -301,8 +492,25 @@ namespace PocketForge.Mining
                 LanguageService.Get("close").ToUpper();
 
             var showMuseum = collectionTab == CollectionTab.Museum;
+            museumNextRewardSurface.gameObject.SetActive(showMuseum);
             museumTabButton.interactable = !showMuseum;
             achievementsTabButton.interactable = showMuseum;
+            ApplyStretchedSimpleSprite(
+                museumTabButton.image,
+                finalSkin?.Task13Simple(showMuseum ? "TabCollectionActive" : "TabCollectionInactive"),
+                Color.white);
+            ApplyStretchedSimpleSprite(
+                achievementsTabButton.image,
+                finalSkin?.Task13Simple(showMuseum ? "TabCollectionInactive" : "TabCollectionActive"),
+                Color.white);
+            ApplyStretchedSimpleSprite(
+                collectionSummarySurface,
+                finalSkin?.Task13Simple(showMuseum ? "UiMuseumSummaryCard" : "UiAchievementSummaryCard"),
+                Color.white);
+            collectionSummaryIcon.sprite = finalSkin?.Task13Simple(
+                showMuseum ? "IconMuseumTab" : "IconAchievementTab");
+            collectionSummaryIcon.type = Image.Type.Simple;
+            collectionSummaryIcon.preserveAspect = true;
             if (showMuseum)
             {
                 RenderMuseum();
@@ -318,9 +526,19 @@ namespace PocketForge.Mining
             var states = lastService.GetCollectionStates(lastState);
             EnsureMuseumRows(states.Count);
             var multiplierBonus = (lastService.GetCollectionPowerMultiplier(lastState) - 1f) * 100f;
+            var discoveredCount = 0;
+            foreach (var state in states)
+            {
+                if (state.IsDiscovered)
+                {
+                    discoveredCount++;
+                }
+            }
+            museumNextRewardText.text = $"{discoveredCount} / {states.Count}";
             collectionSummary.text = string.Format(
                 LanguageService.Get("museum_summary"),
                 multiplierBonus);
+            var milestones = lastService.GetCollectionMilestones();
             for (var index = 0; index < museumRows.Count; index++)
             {
                 var row = museumRows[index];
@@ -344,6 +562,32 @@ namespace PocketForge.Mining
                 row.Icon.color = state.IsDiscovered
                     ? Color.white
                     : new Color(0.18f, 0.24f, 0.38f, 0.8f);
+                row.Icon.sprite = finalSkin?.Task13Simple(GetMuseumOreAsset(state.Definition.ContentId));
+                row.Icon.type = Image.Type.Simple;
+                row.Icon.preserveAspect = true;
+                row.LockedOverlay.gameObject.SetActive(!state.IsDiscovered);
+                row.Pedestal.color = state.IsDiscovered
+                    ? Color.white
+                    : new Color(0.35f, 0.38f, 0.55f, 0.75f);
+
+                var previousTarget = 0L;
+                var nextTarget = 0L;
+                foreach (var milestone in milestones)
+                {
+                    if (state.MinedCount >= milestone)
+                    {
+                        previousTarget = milestone;
+                        continue;
+                    }
+
+                    nextTarget = milestone;
+                    break;
+                }
+
+                row.ProgressFill.fillAmount = nextTarget <= 0L
+                    ? 1f
+                    : Mathf.Clamp01((state.MinedCount - previousTarget) /
+                                    (float)Math.Max(1L, nextTarget - previousTarget));
             }
 
             foreach (var row in achievementRows)
@@ -382,19 +626,35 @@ namespace PocketForge.Mining
                 row.AchievementId = state.Definition.AchievementId;
                 row.Name.text = LanguageService.Get(state.Definition.NameLocalizationKey).ToUpper();
                 row.ClaimButton.interactable = state.CanClaim;
+                row.Icon.sprite = finalSkin?.Task13Simple(
+                    GetAchievementIconAsset(state.Definition.AchievementId));
+                row.Icon.type = Image.Type.Simple;
+                row.Icon.preserveAspect = true;
+                row.CompleteBadge.gameObject.SetActive(state.IsCompleted);
+                row.ClaimButton.gameObject.SetActive(!state.IsCompleted);
+                row.RewardSlot.gameObject.SetActive(!state.IsCompleted);
                 if (state.IsCompleted)
                 {
                     row.Progress.text = LanguageService.Get("achievement_all_complete");
+                    row.ProgressFill.fillAmount = 1f;
                     row.Reward.text = "";
-                    row.ClaimButton.GetComponentInChildren<Text>().text =
-                        LanguageService.Get("completed").ToUpper();
                     continue;
                 }
 
                 var tier = state.NextTier;
                 row.Progress.text =
                     $"{CompactNumberFormatter.Format(state.Progress)} / {CompactNumberFormatter.Format(tier.Target)}";
+                row.ProgressFill.fillAmount = Mathf.Clamp01(state.Progress / (float)Math.Max(1L, tier.Target));
                 row.Reward.text = FormatAchievementReward(tier);
+                row.RewardIcon.sprite = GetAchievementRewardSprite(tier.RewardType);
+                row.RewardIcon.type = Image.Type.Simple;
+                row.RewardIcon.preserveAspect = true;
+                ApplyStretchedSimpleSprite(
+                    row.ClaimButton.image,
+                    finalSkin?.Task13Simple(state.CanClaim
+                        ? "ButtonAchievementClaim"
+                        : "UiAchievementInProgressState"),
+                    Color.white);
                 row.ClaimButton.GetComponentInChildren<Text>().text = LanguageService.Get(
                     state.CanClaim ? "claim" : "in_progress").ToUpper();
             }
@@ -407,13 +667,52 @@ namespace PocketForge.Mining
 
         private static string FormatAchievementReward(AchievementTierDefinition tier)
         {
-            var suffix = tier.RewardType switch
+            return CompactNumberFormatter.Format(tier.RewardAmount);
+        }
+
+        private static string GetMuseumOreAsset(string contentId)
+        {
+            var id = contentId?.ToLowerInvariant() ?? string.Empty;
+            if (id.Contains("copper"))
             {
-                AchievementRewardType.Gems => "\u25C6",
-                AchievementRewardType.BlueprintCores => "CORE",
-                _ => "C"
+                return "IconMuseumCopperOre";
+            }
+
+            if (id.Contains("iron"))
+            {
+                return "IconMuseumIronOre";
+            }
+
+            if (id.Contains("gold"))
+            {
+                return "IconMuseumGoldOre";
+            }
+
+            return "IconMuseumUnknownCrystal";
+        }
+
+        private static string GetAchievementIconAsset(string achievementId)
+        {
+            return achievementId switch
+            {
+                "mine_ores" => "IconAchievementMining",
+                "clear_chapters" => "IconAchievementChapter",
+                "upgrade_facilities" => "IconAchievementFacility",
+                "raise_miner" => "IconAchievementMiner",
+                "complete_research" => "IconAchievementResearch",
+                "collect_equipment" => "IconAchievementEquipment",
+                _ => "IconAchievementTab"
             };
-            return $"+{CompactNumberFormatter.Format(tier.RewardAmount)} {suffix}";
+        }
+
+        private Sprite GetAchievementRewardSprite(AchievementRewardType rewardType)
+        {
+            return finalSkin?.V5Simple(rewardType switch
+            {
+                AchievementRewardType.Gems => "05_GemIcon",
+                AchievementRewardType.BlueprintCores => "06_BlueprintCoreIcon",
+                _ => "04_CreditsIcon"
+            });
         }
 
         private void ApplyCollectionSkin()
@@ -423,19 +722,47 @@ namespace PocketForge.Mining
                 return;
             }
 
-            ApplyStretchedSimpleSprite(collectionCard, finalSkin.Simple("SettingsModal"), Color.white);
+            ApplyStretchedSimpleSprite(
+                collectionCard,
+                finalSkin.Task13Simple("UiCollectionModalBody"),
+                Color.white);
             ApplyStretchedSimpleSprite(
                 collectionTitleSurface,
-                finalSkin.Simple("SettingsTitlePlaque"),
+                finalSkin.Task13Simple("UiCollectionTitlePlaque"),
                 Color.white);
-            foreach (var button in new[] { museumTabButton, achievementsTabButton, closeCollectionButton })
+            ApplyStretchedSimpleSprite(
+                collectionSummarySurface,
+                finalSkin.Task13Simple("UiMuseumSummaryCard"),
+                Color.white);
+            ApplyStretchedSimpleSprite(
+                museumNextRewardSurface,
+                finalSkin.Task13Simple("UiMuseumNextRewardStrip"),
+                Color.white);
+            museumNextRewardIcon.sprite = finalSkin.Task13Simple("IconMuseumMysteryMineral");
+            museumNextRewardIcon.type = Image.Type.Simple;
+            museumNextRewardIcon.preserveAspect = true;
+            ApplyStretchedSimpleSprite(
+                museumTabButton.image,
+                finalSkin.Task13Simple("TabCollectionActive"),
+                Color.white);
+            ApplyStretchedSimpleSprite(
+                achievementsTabButton.image,
+                finalSkin.Task13Simple("TabCollectionInactive"),
+                Color.white);
+            ApplyStretchedSimpleSprite(
+                closeCollectionButton.image,
+                finalSkin.Task13Simple("ButtonAchievementClaim"),
+                Color.white);
+            ApplyStretchedSimpleSprite(
+                closeCollectionCornerButton.image,
+                finalSkin.Task13Simple("UiModalCloseButtonSurface"),
+                Color.white);
+            var cornerIcon = closeCollectionCornerButton.transform.Find("Icon")?.GetComponent<Image>();
+            if (cornerIcon != null)
             {
-                ApplyStretchedSimpleSprite(
-                    button.image,
-                    finalSkin.Simple(button == closeCollectionButton
-                        ? "SettingsCloseButton"
-                        : "SettingsActionButton"),
-                    Color.white);
+                cornerIcon.sprite = finalSkin.Task13Simple("IconCloseX");
+                cornerIcon.type = Image.Type.Simple;
+                cornerIcon.preserveAspect = true;
             }
 
             foreach (var row in museumRows)
@@ -456,10 +783,21 @@ namespace PocketForge.Mining
                 return;
             }
 
-            ApplyStretchedSimpleSprite(row.Surface, finalSkin.Simple("SettingsRow"), Color.white);
-            row.Icon.sprite = finalSkin.V5Simple("21_BossChallengeIcon");
-            row.Icon.type = Image.Type.Simple;
-            row.Icon.preserveAspect = true;
+            ApplyStretchedSimpleSprite(
+                row.Surface,
+                finalSkin.Task13Simple("UiMuseumExhibitCardBase"),
+                Color.white);
+            row.Pedestal.sprite = finalSkin.Task13Simple("UiMuseumPedestal");
+            row.Pedestal.type = Image.Type.Simple;
+            row.Pedestal.preserveAspect = true;
+            row.ProgressTrack.sprite = finalSkin.Task13Simple("UiMuseumProgressTrack");
+            row.ProgressTrack.type = Image.Type.Simple;
+            row.ProgressFill.sprite = finalSkin.Task13Simple("UiMuseumProgressFill");
+            row.ProgressFill.type = Image.Type.Filled;
+            row.ProgressFill.fillMethod = Image.FillMethod.Horizontal;
+            row.LockedOverlay.sprite = finalSkin.Task13Simple("OverlayMuseumLocked");
+            row.LockedOverlay.type = Image.Type.Simple;
+            row.LockedOverlay.preserveAspect = true;
         }
 
         private void ApplyAchievementRowSkin(AchievementRowView row)
@@ -469,11 +807,26 @@ namespace PocketForge.Mining
                 return;
             }
 
-            ApplyStretchedSimpleSprite(row.Surface, finalSkin.Simple("SettingsRow"), Color.white);
+            ApplyStretchedSimpleSprite(
+                row.Surface,
+                finalSkin.Task13Simple("UiAchievementRowBase"),
+                Color.white);
+            row.IconFrame.sprite = finalSkin.Task13Simple("UiAchievementIconFrame");
+            row.IconFrame.type = Image.Type.Simple;
+            row.ProgressTrack.sprite = finalSkin.Task13Simple("UiAchievementProgressTrack");
+            row.ProgressTrack.type = Image.Type.Simple;
+            row.ProgressFill.sprite = finalSkin.Task13Simple("UiAchievementProgressFill");
+            row.ProgressFill.type = Image.Type.Filled;
+            row.ProgressFill.fillMethod = Image.FillMethod.Horizontal;
+            row.RewardSlot.sprite = finalSkin.Task13Simple("UiAchievementRewardSlot");
+            row.RewardSlot.type = Image.Type.Simple;
             ApplyStretchedSimpleSprite(
                 row.ClaimButton.image,
-                finalSkin.Simple("SettingsActionButton"),
+                finalSkin.Task13Simple("UiAchievementInProgressState"),
                 Color.white);
+            row.CompleteBadge.sprite = finalSkin.Task13Simple("BadgeAchievementComplete");
+            row.CompleteBadge.type = Image.Type.Simple;
+            row.CompleteBadge.preserveAspect = true;
         }
     }
 }

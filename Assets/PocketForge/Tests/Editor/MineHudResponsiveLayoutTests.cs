@@ -90,16 +90,16 @@ namespace PocketForge.Tests.Editor
         [Test]
         public void ApprovedSnapshotChrome_UsesMeasured1080WideGeometry()
         {
-            AssertRect("TopSurface", new Vector2(0f, -104f), new Vector2(1040f, 142f));
-            AssertRect("MinerRankButton", new Vector2(-324f, -104f), new Vector2(270f, 104f));
-            AssertRect("SettingsButton", new Vector2(471f, -104f), new Vector2(94f, 94f));
-            AssertRect("RewardedAdButton", new Vector2(33f, -104f), new Vector2(48f, 48f));
-            AssertRect("ChapterInformationPanel", new Vector2(-178f, -316f), new Vector2(650f, 180f));
-            AssertRect("PowerComparisonPanel", new Vector2(354f, -316f), new Vector2(294f, 180f));
-            AssertRect("ProgressBackground", new Vector2(0f, 20f), new Vector2(560f, 86f));
-            AssertRect("MineButton", new Vector2(0f, 660f), new Vector2(480f, 236f));
-            AssertRect("PickaxeButton", new Vector2(-327f, 365f), new Vector2(302f, 340f));
-            AssertRect("BottomNavigationBar", new Vector2(0f, 90f), new Vector2(1044f, 178f));
+            AssertRect("TopSurface", new Vector2(0f, -189f), new Vector2(972f, 162f));
+            AssertRect("MinerRankButton", new Vector2(-275f, -189f), new Vector2(270f, 104f));
+            AssertRect("SettingsButton", new Vector2(444f, -189f), new Vector2(84f, 84f));
+            AssertRect("RewardedAdButton", new Vector2(33f, -189f), new Vector2(48f, 48f));
+            AssertRect("ChapterInformationPanel", new Vector2(-168f, -394f), new Vector2(636f, 188f));
+            AssertRect("PowerComparisonPanel", new Vector2(333f, -394f), new Vector2(306f, 188f));
+            AssertRect("ProgressBackground", new Vector2(0f, 1014f), new Vector2(560f, 86f));
+            AssertRect("MineButton", new Vector2(0f, 843f), new Vector2(450f, 186f));
+            AssertRect("PickaxeButton", new Vector2(-327f, 444f), new Vector2(302f, 348f));
+            AssertRect("BottomNavigationBar", new Vector2(0f, 129f), new Vector2(972f, 174f));
             AssertRect("SettingsCard", new Vector2(0f, 53f), new Vector2(900f, 1344f));
             AssertRect("CloseSettingsButton", new Vector2(0f, 66f), new Vector2(326f, 88f));
         }
@@ -258,6 +258,50 @@ namespace PocketForge.Tests.Editor
         }
 
         [Test]
+        public void Task13GasShotAssets_AreCompleteAndUseSimpleRuntimeImages()
+        {
+            var textures = Resources.LoadAll<Texture2D>("PocketForge/UI/Task13");
+            var required = new[]
+            {
+                "UiEquipmentModalBody",
+                "UiEquipmentSlotCardBase",
+                "UiEquipmentInventoryCardBase",
+                "UiEquipmentComparisonTray",
+                "UiCollectionModalBody",
+                "UiMuseumSummaryCard",
+                "UiMuseumExhibitCardBase",
+                "UiMuseumNextRewardStrip",
+                "UiAchievementSummaryCard",
+                "UiAchievementRowBase",
+                "UiAchievementProgressTrack",
+                "UiAchievementProgressFill",
+                "ButtonAchievementClaim",
+                "BadgeAchievementComplete",
+                "IconAchievementEquipment"
+            };
+
+            Assert.That(textures, Has.Length.GreaterThanOrEqualTo(67));
+            foreach (var assetName in required)
+            {
+                Assert.That(
+                    textures.Any(texture => texture.name == assetName),
+                    Is.True,
+                    $"Task 13 asset {assetName} is missing.");
+            }
+
+            view.SetTheme(null, null, null, null, null);
+            foreach (var rootName in new[] { "EquipmentCard", "CollectionCard" })
+            {
+                var sliced = FindRect(rootName)
+                    .GetComponentsInChildren<Image>(true)
+                    .Where(image => image.type == Image.Type.Sliced)
+                    .Select(image => image.name)
+                    .ToArray();
+                Assert.That(sliced, Is.Empty, $"{rootName} contains sliced images: {string.Join(", ", sliced)}");
+            }
+        }
+
+        [Test]
         public void FinalSettingsChrome_UsesSimpleImagesAndSmallerIcons()
         {
             view.SetTheme(null, null, null, null, null);
@@ -276,7 +320,7 @@ namespace PocketForge.Tests.Editor
             AssertIconSizes(settingsCard, "RemoveAdsIcon", new Vector2(60f, 60f), 1);
             AssertIconSizes(settingsCard, "RestorePurchasesIcon", new Vector2(60f, 60f), 1);
             AssertIconSizes(settingsCard, "CloseIcon", new Vector2(64f, 64f), 1);
-            Assert.That(FindRect("SettingsIcon").sizeDelta, Is.EqualTo(new Vector2(82f, 82f)));
+            Assert.That(FindRect("SettingsIcon").sizeDelta, Is.EqualTo(new Vector2(74f, 74f)));
         }
 
         private (float Min, float Max) VerticalRange(string name, float parentHeight)
@@ -346,8 +390,8 @@ namespace PocketForge.Tests.Editor
 
                 Assert.That(FindRect("MinerRank").GetComponent<Text>().text, Does.Contain("3"));
                 Assert.That(FindRect("MinerExperience").GetComponent<Text>().text, Does.Contain("12"));
-                AssertRect("CreditsCurrencyIcon", new Vector2(-116f, -104f), new Vector2(54f, 54f));
-                AssertRect("DepthCurrencyIcon", new Vector2(92f, -104f), new Vector2(54f, 54f));
+                AssertRect("CreditsCurrencyIcon", new Vector2(-116f, -189f), new Vector2(54f, 54f));
+                AssertRect("DepthCurrencyIcon", new Vector2(92f, -189f), new Vector2(54f, 54f));
                 Assert.That(FindRect("BlueprintCoreIcon"), Is.Not.Null);
             }
             finally
@@ -531,8 +575,8 @@ namespace PocketForge.Tests.Editor
 
                     var surface = FindRect("OfflineRewardSurface");
                     var text = FindRect("OfflineReward").GetComponent<Text>();
-                    Assert.That(surface.sizeDelta, Is.EqualTo(new Vector2(230f, 236f)));
-                    Assert.That(text.rectTransform.sizeDelta, Is.EqualTo(new Vector2(192f, 64f)));
+                    Assert.That(surface.sizeDelta, Is.EqualTo(new Vector2(246f, 186f)));
+                    Assert.That(text.rectTransform.sizeDelta, Is.EqualTo(new Vector2(202f, 50f)));
                     Assert.That(text.text, Does.Contain("+456"));
                     Assert.That(text.text, Does.Contain("\n"));
                     Assert.That(text.text, Does.Not.Contain("offline_"));
@@ -655,7 +699,7 @@ namespace PocketForge.Tests.Editor
                 var primary = FindRect("EquipmentPrimary").GetComponent<Button>();
                 Assert.That(backdrop.gameObject.activeSelf, Is.True);
                 Assert.That(backdrop.GetSiblingIndex(), Is.EqualTo(view.transform.childCount - 1));
-                Assert.That(card.sizeDelta, Is.EqualTo(new Vector2(920f, 1380f)));
+                Assert.That(card.sizeDelta, Is.EqualTo(new Vector2(920f, 1400f)));
                 Assert.That(previous.anchorMin, Is.EqualTo(new Vector2(0.5f, 0.5f)));
                 Assert.That(previous.anchorMax, Is.EqualTo(new Vector2(0.5f, 0.5f)));
                 Assert.That(firstRow.gameObject.activeSelf, Is.True);
@@ -699,7 +743,7 @@ namespace PocketForge.Tests.Editor
                 var museumRow = FindRect("MuseumRow1");
                 Assert.That(backdrop.gameObject.activeSelf, Is.True);
                 Assert.That(backdrop.GetSiblingIndex(), Is.EqualTo(view.transform.childCount - 1));
-                Assert.That(card.sizeDelta, Is.EqualTo(new Vector2(920f, 1380f)));
+                Assert.That(card.sizeDelta, Is.EqualTo(new Vector2(920f, 1400f)));
                 Assert.That(museumRow.gameObject.activeSelf, Is.True);
                 Assert.That(museumRow.GetComponent<Image>().type, Is.EqualTo(Image.Type.Simple));
 
