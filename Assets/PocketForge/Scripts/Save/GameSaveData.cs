@@ -10,6 +10,21 @@ namespace PocketForge.Save
     }
 
     [Serializable]
+    public sealed class EquipmentItemData
+    {
+        public string instanceId = string.Empty;
+        public string definitionId = string.Empty;
+        public int rarity;
+    }
+
+    [Serializable]
+    public sealed class EquippedItemData
+    {
+        public int slot;
+        public string instanceId = string.Empty;
+    }
+
+    [Serializable]
     public sealed class GameSaveData
     {
         public int version = GameSaveMigrator.CurrentVersion;
@@ -17,6 +32,9 @@ namespace PocketForge.Save
         public long gems;
         public long blueprintCores;
         public ResearchProgressData[] researchProgress = Array.Empty<ResearchProgressData>();
+        public EquipmentItemData[] equipmentInventory = Array.Empty<EquipmentItemData>();
+        public EquippedItemData[] equippedEquipment = Array.Empty<EquippedItemData>();
+        public int equipmentRewardSequence;
         public int stage = 1;
         public int furthestStage = 1;
         public int highestCompletedChapter;

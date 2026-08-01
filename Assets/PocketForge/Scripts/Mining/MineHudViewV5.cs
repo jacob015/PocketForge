@@ -450,7 +450,11 @@ namespace PocketForge.Mining
 
             navigationButtons[feature.Value] = button;
             var captured = feature.Value;
-            if (captured == ProgressionFeature.Research)
+            if (captured == ProgressionFeature.Equipment)
+            {
+                button.onClick.AddListener(ShowEquipment);
+            }
+            else if (captured == ProgressionFeature.Research)
             {
                 button.onClick.AddListener(ShowMinerRankSummary);
             }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using PocketForge.Ads;
+using PocketForge.Content;
 using PocketForge.Economy;
 using PocketForge.Iap;
 using PocketForge.Localization;
@@ -217,6 +218,18 @@ namespace PocketForge.Mining
             researchPurchaseAction = purchaseAction;
         }
 
+        public void BindEquipment(
+            Action<string> equipAction,
+            Action<EquipmentSlot> unequipAction,
+            Action<string, EquipmentRarity> fuseAction,
+            Action autoEquipAction)
+        {
+            equipmentEquipAction = equipAction;
+            equipmentUnequipAction = unequipAction;
+            equipmentFuseAction = fuseAction;
+            equipmentAutoEquipAction = autoEquipAction;
+        }
+
         public void BindIap(Action purchaseRemoveAdsAction, Action restorePurchasesAction)
         {
             removeAdsButton.onClick.AddListener(() => purchaseRemoveAdsAction());
@@ -313,6 +326,7 @@ namespace PocketForge.Mining
             UpdatePips(robotPips, player.robotLevel, new Color(1f, 0.7f, 0.16f));
             RenderV5Hud(state, service);
             RenderResearch();
+            RenderEquipment();
         }
 
         public void ShowOfflineReward(OfflineProgressResult result)
@@ -463,6 +477,7 @@ namespace PocketForge.Mining
             RenderIapState();
             RenderChapterComplete();
             RenderResearch();
+            RenderEquipment();
             if (chapterSelectionPanel != null && chapterSelectionPanel.activeSelf && lastState != null && lastService != null)
             {
                 chapterSelectionOptions = lastService.GetChapterSelectionOptions(lastState);
@@ -576,6 +591,7 @@ namespace PocketForge.Mining
             CreateChapterCompletePanel();
             CreateChapterSelectionPanel();
             CreateResearchPanel();
+            CreateEquipmentPanel();
             RenderSettings();
         }
 
@@ -750,6 +766,7 @@ namespace PocketForge.Mining
             ApplyLanguageIcon(SupportedLanguage.Japanese, "IconFlagJapanese");
             ApplyLanguageIcon(SupportedLanguage.ChineseSimplified, "IconFlagChinese");
             ApplyV5HudSkin();
+            ApplyEquipmentSkin();
 
             DisableOutline(mineButton);
             DisableOutline(pickaxeButton);

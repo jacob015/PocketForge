@@ -14,6 +14,7 @@ namespace PocketForge.Content
         [SerializeField] private UpgradeDefinition[] upgrades = Array.Empty<UpgradeDefinition>();
         [SerializeField] private ChapterDefinition[] chapters = Array.Empty<ChapterDefinition>();
         [SerializeField] private ResearchNodeDefinition[] researchNodes = Array.Empty<ResearchNodeDefinition>();
+        [SerializeField] private EquipmentDefinition[] equipment = Array.Empty<EquipmentDefinition>();
         [SerializeField, Min(60)] private int maxOfflineRewardSeconds = 14400;
         [SerializeField, Min(1)] private int rewardedAdRewardMultiplier = 5;
         [SerializeField, Min(0.01f)] private float baseAutoPowerPerSecond = 0.5f;
@@ -36,6 +37,8 @@ namespace PocketForge.Content
         private static readonly ChapterDefinition RuntimeDefaultChapter = ChapterDefinition.CreateRuntimeDefault();
         private static readonly ResearchNodeDefinition[] RuntimeDefaultResearchNodes =
             ResearchNodeDefinition.CreateRuntimeDefaults();
+        private static readonly EquipmentDefinition[] RuntimeDefaultEquipment =
+            EquipmentDefinition.CreateRuntimeDefaults();
 
         public int MaxOfflineRewardSeconds => maxOfflineRewardSeconds;
         public int RewardedAdRewardMultiplier => rewardedAdRewardMultiplier;
@@ -113,6 +116,20 @@ namespace PocketForge.Content
             return GetResearchNodes().FirstOrDefault(candidate => candidate.NodeId == nodeId);
         }
 
+        public IReadOnlyList<EquipmentDefinition> GetEquipmentDefinitions()
+        {
+            var configured = equipment
+                .Where(candidate => candidate != null && !string.IsNullOrWhiteSpace(candidate.DefinitionId))
+                .ToArray();
+            return configured.Length > 0 ? configured : RuntimeDefaultEquipment;
+        }
+
+        public EquipmentDefinition GetEquipment(string definitionId)
+        {
+            return GetEquipmentDefinitions()
+                .FirstOrDefault(candidate => candidate.DefinitionId == definitionId);
+        }
+
         public static MiningContentCatalog CreateRuntimeDefault()
         {
             var catalog = CreateInstance<MiningContentCatalog>();
@@ -126,6 +143,7 @@ namespace PocketForge.Content
             };
             catalog.chapters = new[] { ChapterDefinition.CreateRuntimeDefault() };
             catalog.researchNodes = ResearchNodeDefinition.CreateRuntimeDefaults();
+            catalog.equipment = EquipmentDefinition.CreateRuntimeDefaults();
             return catalog;
         }
 

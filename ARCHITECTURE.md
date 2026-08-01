@@ -121,7 +121,7 @@ MineGameController (Unity composition root)
 - 능동 채굴력: `자동 채굴력 + 탭 피해 × 기준 초당 5회`
 - 보스 권장 채굴력: `보스 내구도 ÷ 제한 시간`
 
-현재 실제 저장 데이터에서는 곡괭이·드릴·로봇 레벨, 광부 등급, 연구가 기여한다. 광부 등급은 Lv.1을 기준으로 레벨당 총 채굴력 `+2%`를 `MinerRankMultiplier`에 전달한다. 연구 노드의 누적 보너스는 `ResearchMultiplier`로 전달되므로 자동·탭·오프라인·보스 비교가 같은 계산 경계를 공유한다. 장비·도감·일시 버프는 아직 `1`이며 각 후속 메타 시스템이 연결될 확장 지점이다. 기본 레벨의 능동 채굴력은 5.5/s이고 현재 챕터 보스 권장치는 각각 약 5.5/s, 14.58/s, 26/s다.
+현재 실제 저장 데이터에서는 곡괭이·드릴·로봇 레벨, 광부 등급, 연구, 장비가 기여한다. 광부 등급은 Lv.1을 기준으로 레벨당 총 채굴력 `+2%`를 `MinerRankMultiplier`에 전달한다. 연구 노드의 누적 보너스는 `ResearchMultiplier`, 장착 장비의 합산 보너스는 `EquipmentMultiplier`로 전달되므로 자동·탭·오프라인·보스 비교가 같은 계산 경계를 공유한다. 도감·일시 버프는 아직 `1`이며 각 후속 메타 시스템이 연결될 확장 지점이다. 기본 레벨의 능동 채굴력은 5.5/s이고 현재 챕터 보스 권장치는 각각 약 5.5/s, 14.58/s, 26/s다.
 
 ### 광부 경험치와 기능 해금
 
@@ -134,7 +134,7 @@ MineGameController (Unity composition root)
 - 자동 레벨업 보상: `새 레벨 × 25 Credits`, 5레벨마다 `1 Gem`
 - 해금: Lv.2 장비, Lv.3 박물관, Lv.4 연구, Lv.5 미션, Lv.6 상점, Lv.7 이벤트
 
-레벨업 보상은 `highestRewardedMinerLevel`보다 높은 레벨을 처음 통과할 때만 지급한다. 기능 상태는 별도 불리언을 저장하지 않고 현재 광부 레벨과 `FeatureUnlockDefinition`에서 파생해 콘텐츠 추가와 저장 호환을 단순화한다. 연구는 실제 화면과 규칙이 연결됐고 장비·박물관·미션·상점·이벤트는 아직 Placeholder다.
+레벨업 보상은 `highestRewardedMinerLevel`보다 높은 레벨을 처음 통과할 때만 지급한다. 기능 상태는 별도 불리언을 저장하지 않고 현재 광부 레벨과 `FeatureUnlockDefinition`에서 파생해 콘텐츠 추가와 저장 호환을 단순화한다. 장비와 연구는 실제 화면과 규칙이 연결됐고 박물관·미션·상점·이벤트는 아직 Placeholder다.
 
 ### 설계도 코어와 영구 연구
 
@@ -145,6 +145,21 @@ MineGameController (Unity composition root)
 - `deep_automation`: `precision_tools` Lv.2 필요, 최대 3레벨, 비용 4부터 +4, 레벨당 +10%
 
 연구 정의는 `MiningContentCatalog.researchNodes`에 있고 진행도는 노드 ID와 레벨만 저장한다. 구매 서비스는 잠금, 선행 조건, 코어 잔액, 최대 레벨을 순서대로 검사하며 같은 노드 ID의 중복 저장 항목은 마이그레이션에서 가장 높은 레벨 하나로 정규화한다.
+
+### 장비 인벤토리와 합성
+
+`EquipmentDefinition`은 정의 ID, 현지화 키, 슬롯, 기본 채굴력 보너스를 가진다. 현재 런타임 기본 장비는 곡괭이·드릴·로봇·부적 각 1종이며 등급은 Common, Rare, Epic, Legendary 네 단계다. 등급 배율은 기본 보너스의 1/2/4/8배다.
+
+`EquipmentService`는 Unity 표시 계층과 분리해 다음 규칙을 담당한다.
+
+- 인벤토리의 알 수 없는 정의, 빈 ID, 중복 인스턴스 ID와 잘못된 장착 슬롯 정규화
+- 광부 Lv.2 해금 이후 장착·해제와 슬롯별 최고 보너스 자동 장착
+- 장착하지 않은 동일 정의·동일 등급 3개를 다음 등급 1개로 합성
+- 전설 등급, 재료 부족, 존재하지 않는 장비, 잠긴 기능 차단
+- 장착 장비 보너스 합계를 `1 + 보너스 합` 형태의 `EquipmentMultiplier`로 계산
+- 보스 처치마다 카탈로그 순서로 다음 슬롯 장비 지급, 1~2챕터 Common·3챕터 이후 Rare 지급
+
+장비 획득은 확률 테이블이나 신규 재료 없이 초기 흐름만 제공한다. 미션·상점 획득처, 랜덤 옵션, 프리셋, 세트 효과, 유료 장비는 후속 범위다.
 
 ### 오프라인 진행
 
@@ -183,10 +198,12 @@ MineGameController (Unity composition root)
 
 ## 저장 스키마
 
-`GameSaveData` 버전 8:
+`GameSaveData` 버전 9:
 
 - 64비트 증가형 재화 `credits`, `gems`, `blueprintCores`
 - 확장 가능한 `researchProgress[]` (`nodeId`, `level`)
+- 고유 ID 장비 인벤토리 `equipmentInventory[]` (`instanceId`, `definitionId`, `rarity`)
+- 슬롯 참조 `equippedEquipment[]` (`slot`, `instanceId`)과 `equipmentRewardSequence`
 - `stage`, `furthestStage`
 - `highestCompletedChapter`
 - `pickaxeLevel`, `drillLevel`, `robotLevel`
@@ -194,7 +211,7 @@ MineGameController (Unity composition root)
 - `adsRemoved`
 - `lastSavedUnixSeconds`
 
-`GameSaveMigrator.Normalize`는 null과 음수 값을 안전한 기본값으로 정규화하고 현재 버전으로 올린다. 기존 JSON 정수 재화는 64비트 필드로 그대로 읽히며 더 이상 약 21억에서 포화되지 않는다. 광부 레벨과 마지막 보상 레벨은 최소 1이며 보상 레벨은 현재 광부 레벨보다 높아질 수 없다. `SaveService`는 기존 `lastSavedUnixSeconds`보다 과거 시각으로 저장하지 않는다. 최초 챕터 보상은 `highestCompletedChapter`보다 큰 챕터를 처음 완료할 때만 지급한다.
+`GameSaveMigrator.Normalize`는 null과 음수 값을 안전한 기본값으로 정규화하고 현재 버전으로 올린다. 장비는 빈 ID를 제거하고 같은 인스턴스 ID 중 가장 높은 등급 하나만 남기며, 등급을 0~3으로 제한하고 존재하지 않는 장비를 가리키는 슬롯 참조를 제거한다. 카탈로그 정의와 슬롯 일치는 `EquipmentService.SanitizeAgainstCatalog`가 추가로 검증한다. 기존 JSON 정수 재화는 64비트 필드로 그대로 읽히며 더 이상 약 21억에서 포화되지 않는다. 광부 레벨과 마지막 보상 레벨은 최소 1이며 보상 레벨은 현재 광부 레벨보다 높아질 수 없다. `SaveService`는 기존 `lastSavedUnixSeconds`보다 과거 시각으로 저장하지 않는다. 최초 챕터 보상은 `highestCompletedChapter`보다 큰 챕터를 처음 완료할 때만 지급한다.
 
 ## UI·비주얼
 
@@ -206,6 +223,7 @@ MineGameController (Unity composition root)
 - `MobileButtonFeedback`, `PositiveFeedbackBurst`, `CasualFeedbackText`가 버튼·긍정 보상 피드백을 담당한다.
 - 진행 바 위 `ChapterStatus`는 일반 stage에서 챕터 내 진행도와 자동 채굴력, 보스에서 카운트다운과 현재/권장 채굴력을 네 언어로 표시한다. 보스 실패 후에는 `보스 준비` 상태와 현재/권장치를 표시하며 같은 버튼이 재도전 진입점이 된다.
 - 기존 자원 카운터 좌표를 이동하지 않고 헤더 왼쪽의 비어 있던 영역에 `MinerRankButton` 260×94를 배치했다. 현재 광부 레벨·XP를 표시하고 누르면 총 등급 보너스와 다음 기능 해금을 네 언어로 안내한다.
+- `MineHudViewEquipment` 부분 클래스가 V5 하단 장비 탭의 모달을 담당한다. 4개 장착 슬롯, 페이지당 6개 인벤토리 행, 현재 장비 대비 보너스, 장착·해제·3개 합성·자동 장착을 제공하며 기존 설정 모달의 Simple 스킨 자산을 재사용한다.
 - 기존 `OfflineRewardSurface`는 위치·크기를 유지하며 보상이 적용된 시간, 처리한 일반 광석 수, Credits와 XP를 두 줄로 표시한다.
 - 광석은 Meshy 생성 모델을 모바일용 Unity 메시·텍스처로 변환한 자산을 사용한다.
 - Task 13-1에서는 기존 모델을 보스일 때 확대할 뿐 전용 보스 그래픽은 아직 사용하지 않는다.

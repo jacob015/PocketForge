@@ -622,6 +622,56 @@ namespace PocketForge.Tests.Editor
             }
         }
 
+        [Test]
+        public void EquipmentNavigation_OpensSafeAreaModalAndEquipsSelectedItemAtLevelTwo()
+        {
+            var catalog = MiningContentCatalog.CreateRuntimeDefault();
+            try
+            {
+                var service = new MiningGameService(catalog);
+                var state = service.CreateInitialState(new GameSaveData
+                {
+                    minerLevel = 2,
+                    highestRewardedMinerLevel = 2,
+                    equipmentInventory = new[]
+                    {
+                        new EquipmentItemData
+                        {
+                            instanceId = "pickaxe-item",
+                            definitionId = "rugged_pickaxe",
+                            rarity = (int)EquipmentRarity.Rare
+                        }
+                    }
+                }, 1f);
+                var presenter = new MineHudPresenter(view, service, state);
+                presenter.Render();
+
+                FindRect("EquipmentNavigation").GetComponent<Button>().onClick.Invoke();
+
+                var backdrop = FindRect("EquipmentBackdrop");
+                var card = FindRect("EquipmentCard");
+                var previous = FindRect("EquipmentPrevious");
+                var firstRow = FindRect("EquipmentInventoryRow1");
+                var primary = FindRect("EquipmentPrimary").GetComponent<Button>();
+                Assert.That(backdrop.gameObject.activeSelf, Is.True);
+                Assert.That(backdrop.GetSiblingIndex(), Is.EqualTo(view.transform.childCount - 1));
+                Assert.That(card.sizeDelta, Is.EqualTo(new Vector2(920f, 1380f)));
+                Assert.That(previous.anchorMin, Is.EqualTo(new Vector2(0.5f, 0.5f)));
+                Assert.That(previous.anchorMax, Is.EqualTo(new Vector2(0.5f, 0.5f)));
+                Assert.That(firstRow.gameObject.activeSelf, Is.True);
+                Assert.That(primary.interactable, Is.True);
+
+                primary.onClick.Invoke();
+
+                Assert.That(state.Player.equippedEquipment, Has.Length.EqualTo(1));
+                Assert.That(state.Player.equippedEquipment[0].instanceId, Is.EqualTo("pickaxe-item"));
+            }
+            finally
+            {
+                Object.DestroyImmediate(catalog);
+            }
+        }
+
         private static RectTransform FindChildRect(RectTransform parent, string name)
         {
             return parent.GetComponentsInChildren<RectTransform>(true).Single(rect => rect.name == name);

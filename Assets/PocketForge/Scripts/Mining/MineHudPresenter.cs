@@ -1,5 +1,6 @@
 using System;
 using PocketForge.Audio;
+using PocketForge.Content;
 using PocketForge.Economy;
 using PocketForge.Localization;
 using PocketForge.Presentation;
@@ -21,6 +22,7 @@ namespace PocketForge.Mining
             this.state = state;
             view.Bind(Mine, Upgrade, OpenChapterSelection, SelectChapter);
             view.BindResearch(Research);
+            view.BindEquipment(Equip, Unequip, Fuse, AutoEquip);
         }
 
         public event Action StateChanged;
@@ -94,6 +96,50 @@ namespace PocketForge.Mining
             GameAudioController.Instance?.PlayUpgradeSuccess();
         }
 
+        private void Equip(string instanceId)
+        {
+            ApplyEquipmentAction(gameService.TryEquip(state, instanceId), "equipment_equipped_feedback");
+        }
+
+        private void Unequip(EquipmentSlot slot)
+        {
+            ApplyEquipmentAction(gameService.TryUnequip(state, slot), "equipment_unequipped_feedback");
+        }
+
+        private void Fuse(string definitionId, EquipmentRarity rarity)
+        {
+            ApplyEquipmentAction(gameService.TryFuse(state, definitionId, rarity), "equipment_fused_feedback");
+        }
+
+        private void AutoEquip()
+        {
+            ApplyEquipmentAction(gameService.AutoEquip(state), "equipment_auto_equipped_feedback");
+        }
+
+        private void ApplyEquipmentAction(EquipmentActionStatus status, string successKey)
+        {
+            if (status != EquipmentActionStatus.Success)
+            {
+                var key = status switch
+                {
+                    EquipmentActionStatus.FeatureLocked => "equipment_locked",
+                    EquipmentActionStatus.NeedMoreDuplicates => "equipment_need_three",
+                    EquipmentActionStatus.MaxRarity => "equipment_max_rarity",
+                    EquipmentActionStatus.AlreadyEquipped => "equipment_already_equipped",
+                    EquipmentActionStatus.NotEquipped => "equipment_not_equipped",
+                    _ => "equipment_unavailable"
+                };
+                view.ShowFeedback(LanguageService.Get(key), new Color(1f, 0.55f, 0.3f));
+                return;
+            }
+
+            Render();
+            StateChanged?.Invoke();
+            SaveRequested?.Invoke();
+            view.ShowFeedback(LanguageService.Get(successKey), new Color(0.45f, 0.95f, 1f));
+            GameAudioController.Instance?.PlayUpgradeSuccess();
+        }
+
         private void Apply(MiningGameResult result, UpgradeType? upgradedType = null)
         {
             if (result.PurchaseFailed)
@@ -150,7 +196,8 @@ namespace PocketForge.Mining
             }
             else if (result.RewardCredits > 0 ||
                      result.RewardGems > 0 ||
-                     result.RewardBlueprintCores > 0)
+                     result.RewardBlueprintCores > 0 ||
+                     result.RewardEquipment != null)
             {
                 var message = result.RewardCredits > 0
                     ? $"+{CompactNumberFormatter.Format(result.RewardCredits)} C"
@@ -163,6 +210,11 @@ namespace PocketForge.Mining
                 if (result.RewardBlueprintCores > 0)
                 {
                     message += $"  +{CompactNumberFormatter.Format(result.RewardBlueprintCores)} CORE";
+                }
+
+                if (result.RewardEquipment != null)
+                {
+                    message += $"  +{LanguageService.Get("equipment_drop")}";
                 }
 
                 view.ShowFeedback(message.Trim(), new Color(1f, 0.82f, 0.3f));
