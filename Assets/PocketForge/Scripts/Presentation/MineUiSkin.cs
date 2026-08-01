@@ -136,6 +136,59 @@ namespace PocketForge.Presentation
             return sprite;
         }
 
+        /// <summary>
+        /// Creates a Task 13 sprite with measured pixel borders.
+        /// Vector4 order is left, bottom, right, top to match Sprite.Create.
+        /// </summary>
+        public Sprite Task13Sliced(string assetName, Vector4 borderPixels)
+        {
+            var cacheKey = $"Task13/{assetName}:sliced:" +
+                           $"{borderPixels.x:F1},{borderPixels.y:F1}," +
+                           $"{borderPixels.z:F1},{borderPixels.w:F1}";
+            if (sprites.TryGetValue(cacheKey, out var cached) && cached != null)
+            {
+                return cached;
+            }
+
+            sprites.Remove(cacheKey);
+
+            var texture = Task13Texture(assetName);
+            if (texture == null)
+            {
+                return null;
+            }
+
+            var finite = IsFinite(borderPixels.x) &&
+                         IsFinite(borderPixels.y) &&
+                         IsFinite(borderPixels.z) &&
+                         IsFinite(borderPixels.w);
+            var valid = finite &&
+                        borderPixels.x >= 0f &&
+                        borderPixels.y >= 0f &&
+                        borderPixels.z >= 0f &&
+                        borderPixels.w >= 0f &&
+                        borderPixels.x + borderPixels.z < texture.width &&
+                        borderPixels.y + borderPixels.w < texture.height;
+            if (!valid)
+            {
+                Debug.LogWarning(
+                    $"Pocket Forge Task13 border is invalid for {assetName} " +
+                    $"({texture.width}x{texture.height}): {borderPixels}");
+                return Task13Simple(assetName);
+            }
+
+            var sprite = Sprite.Create(
+                texture,
+                new Rect(0f, 0f, texture.width, texture.height),
+                new Vector2(0.5f, 0.5f),
+                100f,
+                0,
+                SpriteMeshType.FullRect,
+                borderPixels);
+            sprites[cacheKey] = sprite;
+            return sprite;
+        }
+
         public Sprite Sliced(string assetName, Vector4 normalizedBorder)
         {
             var key = $"{normalizedBorder.x:F3},{normalizedBorder.y:F3},{normalizedBorder.z:F3},{normalizedBorder.w:F3}";
@@ -194,6 +247,11 @@ namespace PocketForge.Presentation
                 SpriteMeshType.FullRect);
             sprites[cacheKey] = sprite;
             return sprite;
+        }
+
+        private static bool IsFinite(float value)
+        {
+            return !float.IsNaN(value) && !float.IsInfinity(value);
         }
     }
 }

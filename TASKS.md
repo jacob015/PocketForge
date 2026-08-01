@@ -1,8 +1,29 @@
 # Pocket Forge 작업 현황
 
-마지막 갱신: 2026-08-01
+마지막 갱신: 2026-08-02
 
 ## 현재 작업
+
+### Task 13 UI 겹침·9-slice 후속 교정
+
+상태: 완료
+
+완료 내용:
+
+- Task13 PNG 알파 경계와 코너를 원본 픽셀로 측정하고 Simple·Sliced·Filled·분리 조립으로 분류
+- 실제 Border를 받는 `MineUiSkin.Task13Sliced()`와 최소 Rect 방어 헬퍼 추가
+- 장비 비교 트레이를 빈 배경·Divider·3개 텍스트 열로 분리하고 장비 카드·행·행동 영역 재배치
+- 박물관 잠금, 업적 5열, 연구 텍스트/버튼, 공통 제목/닫기 충돌 교정
+- 메인 상단 자원 슬롯, 보스 전용 행, 강화 카드, 하단 6개 내비게이션 Safe Area 교정
+- 5개 최종 렌더와 분류·Border 표를 `Review/Task13OverlapFix/`에 기록
+
+검증:
+
+- Unity 컴파일 오류 0건
+- UI·화면비·4개 언어 대상 EditMode 30/30 통과
+- 전체 EditMode 154/154 통과
+- 메인·장비·연구·박물관·업적 실제 렌더 육안 검수
+- Android APK/AAB·실기기 검증은 이번 범위에서 미실행
 
 ### Task 13-5A — 광물 박물관·업적
 
@@ -53,6 +74,12 @@
 - 전체 EditMode 152/152, UI·화면비 대상 28/28 통과
 - 1440×3088 메인 HUD·장비·박물관·업적 런타임 캡처와 메인 가스샷 50% 오버레이 검수 완료
 - Android APK/AAB와 실기기 검증은 이번 승인 범위에서 제외
+
+후속 시각 검수:
+
+- 2026-08-01 사용자 캡처에서 메인 하단 내비게이션, 모달 타이틀·닫기, 장비 비교 트레이, 업적 고정 열, 박물관 잠금 카드, 연구 행의 추가 겹침·압축을 확인
+- Task13 Sprite가 Border 0의 Simple 경로로 강제 확대되는 현행 구조와 잘못된 Sliced 전환을 함께 교정하는 `POCKET_FORGE_UI_OVERLAP_AND_9SLICE_CORRECTION_PROMPT.txt` 작성
+- 프롬프트만 작성했으며 실제 RectTransform·Sprite Border·렌더 타입과 위 검증 결과는 아직 변경하지 않음
 
 ## 다음 작업
 

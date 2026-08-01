@@ -55,6 +55,7 @@ namespace PocketForge.Tests.Editor
             var bossWarning = VerticalRange("BossWarningPanel", virtualHeight);
             var progress = VerticalRange("ProgressBackground", virtualHeight);
             var mine = VerticalRange("MineButton", virtualHeight);
+            var bossAction = VerticalRange("BossChallengeButton", virtualHeight);
             var cards = VerticalRange("PickaxeButton", virtualHeight);
             var navigation = VerticalRange("BottomNavigationBar", virtualHeight);
 
@@ -62,7 +63,8 @@ namespace PocketForge.Tests.Editor
             Assert.That(chapter.Max, Is.LessThanOrEqualTo(topBar.Min), "Chapter information must sit below the resource bar.");
             Assert.That(bossWarning.Max, Is.LessThanOrEqualTo(chapter.Min), "Boss warning must sit below chapter information.");
             Assert.That(mine.Max, Is.LessThanOrEqualTo(progress.Min + 0.01f), "The mine button must not cover the ore gauge.");
-            Assert.That(cards.Max, Is.LessThanOrEqualTo(mine.Min + 0.01f), "Upgrade cards must not cover the mine button.");
+            Assert.That(bossAction.Max, Is.LessThanOrEqualTo(mine.Min), "Boss action needs its own row below the mine shortcuts.");
+            Assert.That(cards.Max, Is.LessThanOrEqualTo(bossAction.Min), "Upgrade cards must not cover the boss action row.");
             Assert.That(cards.Min, Is.GreaterThanOrEqualTo(navigation.Max - 0.01f));
             Assert.That(navigation.Min, Is.GreaterThanOrEqualTo(0f));
         }
@@ -91,15 +93,16 @@ namespace PocketForge.Tests.Editor
         public void ApprovedSnapshotChrome_UsesMeasured1080WideGeometry()
         {
             AssertRect("TopSurface", new Vector2(0f, -189f), new Vector2(972f, 162f));
-            AssertRect("MinerRankButton", new Vector2(-275f, -189f), new Vector2(270f, 104f));
+            AssertRect("MinerRankButton", new Vector2(-250f, -189f), new Vector2(184f, 104f));
             AssertRect("SettingsButton", new Vector2(444f, -189f), new Vector2(84f, 84f));
-            AssertRect("RewardedAdButton", new Vector2(33f, -189f), new Vector2(48f, 48f));
+            AssertRect("RewardedAdButton", new Vector2(322f, -189f), new Vector2(48f, 48f));
             AssertRect("ChapterInformationPanel", new Vector2(-168f, -394f), new Vector2(636f, 188f));
             AssertRect("PowerComparisonPanel", new Vector2(333f, -394f), new Vector2(306f, 188f));
             AssertRect("ProgressBackground", new Vector2(0f, 1014f), new Vector2(560f, 86f));
             AssertRect("MineButton", new Vector2(0f, 843f), new Vector2(450f, 186f));
-            AssertRect("PickaxeButton", new Vector2(-327f, 444f), new Vector2(302f, 348f));
-            AssertRect("BottomNavigationBar", new Vector2(0f, 129f), new Vector2(972f, 174f));
+            AssertRect("BossChallengeButton", new Vector2(0f, 650f), new Vector2(322f, 90f));
+            AssertRect("PickaxeButton", new Vector2(-327f, 420f), new Vector2(302f, 330f));
+            AssertRect("BottomNavigationBar", new Vector2(0f, 120f), new Vector2(948f, 160f));
             AssertRect("SettingsCard", new Vector2(0f, 53f), new Vector2(900f, 1344f));
             AssertRect("CloseSettingsButton", new Vector2(0f, 66f), new Vector2(326f, 88f));
         }
@@ -258,7 +261,7 @@ namespace PocketForge.Tests.Editor
         }
 
         [Test]
-        public void Task13GasShotAssets_AreCompleteAndUseSimpleRuntimeImages()
+        public void Task13GasShotAssets_AreCompleteAndUseMeasuredRuntimeClassifications()
         {
             var textures = Resources.LoadAll<Texture2D>("PocketForge/UI/Task13");
             var required = new[]
@@ -290,15 +293,35 @@ namespace PocketForge.Tests.Editor
             }
 
             view.SetTheme(null, null, null, null, null);
-            foreach (var rootName in new[] { "EquipmentCard", "CollectionCard" })
+            foreach (var slicedName in new[]
             {
-                var sliced = FindRect(rootName)
-                    .GetComponentsInChildren<Image>(true)
-                    .Where(image => image.type == Image.Type.Sliced)
-                    .Select(image => image.name)
-                    .ToArray();
-                Assert.That(sliced, Is.Empty, $"{rootName} contains sliced images: {string.Join(", ", sliced)}");
+                "EquipmentCard",
+                "EquipmentSlotPickaxe",
+                "EquipmentPrimary",
+                "EquipmentFuse",
+                "EquipmentAutoEquip",
+                "CollectionCard",
+                "MuseumTab",
+                "AchievementsTab",
+                "ResearchCard",
+                "ResearchRow1"
+            })
+            {
+                AssertValidSliced(FindRect(slicedName).GetComponent<Image>(), slicedName);
             }
+            AssertValidSliced(
+                FindChildRect(FindRect("ResearchRow1"), "ResearchPurchaseButton").GetComponent<Image>(),
+                "ResearchPurchaseButton");
+
+            AssertSimple(FindRect("EquipmentTitleSurface").GetComponent<Image>(), "EquipmentTitleSurface");
+            AssertSimple(FindRect("EquipmentInventoryRow1").GetComponent<Image>(), "EquipmentInventoryRow1");
+            AssertSimple(FindRect("CollectionTitleSurface").GetComponent<Image>(), "CollectionTitleSurface");
+            AssertSimple(FindRect("CollectionSummarySurface").GetComponent<Image>(), "CollectionSummarySurface");
+            Assert.That(
+                FindRect("EquipmentCompareSurface").GetComponent<Image>().sprite.texture.name,
+                Is.Not.EqualTo("UiEquipmentComparisonTray"),
+                "The baked comparison tray must be replaced by a separated background and dividers.");
+            Assert.That(FindRect("ProgressFill").GetComponent<Image>().type, Is.EqualTo(Image.Type.Filled));
         }
 
         [Test]
@@ -323,6 +346,92 @@ namespace PocketForge.Tests.Editor
             Assert.That(FindRect("SettingsIcon").sizeDelta, Is.EqualTo(new Vector2(74f, 74f)));
         }
 
+        [Test]
+        public void CorrectedHeaderComparisonResearchAndNavigationZones_DoNotOverlap()
+        {
+            view.SetTheme(null, null, null, null, null);
+
+            AssertNoOverlap(
+                FindRect("EquipmentTitleSurface"),
+                FindRect("EquipmentCapacitySurface"),
+                "Equipment capacity must sit below, not over, the title plaque.");
+            AssertNoOverlap(
+                FindRect("EquipmentCompare"),
+                FindRect("EquipmentCompareDividerLeft"),
+                "Comparison value must not touch the left divider.");
+            AssertNoOverlap(
+                FindRect("EquipmentCompare"),
+                FindRect("EquipmentCompareDividerRight"),
+                "Comparison value must not touch the right divider.");
+            AssertNoOverlap(
+                FindChildRect(FindRect("ResearchRow1"), "ResearchName"),
+                FindChildRect(FindRect("ResearchRow1"), "ResearchPurchaseButton"),
+                "Research text zone must not enter the purchase button.");
+            AssertNoWorldOverlap(
+                FindRect("ResearchSummary"),
+                FindRect("ResearchRow1"),
+                "Research rows must start below the summary and core header zones.");
+
+            var navigation = FindRect("BottomNavigationBar");
+            var first = LocalRect(FindChildRect(navigation, "EquipmentNavigation"));
+            var last = LocalRect(FindChildRect(navigation, "ShopNavigation"));
+            Assert.That(first.xMin, Is.GreaterThanOrEqualTo(navigation.rect.xMin));
+            Assert.That(last.xMax, Is.LessThanOrEqualTo(navigation.rect.xMax));
+        }
+
+        [Test]
+        public void CorrectedModalColumns_RemainSeparatedInEverySupportedLanguage()
+        {
+            var originalLanguage = LanguageService.Current;
+            var catalog = MiningContentCatalog.CreateRuntimeDefault();
+            try
+            {
+                var service = new MiningGameService(catalog);
+                var state = service.CreateInitialState(new GameSaveData
+                {
+                    minerLevel = 63,
+                    highestRewardedMinerLevel = 63,
+                    blueprintCores = 20
+                }, 1f);
+                var presenter = new MineHudPresenter(view, service, state);
+                presenter.Render();
+                view.SetTheme(null, null, null, null, null);
+                FindRect("EquipmentNavigation").GetComponent<Button>().onClick.Invoke();
+                FindRect("MuseumNavigation").GetComponent<Button>().onClick.Invoke();
+                FindRect("AchievementsTab").GetComponent<Button>().onClick.Invoke();
+                FindRect("ResearchNavigation").GetComponent<Button>().onClick.Invoke();
+
+                foreach (var language in new[]
+                         {
+                             SupportedLanguage.Korean,
+                             SupportedLanguage.English,
+                             SupportedLanguage.Japanese,
+                             SupportedLanguage.ChineseSimplified
+                         })
+                {
+                    LanguageService.SetLanguage(language);
+                    Canvas.ForceUpdateCanvases();
+                    AssertNoOverlap(
+                        FindChildRect(FindRect("AchievementRow1"), "IconFrame"),
+                        FindChildRect(FindRect("AchievementRow1"), "AchievementName"),
+                        $"Achievement icon/title overlap in {language}.");
+                    AssertNoOverlap(
+                        FindChildRect(FindRect("AchievementRow1"), "AchievementReward"),
+                        FindChildRect(FindRect("AchievementRow1"), "ClaimAchievement"),
+                        $"Achievement reward/action overlap in {language}.");
+                    AssertNoOverlap(
+                        FindChildRect(FindRect("ResearchRow1"), "ResearchName"),
+                        FindChildRect(FindRect("ResearchRow1"), "ResearchPurchaseButton"),
+                        $"Research text/action overlap in {language}.");
+                }
+            }
+            finally
+            {
+                LanguageService.SetLanguage(originalLanguage);
+                Object.DestroyImmediate(catalog);
+            }
+        }
+
         private (float Min, float Max) VerticalRange(string name, float parentHeight)
         {
             var rect = FindRect(name);
@@ -345,6 +454,45 @@ namespace PocketForge.Tests.Editor
         private static void AssertSimple(Image image, string name)
         {
             Assert.That(image.type, Is.EqualTo(Image.Type.Simple), $"{name} must not use 9-slice rendering.");
+        }
+
+        private static void AssertValidSliced(Image image, string name)
+        {
+            Assert.That(image.type, Is.EqualTo(Image.Type.Sliced), $"{name} must use measured 9-slice rendering.");
+            Assert.That(image.sprite, Is.Not.Null, $"{name} has no sprite.");
+            var border = image.sprite.border;
+            Assert.That(border.x + border.z, Is.GreaterThan(0f), $"{name} has no horizontal border.");
+            Assert.That(border.y + border.w, Is.GreaterThan(0f), $"{name} has no vertical border.");
+            Assert.That(image.rectTransform.sizeDelta.x, Is.GreaterThanOrEqualTo(border.x + border.z + 16f));
+            Assert.That(image.rectTransform.sizeDelta.y, Is.GreaterThanOrEqualTo(border.y + border.w + 16f));
+        }
+
+        private static Rect LocalRect(RectTransform rect)
+        {
+            var parent = (RectTransform)rect.parent;
+            var parentRect = parent.rect;
+            var anchorPoint = parentRect.min + Vector2.Scale(rect.anchorMin, parentRect.size);
+            var bottomLeft = anchorPoint + rect.anchoredPosition - Vector2.Scale(rect.pivot, rect.sizeDelta);
+            return new Rect(bottomLeft, rect.sizeDelta);
+        }
+
+        private static void AssertNoOverlap(RectTransform first, RectTransform second, string message)
+        {
+            Assert.That(first.parent, Is.EqualTo(second.parent), "Overlap checks require a shared parent.");
+            Assert.That(LocalRect(first).Overlaps(LocalRect(second)), Is.False, message);
+        }
+
+        private static Rect WorldRect(RectTransform rect)
+        {
+            var corners = new Vector3[4];
+            rect.GetWorldCorners(corners);
+            return Rect.MinMaxRect(corners[0].x, corners[0].y, corners[2].x, corners[2].y);
+        }
+
+        private static void AssertNoWorldOverlap(RectTransform first, RectTransform second, string message)
+        {
+            Canvas.ForceUpdateCanvases();
+            Assert.That(WorldRect(first).Overlaps(WorldRect(second)), Is.False, message);
         }
 
         private static void AssertIconSizes(RectTransform parent, string name, Vector2 expectedSize, int expectedCount)
@@ -390,8 +538,8 @@ namespace PocketForge.Tests.Editor
 
                 Assert.That(FindRect("MinerRank").GetComponent<Text>().text, Does.Contain("3"));
                 Assert.That(FindRect("MinerExperience").GetComponent<Text>().text, Does.Contain("12"));
-                AssertRect("CreditsCurrencyIcon", new Vector2(-116f, -189f), new Vector2(54f, 54f));
-                AssertRect("DepthCurrencyIcon", new Vector2(92f, -189f), new Vector2(54f, 54f));
+                AssertRect("CreditsCurrencyIcon", new Vector2(-136f, -189f), new Vector2(48f, 48f));
+                AssertRect("DepthCurrencyIcon", new Vector2(30f, -189f), new Vector2(48f, 48f));
                 Assert.That(FindRect("BlueprintCoreIcon"), Is.Not.Null);
             }
             finally
@@ -652,6 +800,11 @@ namespace PocketForge.Tests.Editor
                 Assert.That(backdrop.gameObject.activeSelf, Is.True);
                 Assert.That(backdrop.GetSiblingIndex(), Is.EqualTo(view.transform.childCount - 1));
                 Assert.That(purchase.interactable, Is.True);
+                Assert.That(FindRect("ResearchCard").sizeDelta, Is.EqualTo(new Vector2(920f, 1200f)));
+                AssertNoOverlap(
+                    FindChildRect(firstRow, "ResearchName"),
+                    FindChildRect(firstRow, "ResearchPurchaseButton"),
+                    "Research text and purchase action must stay in separate columns.");
 
                 purchase.onClick.Invoke();
 
@@ -699,11 +852,15 @@ namespace PocketForge.Tests.Editor
                 var primary = FindRect("EquipmentPrimary").GetComponent<Button>();
                 Assert.That(backdrop.gameObject.activeSelf, Is.True);
                 Assert.That(backdrop.GetSiblingIndex(), Is.EqualTo(view.transform.childCount - 1));
-                Assert.That(card.sizeDelta, Is.EqualTo(new Vector2(920f, 1400f)));
+                Assert.That(card.sizeDelta, Is.EqualTo(new Vector2(920f, 1700f)));
                 Assert.That(previous.anchorMin, Is.EqualTo(new Vector2(0.5f, 0.5f)));
                 Assert.That(previous.anchorMax, Is.EqualTo(new Vector2(0.5f, 0.5f)));
                 Assert.That(firstRow.gameObject.activeSelf, Is.True);
                 Assert.That(primary.interactable, Is.True);
+                AssertNoOverlap(
+                    FindRect("EquipmentTitleSurface"),
+                    FindRect("EquipmentCapacitySurface"),
+                    "Equipment title and capacity capsule must not collide.");
 
                 primary.onClick.Invoke();
 
@@ -743,15 +900,26 @@ namespace PocketForge.Tests.Editor
                 var museumRow = FindRect("MuseumRow1");
                 Assert.That(backdrop.gameObject.activeSelf, Is.True);
                 Assert.That(backdrop.GetSiblingIndex(), Is.EqualTo(view.transform.childCount - 1));
-                Assert.That(card.sizeDelta, Is.EqualTo(new Vector2(920f, 1400f)));
+                Assert.That(card.sizeDelta, Is.EqualTo(new Vector2(920f, 1700f)));
                 Assert.That(museumRow.gameObject.activeSelf, Is.True);
-                Assert.That(museumRow.GetComponent<Image>().type, Is.EqualTo(Image.Type.Simple));
+                Assert.That(museumRow.GetComponent<Image>().type, Is.EqualTo(Image.Type.Sliced));
+                var locked = FindChildRect(museumRow, "LockedOverlay");
+                AssertNoOverlap(locked, FindChildRect(museumRow, "OreName"), "Museum lock must not cover the name.");
+                AssertNoOverlap(locked, FindChildRect(museumRow, "OreDetails"), "Museum lock must not cover details.");
 
                 FindRect("AchievementsTab").GetComponent<Button>().onClick.Invoke();
                 var achievementRow = FindRect("AchievementRow1");
                 var claim = FindChildRect(achievementRow, "ClaimAchievement").GetComponent<Button>();
                 Assert.That(achievementRow.gameObject.activeSelf, Is.True);
                 Assert.That(claim.interactable, Is.True);
+                AssertNoOverlap(
+                    FindChildRect(achievementRow, "IconFrame"),
+                    FindChildRect(achievementRow, "AchievementName"),
+                    "Achievement icon must not cover the objective title.");
+                AssertNoOverlap(
+                    FindChildRect(achievementRow, "AchievementReward"),
+                    FindChildRect(achievementRow, "ClaimAchievement"),
+                    "Achievement reward value must not enter the claim button.");
 
                 claim.onClick.Invoke();
 

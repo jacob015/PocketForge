@@ -36,12 +36,16 @@ namespace PocketForge.Mining
         private Text equipmentCapacityText;
         private Image equipmentCapacitySurface;
         private Image equipmentCompareSurface;
+        private Image equipmentCompareDividerLeft;
+        private Image equipmentCompareDividerRight;
         private readonly List<Button> equipmentSlotButtons = new();
         private readonly List<RawImage> equipmentSlotIcons = new();
         private readonly List<Text> equipmentSlotLabels = new();
         private readonly List<EquipmentRowView> equipmentRows = new();
         private Text equipmentPageText;
         private Text equipmentCompareText;
+        private Text equipmentCompareLeftText;
+        private Text equipmentCompareRightText;
         private Button equipmentPreviousButton;
         private Button equipmentNextButton;
         private Button equipmentPrimaryButton;
@@ -74,15 +78,15 @@ namespace PocketForge.Mining
                 new Vector2(0.5f, 0.5f),
                 new Vector2(0.5f, 0.5f),
                 new Vector2(0f, 24f),
-                new Vector2(920f, 1400f),
+                new Vector2(920f, 1700f),
                 new Color(0.035f, 0.075f, 0.15f, 0.995f));
             equipmentTitleSurface = CreatePanel(
                 "EquipmentTitleSurface",
                 equipmentCard.transform,
                 new Vector2(0.5f, 1f),
                 new Vector2(0.5f, 1f),
-                new Vector2(0f, -38f),
-                new Vector2(650f, 126f),
+                new Vector2(-30f, -62f),
+                new Vector2(610f, 124f),
                 new Color(0.12f, 0.17f, 0.42f, 1f));
             equipmentTitle = CreateText(
                 "EquipmentTitle",
@@ -100,7 +104,7 @@ namespace PocketForge.Mining
                 equipmentCard.transform,
                 new Vector2(0f, 1f),
                 new Vector2(0f, 1f),
-                new Vector2(142f, -86f),
+                new Vector2(145f, -184f),
                 new Vector2(190f, 58f),
                 Color.white);
             equipmentCapacityText = CreateText(
@@ -119,7 +123,7 @@ namespace PocketForge.Mining
                 equipmentCard.transform,
                 new Vector2(1f, 1f),
                 new Vector2(1f, 1f),
-                new Vector2(-72f, -70f),
+                new Vector2(-70f, -70f),
                 new Vector2(84f, 84f),
                 Color.white);
             closeEquipmentCornerButton.GetComponentInChildren<Text>().gameObject.SetActive(false);
@@ -139,8 +143,8 @@ namespace PocketForge.Mining
                 equipmentCard.transform,
                 new Vector2(0.5f, 1f),
                 new Vector2(0.5f, 1f),
-                new Vector2(0f, -166f),
-                new Vector2(710f, 50f),
+                new Vector2(112f, -184f),
+                new Vector2(540f, 58f),
                 27,
                 TextAnchor.MiddleCenter);
             equipmentSummary.font = UiFontProvider.GetCasual();
@@ -159,9 +163,10 @@ namespace PocketForge.Mining
             equipmentPreviousButton = CreateEquipmentActionButton(
                 "EquipmentPrevious",
                 -300f,
-                -314f,
+                -360f,
                 112f,
-                true);
+                true,
+                72f);
             equipmentPreviousButton.GetComponentInChildren<Text>().text = "<";
             equipmentPreviousButton.onClick.AddListener(() =>
             {
@@ -171,9 +176,10 @@ namespace PocketForge.Mining
             equipmentNextButton = CreateEquipmentActionButton(
                 "EquipmentNext",
                 300f,
-                -314f,
+                -360f,
                 112f,
-                true);
+                true,
+                72f);
             equipmentNextButton.GetComponentInChildren<Text>().text = ">";
             equipmentNextButton.onClick.AddListener(() =>
             {
@@ -185,7 +191,7 @@ namespace PocketForge.Mining
                 equipmentCard.transform,
                 new Vector2(0.5f, 0.5f),
                 new Vector2(0.5f, 0.5f),
-                new Vector2(0f, -314f),
+                new Vector2(0f, -360f),
                 new Vector2(280f, 58f),
                 24,
                 TextAnchor.MiddleCenter);
@@ -195,30 +201,71 @@ namespace PocketForge.Mining
                 equipmentCard.transform,
                 new Vector2(0.5f, 0f),
                 new Vector2(0.5f, 0f),
-                new Vector2(0f, 246f),
-                new Vector2(760f, 132f),
+                new Vector2(0f, 390f),
+                new Vector2(824f, 120f),
                 Color.white);
+            equipmentCompareDividerLeft = CreateSimpleImage(
+                "EquipmentCompareDividerLeft",
+                equipmentCompareSurface.transform,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(-140f, 0f),
+                new Vector2(3f, 88f),
+                new Color(0.42f, 0.55f, 0.94f, 0.72f));
+            equipmentCompareDividerRight = CreateSimpleImage(
+                "EquipmentCompareDividerRight",
+                equipmentCompareSurface.transform,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(140f, 0f),
+                new Vector2(3f, 88f),
+                new Color(0.42f, 0.55f, 0.94f, 0.72f));
+            equipmentCompareLeftText = CreateText(
+                "EquipmentCompareSelected",
+                equipmentCompareSurface.transform,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(-276f, 0f),
+                new Vector2(244f, 82f),
+                22,
+                TextAnchor.MiddleCenter);
             equipmentCompareText = CreateText(
                 "EquipmentCompare",
                 equipmentCompareSurface.transform,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
                 Vector2.zero,
-                Vector2.one,
-                Vector2.zero,
-                new Vector2(-58f, -24f),
+                new Vector2(244f, 82f),
                 25,
                 TextAnchor.MiddleCenter);
             equipmentCompareText.font = UiFontProvider.GetCasual();
             equipmentCompareText.resizeTextForBestFit = true;
             equipmentCompareText.resizeTextMinSize = 18;
             equipmentCompareText.resizeTextMaxSize = 25;
+            equipmentCompareRightText = CreateText(
+                "EquipmentCompareCurrent",
+                equipmentCompareSurface.transform,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(276f, 0f),
+                new Vector2(244f, 82f),
+                22,
+                TextAnchor.MiddleCenter);
+            foreach (var text in new[] { equipmentCompareLeftText, equipmentCompareRightText })
+            {
+                text.font = UiFontProvider.GetCasual();
+                text.resizeTextForBestFit = true;
+                text.resizeTextMinSize = 16;
+                text.resizeTextMaxSize = 22;
+            }
 
-            equipmentPrimaryButton = CreateEquipmentActionButton("EquipmentPrimary", -252f, 132f, 230f);
+            equipmentPrimaryButton = CreateEquipmentActionButton("EquipmentPrimary", -252f, 250f, 230f);
             equipmentPrimaryButton.onClick.AddListener(UseSelectedEquipment);
-            equipmentFuseButton = CreateEquipmentActionButton("EquipmentFuse", 0f, 132f, 230f);
+            equipmentFuseButton = CreateEquipmentActionButton("EquipmentFuse", 0f, 250f, 230f);
             equipmentFuseButton.onClick.AddListener(FuseSelectedEquipment);
-            equipmentAutoEquipButton = CreateEquipmentActionButton("EquipmentAutoEquip", 252f, 132f, 230f);
+            equipmentAutoEquipButton = CreateEquipmentActionButton("EquipmentAutoEquip", 252f, 250f, 230f);
             equipmentAutoEquipButton.onClick.AddListener(() => equipmentAutoEquipAction?.Invoke());
-            closeEquipmentButton = CreateEquipmentActionButton("CloseEquipment", 0f, 34f, 360f);
+            closeEquipmentButton = CreateEquipmentActionButton("CloseEquipment", 0f, 70f, 360f, false, 72f);
             closeEquipmentButton.onClick.AddListener(() => equipmentPanel.SetActive(false));
             equipmentPanel.SetActive(false);
         }
@@ -230,8 +277,8 @@ namespace PocketForge.Mining
                 equipmentCard.transform,
                 new Vector2(0.5f, 1f),
                 new Vector2(0.5f, 1f),
-                new Vector2(-300f + index * 200f, -302f),
-                new Vector2(184f, 216f),
+                new Vector2(-303f + index * 202f, -340f),
+                new Vector2(186f, 216f),
                 new Color(0.08f, 0.15f, 0.32f, 1f));
             button.GetComponentInChildren<Text>().gameObject.SetActive(false);
             var icon = new GameObject("Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(RawImage))
@@ -270,10 +317,10 @@ namespace PocketForge.Mining
             row.Button = CreateButton(
                 $"EquipmentInventoryRow{index + 1}",
                 equipmentCard.transform,
-                new Vector2(0.5f, 0.5f),
-                new Vector2(0.5f, 0.5f),
-                new Vector2(-250f + column * 250f, 126f - line * 276f),
-                new Vector2(220f, 252f),
+                new Vector2(0.5f, 1f),
+                new Vector2(0.5f, 1f),
+                new Vector2(-222f + column * 222f, -650f - line * 352f),
+                new Vector2(190f, 328f),
                 new Color(0.055f, 0.12f, 0.23f, 0.98f));
             row.Button.GetComponentInChildren<Text>().gameObject.SetActive(false);
 
@@ -290,16 +337,16 @@ namespace PocketForge.Mining
                 .GetComponent<RawImage>();
             row.Icon.transform.SetParent(row.Button.transform, false);
             row.Icon.rectTransform.anchorMin = row.Icon.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
-            row.Icon.rectTransform.anchoredPosition = new Vector2(0f, 48f);
-            row.Icon.rectTransform.sizeDelta = new Vector2(112f, 102f);
+            row.Icon.rectTransform.anchoredPosition = new Vector2(0f, 70f);
+            row.Icon.rectTransform.sizeDelta = new Vector2(120f, 112f);
             row.Icon.raycastTarget = false;
             row.Name = CreateText(
                 "ItemName",
                 row.Button.transform,
                 new Vector2(0.5f, 0.5f),
                 new Vector2(0.5f, 0.5f),
-                new Vector2(0f, -34f),
-                new Vector2(188f, 38f),
+                new Vector2(0f, -40f),
+                new Vector2(162f, 48f),
                 22,
                 TextAnchor.MiddleCenter);
             row.Name.font = UiFontProvider.GetCasual();
@@ -311,8 +358,8 @@ namespace PocketForge.Mining
                 row.Button.transform,
                 new Vector2(0.5f, 0.5f),
                 new Vector2(0.5f, 0.5f),
-                new Vector2(0f, -73f),
-                new Vector2(190f, 34f),
+                new Vector2(0f, -91f),
+                new Vector2(164f, 44f),
                 18,
                 TextAnchor.MiddleCenter);
             row.Details.color = new Color(0.62f, 0.86f, 1f);
@@ -322,8 +369,8 @@ namespace PocketForge.Mining
                 row.Button.transform,
                 new Vector2(1f, 0f),
                 new Vector2(1f, 0f),
-                new Vector2(-34f, 24f),
-                new Vector2(62f, 42f),
+                new Vector2(-36f, 28f),
+                new Vector2(58f, 40f),
                 Color.white);
             row.CountSurface.raycastTarget = false;
             row.Count = CreateText(
@@ -372,7 +419,8 @@ namespace PocketForge.Mining
             float x,
             float y,
             float width,
-            bool centered = false)
+            bool centered = false,
+            float height = 104f)
         {
             var anchor = centered ? new Vector2(0.5f, 0.5f) : new Vector2(0.5f, 0f);
             var button = CreateButton(
@@ -381,7 +429,7 @@ namespace PocketForge.Mining
                 anchor,
                 anchor,
                 new Vector2(x, y),
-                new Vector2(width, 82f),
+                new Vector2(width, height),
                 new Color(0.25f, 0.68f, 0.2f, 1f));
             var label = button.GetComponentInChildren<Text>();
             label.font = UiFontProvider.GetCasual();
@@ -506,16 +554,19 @@ namespace PocketForge.Mining
             closeEquipmentButton.GetComponentInChildren<Text>().text = LanguageService.Get("close").ToUpper();
             if (!hasSelected)
             {
-                equipmentCompareText.text = LanguageService.Get("equipment_no_items");
+                equipmentCompareLeftText.text = LanguageService.Get("equipment_no_items");
+                equipmentCompareText.text = "—";
+                equipmentCompareRightText.text = LanguageService.Get("equipment_empty");
                 return;
             }
 
             var current = lastService.GetEquippedItem(lastState, selected.Definition.Slot);
             var delta = selected.PowerBonus - (current?.PowerBonus ?? 0f);
-            equipmentCompareText.text = string.Format(
-                LanguageService.Get("equipment_compare"),
-                LanguageService.Get(selected.Definition.LocalizationKey),
-                delta * 100f);
+            equipmentCompareLeftText.text = LanguageService.Get(selected.Definition.LocalizationKey);
+            equipmentCompareText.text = $"{delta * 100f:+0.#;-0.#;0}%";
+            equipmentCompareRightText.text = current.HasValue
+                ? LanguageService.Get(current.Value.Definition.LocalizationKey)
+                : LanguageService.Get("equipment_empty");
         }
 
         private void UseSelectedEquipment()
@@ -554,26 +605,19 @@ namespace PocketForge.Mining
                 return;
             }
 
-            ApplyStretchedSimpleSprite(
+            ApplyBorderedSprite(
                 equipmentCard,
-                finalSkin.Task13Simple("UiEquipmentModalBody"),
+                finalSkin.Task13Sliced("UiEquipmentModalBody", new Vector4(30f, 30f, 30f, 30f)),
                 Color.white);
-            ApplyStretchedSimpleSprite(
-                equipmentTitleSurface,
-                finalSkin.Task13Simple("UiEquipmentTitlePlaque"),
-                Color.white);
-            ApplyStretchedSimpleSprite(
-                equipmentCapacitySurface,
-                finalSkin.Task13Simple("UiEquipmentCapacityCapsule"),
-                Color.white);
-            ApplyStretchedSimpleSprite(
+            ApplySimpleSprite(equipmentTitleSurface, finalSkin.Task13Simple("UiEquipmentTitlePlaque"));
+            ApplySimpleSprite(equipmentCapacitySurface, finalSkin.Task13Simple("UiEquipmentCapacityCapsule"));
+            ApplyBorderedSprite(
                 equipmentCompareSurface,
-                finalSkin.Task13Simple("UiEquipmentComparisonTray"),
+                finalSkin.Task13Sliced("UiEquipmentModalBody", new Vector4(30f, 30f, 30f, 30f)),
                 Color.white);
-            ApplyStretchedSimpleSprite(
+            ApplySimpleSprite(
                 closeEquipmentCornerButton.image,
-                finalSkin.Task13Simple("UiModalCloseButtonSurface"),
-                Color.white);
+                finalSkin.Task13Simple("UiModalCloseButtonSurface"));
             var cornerIcon = closeEquipmentCornerButton.transform.Find("Icon")?.GetComponent<Image>();
             if (cornerIcon != null)
             {
@@ -584,20 +628,18 @@ namespace PocketForge.Mining
 
             foreach (var button in equipmentSlotButtons)
             {
-                ApplyStretchedSimpleSprite(
+                ApplyBorderedSprite(
                     button.image,
-                    finalSkin.Task13Simple("UiEquipmentSlotCardBase"),
+                    finalSkin.Task13Sliced("UiEquipmentSlotCardBase", new Vector4(32f, 32f, 32f, 32f)),
                     Color.white);
             }
 
             foreach (var row in equipmentRows)
             {
-                ApplyStretchedSimpleSprite(
-                    row.Button.image,
-                    finalSkin.Task13Simple("UiEquipmentInventoryCardBase"),
-                    Color.white);
+                ApplySimpleSprite(row.Button.image, finalSkin.Task13Simple("UiEquipmentInventoryCardBase"));
                 row.SelectionOverlay.sprite = finalSkin.Task13Simple("OverlayEquipmentSelected");
                 row.SelectionOverlay.type = Image.Type.Simple;
+                row.SelectionOverlay.preserveAspect = true;
                 row.EquippedBadge.sprite = finalSkin.Task13Simple("BadgeEquipmentEquipped");
                 row.EquippedBadge.type = Image.Type.Simple;
                 row.EquippedBadge.preserveAspect = true;
@@ -606,31 +648,32 @@ namespace PocketForge.Mining
                 row.MergeBadge.preserveAspect = true;
                 row.CountSurface.sprite = finalSkin.Task13Simple("BadgeEquipmentCountBlank");
                 row.CountSurface.type = Image.Type.Simple;
+                row.CountSurface.preserveAspect = true;
             }
 
-            ApplyStretchedSimpleSprite(
+            ApplyBorderedSprite(
                 equipmentPreviousButton.image,
-                finalSkin.Task13Simple("ButtonEquipmentUnequip"),
+                finalSkin.Task13Sliced("ButtonEquipmentUnequip", new Vector4(36f, 28f, 36f, 28f)),
                 Color.white);
-            ApplyStretchedSimpleSprite(
+            ApplyBorderedSprite(
                 equipmentNextButton.image,
-                finalSkin.Task13Simple("ButtonEquipmentUnequip"),
+                finalSkin.Task13Sliced("ButtonEquipmentUnequip", new Vector4(36f, 28f, 36f, 28f)),
                 Color.white);
-            ApplyStretchedSimpleSprite(
+            ApplyBorderedSprite(
                 equipmentPrimaryButton.image,
-                finalSkin.Task13Simple("ButtonEquipmentEquip"),
+                finalSkin.Task13Sliced("ButtonEquipmentEquip", new Vector4(36f, 28f, 36f, 28f)),
                 Color.white);
-            ApplyStretchedSimpleSprite(
+            ApplyBorderedSprite(
                 equipmentFuseButton.image,
-                finalSkin.Task13Simple("ButtonEquipmentMerge"),
+                finalSkin.Task13Sliced("ButtonEquipmentMerge", new Vector4(42f, 34f, 42f, 34f)),
                 Color.white);
-            ApplyStretchedSimpleSprite(
+            ApplyBorderedSprite(
                 equipmentAutoEquipButton.image,
-                finalSkin.Task13Simple("ButtonEquipmentAutoEquip"),
+                finalSkin.Task13Sliced("ButtonEquipmentAutoEquip", new Vector4(48f, 44f, 48f, 44f)),
                 Color.white);
-            ApplyStretchedSimpleSprite(
+            ApplyBorderedSprite(
                 closeEquipmentButton.image,
-                finalSkin.Task13Simple("ButtonEquipmentUnequip"),
+                finalSkin.Task13Sliced("ButtonEquipmentUnequip", new Vector4(36f, 28f, 36f, 28f)),
                 Color.white);
 
             for (var index = 0; index < equipmentSlotIcons.Count; index++)

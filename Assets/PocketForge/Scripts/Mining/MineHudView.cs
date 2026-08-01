@@ -130,6 +130,7 @@ namespace PocketForge.Mining
         private Text researchCores;
         private RectTransform researchRowsRoot;
         private Button closeResearchButton;
+        private Button closeResearchCornerButton;
         private readonly List<ResearchRowView> researchRows = new();
         private Action<string> researchPurchaseAction;
         private int completedChapterNumber;
@@ -761,9 +762,23 @@ namespace PocketForge.Mining
                 ApplyChapterRowSkin(row);
             }
 
-            ApplyStretchedSimpleSprite(researchCard, finalSkin.Simple("SettingsModal"), Color.white);
-            ApplyStretchedSimpleSprite(researchTitleSurface, finalSkin.Simple("SettingsTitlePlaque"), Color.white);
-            ApplyStretchedSimpleSprite(closeResearchButton.image, finalSkin.Simple("SettingsCloseButton"), Color.white);
+            ApplyBorderedSprite(
+                researchCard,
+                finalSkin.Task13Sliced("UiCollectionModalBody", new Vector4(30f, 30f, 30f, 30f)),
+                Color.white);
+            ApplySimpleSprite(researchTitleSurface, finalSkin.Task13Simple("UiCollectionTitlePlaque"));
+            ApplyBorderedSprite(
+                closeResearchButton.image,
+                finalSkin.Task13Sliced("ButtonAchievementClaim", new Vector4(36f, 28f, 36f, 28f)),
+                Color.white);
+            ApplySimpleSprite(
+                closeResearchCornerButton.image,
+                finalSkin.Task13Simple("UiModalCloseButtonSurface"));
+            var researchCloseIcon = closeResearchCornerButton.transform.Find("Icon")?.GetComponent<Image>();
+            if (researchCloseIcon != null)
+            {
+                ApplySimpleSprite(researchCloseIcon, finalSkin.Task13Simple("IconCloseX"));
+            }
             foreach (var row in researchRows)
             {
                 ApplyResearchRowSkin(row);
@@ -789,6 +804,7 @@ namespace PocketForge.Mining
             DisableOutline(chapterCompleteContinueButton);
             DisableOutline(closeChapterSelectionButton);
             DisableOutline(closeResearchButton);
+            DisableOutline(closeResearchCornerButton);
         }
 
         private void ApplyChapterRowSkin(ChapterRowView row)
@@ -810,10 +826,13 @@ namespace PocketForge.Mining
                 return;
             }
 
-            ApplyStretchedSimpleSprite(row.Surface, finalSkin.Simple("SettingsRow"), Color.white);
-            ApplyStretchedSimpleSprite(
+            ApplyBorderedSprite(
+                row.Surface,
+                finalSkin.Task13Sliced("UiCollectionModalBody", new Vector4(30f, 30f, 30f, 30f)),
+                Color.white);
+            ApplyBorderedSprite(
                 row.PurchaseButton.image,
-                finalSkin.Simple("SettingsActionButton"),
+                finalSkin.Task13Sliced("ButtonEquipmentEquip", new Vector4(36f, 28f, 36f, 28f)),
                 Color.white);
             DisableOutline(row.PurchaseButton);
         }
@@ -892,6 +911,45 @@ namespace PocketForge.Mining
             image.sprite = sprite;
             image.type = Image.Type.Simple;
             image.preserveAspect = false;
+            image.color = color;
+        }
+
+        private static void ApplyBorderedSprite(
+            Image image,
+            Sprite sprite,
+            Color color,
+            float minimumCenterWidth = 16f,
+            float minimumCenterHeight = 16f)
+        {
+            if (image == null || sprite == null)
+            {
+                return;
+            }
+
+            var border = sprite.border;
+            var hasHorizontalBorder = border.x > 0f || border.z > 0f;
+            var hasVerticalBorder = border.y > 0f || border.w > 0f;
+            Debug.Assert(
+                hasHorizontalBorder && hasVerticalBorder,
+                $"{image.name} cannot use Image.Type.Sliced because {sprite.name} has a zero border.");
+
+            var size = image.rectTransform.sizeDelta;
+            var width = Mathf.Abs(size.x);
+            var height = Mathf.Abs(size.y);
+            Debug.Assert(
+                width + 0.01f >= border.x + border.z + minimumCenterWidth,
+                $"{image.name} width {width:0.#} is smaller than the sliced minimum " +
+                $"{border.x + border.z + minimumCenterWidth:0.#}.");
+            Debug.Assert(
+                height + 0.01f >= border.y + border.w + minimumCenterHeight,
+                $"{image.name} height {height:0.#} is smaller than the sliced minimum " +
+                $"{border.y + border.w + minimumCenterHeight:0.#}.");
+
+            image.sprite = sprite;
+            image.type = Image.Type.Sliced;
+            image.preserveAspect = false;
+            image.fillCenter = true;
+            image.pixelsPerUnitMultiplier = 1f;
             image.color = color;
         }
 
@@ -1299,15 +1357,15 @@ namespace PocketForge.Mining
                 new Vector2(0.5f, 0.5f),
                 new Vector2(0.5f, 0.5f),
                 new Vector2(0f, 20f),
-                new Vector2(850f, 1120f),
+                new Vector2(920f, 1200f),
                 new Color(0.035f, 0.075f, 0.15f, 0.99f));
             researchTitleSurface = CreatePanel(
                 "ResearchTitleSurface",
                 researchCard.transform,
                 new Vector2(0.5f, 1f),
                 new Vector2(0.5f, 1f),
-                new Vector2(0f, -46f),
-                new Vector2(610f, 130f),
+                new Vector2(-30f, -62f),
+                new Vector2(610f, 124f),
                 Color.white);
             researchTitle = CreateText(
                 "ResearchTitle",
@@ -1315,7 +1373,7 @@ namespace PocketForge.Mining
                 Vector2.zero,
                 Vector2.one,
                 Vector2.zero,
-                new Vector2(-40f, -16f),
+                new Vector2(0f, -8f),
                 43,
                 TextAnchor.MiddleCenter);
             researchTitle.font = UiFontProvider.GetCasual();
@@ -1324,8 +1382,8 @@ namespace PocketForge.Mining
                 researchCard.transform,
                 new Vector2(0.5f, 1f),
                 new Vector2(0.5f, 1f),
-                new Vector2(0f, -160f),
-                new Vector2(700f, 54f),
+                new Vector2(-110f, -180f),
+                new Vector2(570f, 56f),
                 27,
                 TextAnchor.MiddleCenter);
             researchSummary.font = UiFontProvider.GetCasual();
@@ -1335,8 +1393,8 @@ namespace PocketForge.Mining
                 researchCard.transform,
                 new Vector2(0.5f, 1f),
                 new Vector2(0.5f, 1f),
-                new Vector2(0f, -218f),
-                new Vector2(700f, 50f),
+                new Vector2(280f, -180f),
+                new Vector2(190f, 56f),
                 29,
                 TextAnchor.MiddleCenter);
             researchCores.color = new Color(1f, 0.78f, 0.28f);
@@ -1344,19 +1402,39 @@ namespace PocketForge.Mining
             researchRowsRoot = CreateRect(
                 "ResearchRows",
                 researchCard.transform,
-                new Vector2(0.5f, 0.5f),
-                new Vector2(0.5f, 0.5f),
-                new Vector2(0f, -72f),
-                new Vector2(740f, 660f));
+                new Vector2(0.5f, 1f),
+                new Vector2(0.5f, 1f),
+                new Vector2(0f, -600f),
+                new Vector2(824f, 620f));
             EnsureResearchRows(3);
+
+            closeResearchCornerButton = CreateButton(
+                "CloseResearchCorner",
+                researchCard.transform,
+                new Vector2(1f, 1f),
+                new Vector2(1f, 1f),
+                new Vector2(-70f, -70f),
+                new Vector2(84f, 84f),
+                Color.white);
+            closeResearchCornerButton.GetComponentInChildren<Text>().gameObject.SetActive(false);
+            var closeResearchIcon = CreateSimpleImage(
+                "Icon",
+                closeResearchCornerButton.transform,
+                Vector2.zero,
+                Vector2.one,
+                Vector2.zero,
+                new Vector2(-22f, -22f),
+                Color.white);
+            closeResearchIcon.raycastTarget = false;
+            closeResearchCornerButton.onClick.AddListener(CloseResearch);
 
             closeResearchButton = CreateButton(
                 "CloseResearchButton",
                 researchCard.transform,
                 new Vector2(0.5f, 0f),
                 new Vector2(0.5f, 0f),
-                new Vector2(0f, 72f),
-                new Vector2(360f, 100f),
+                new Vector2(0f, 68f),
+                new Vector2(360f, 82f),
                 new Color(1f, 0.48f, 0.12f));
             closeResearchButton.GetComponentInChildren<Text>().font = UiFontProvider.GetCasual();
             closeResearchButton.onClick.AddListener(CloseResearch);
@@ -1384,16 +1462,16 @@ namespace PocketForge.Mining
                 researchRowsRoot,
                 new Vector2(0.5f, 1f),
                 new Vector2(0.5f, 1f),
-                new Vector2(0f, -108f - index * 204f),
-                new Vector2(720f, 180f),
+                new Vector2(0f, -95f - index * 190f),
+                new Vector2(824f, 170f),
                 new Color(0.055f, 0.12f, 0.23f, 0.98f));
             row.Name = CreateText(
                 "ResearchName",
                 row.Surface.transform,
                 new Vector2(0f, 0.5f),
                 new Vector2(0f, 0.5f),
-                new Vector2(190f, 44f),
-                new Vector2(340f, 50f),
+                new Vector2(230f, 44f),
+                new Vector2(400f, 50f),
                 28,
                 TextAnchor.MiddleLeft);
             row.Name.font = UiFontProvider.GetCasual();
@@ -1402,8 +1480,8 @@ namespace PocketForge.Mining
                 row.Surface.transform,
                 new Vector2(0f, 0.5f),
                 new Vector2(0f, 0.5f),
-                new Vector2(190f, -8f),
-                new Vector2(340f, 42f),
+                new Vector2(230f, -8f),
+                new Vector2(400f, 42f),
                 24,
                 TextAnchor.MiddleLeft);
             row.Bonus = CreateText(
@@ -1411,8 +1489,8 @@ namespace PocketForge.Mining
                 row.Surface.transform,
                 new Vector2(0f, 0.5f),
                 new Vector2(0f, 0.5f),
-                new Vector2(190f, -50f),
-                new Vector2(340f, 38f),
+                new Vector2(230f, -50f),
+                new Vector2(400f, 38f),
                 21,
                 TextAnchor.MiddleLeft);
             row.Bonus.color = new Color(0.45f, 0.92f, 1f);
@@ -1421,8 +1499,8 @@ namespace PocketForge.Mining
                 row.Surface.transform,
                 new Vector2(1f, 0.5f),
                 new Vector2(1f, 0.5f),
-                new Vector2(-126f, 0f),
-                new Vector2(220f, 104f),
+                new Vector2(-148f, 0f),
+                new Vector2(250f, 100f),
                 new Color(0.35f, 0.75f, 0.16f));
             row.PurchaseButton.GetComponentInChildren<Text>().font = UiFontProvider.GetCasual();
             row.PurchaseButton.GetComponentInChildren<Text>().fontSize = 23;
