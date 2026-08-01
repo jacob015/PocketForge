@@ -672,6 +672,55 @@ namespace PocketForge.Tests.Editor
             }
         }
 
+        [Test]
+        public void MuseumNavigation_OpensCollectionTabsAndClaimsAchievementAtLevelThree()
+        {
+            var catalog = MiningContentCatalog.CreateRuntimeDefault();
+            try
+            {
+                var service = new MiningGameService(catalog);
+                var state = service.CreateInitialState(new GameSaveData
+                {
+                    minerLevel = 3,
+                    highestRewardedMinerLevel = 3,
+                    oreCollection = new[]
+                    {
+                        new OreCollectionData { contentId = "copper", minedCount = 10 }
+                    }
+                }, 1f);
+                var presenter = new MineHudPresenter(view, service, state);
+                presenter.Render();
+                view.SetTheme(null, null, null, null, null);
+
+                FindRect("MuseumNavigation").GetComponent<Button>().onClick.Invoke();
+
+                var backdrop = FindRect("CollectionBackdrop");
+                var card = FindRect("CollectionCard");
+                var museumRow = FindRect("MuseumRow1");
+                Assert.That(backdrop.gameObject.activeSelf, Is.True);
+                Assert.That(backdrop.GetSiblingIndex(), Is.EqualTo(view.transform.childCount - 1));
+                Assert.That(card.sizeDelta, Is.EqualTo(new Vector2(920f, 1380f)));
+                Assert.That(museumRow.gameObject.activeSelf, Is.True);
+                Assert.That(museumRow.GetComponent<Image>().type, Is.EqualTo(Image.Type.Simple));
+
+                FindRect("AchievementsTab").GetComponent<Button>().onClick.Invoke();
+                var achievementRow = FindRect("AchievementRow1");
+                var claim = FindChildRect(achievementRow, "ClaimAchievement").GetComponent<Button>();
+                Assert.That(achievementRow.gameObject.activeSelf, Is.True);
+                Assert.That(claim.interactable, Is.True);
+
+                claim.onClick.Invoke();
+
+                Assert.That(state.Player.credits, Is.EqualTo(100));
+                Assert.That(state.Player.achievementClaims, Has.Length.EqualTo(1));
+                Assert.That(state.Player.achievementClaims[0].claimedTiers, Is.EqualTo(1));
+            }
+            finally
+            {
+                Object.DestroyImmediate(catalog);
+            }
+        }
+
         private static RectTransform FindChildRect(RectTransform parent, string name)
         {
             return parent.GetComponentsInChildren<RectTransform>(true).Single(rect => rect.name == name);

@@ -2,7 +2,7 @@ namespace PocketForge.Save
 {
     public static class GameSaveMigrator
     {
-        public const int CurrentVersion = 9;
+        public const int CurrentVersion = 10;
 
         public static GameSaveData Normalize(GameSaveData data)
         {
@@ -16,6 +16,8 @@ namespace PocketForge.Save
                 data.equippedEquipment,
                 data.equipmentInventory);
             data.equipmentRewardSequence = System.Math.Max(0, data.equipmentRewardSequence);
+            data.oreCollection = NormalizeOreCollection(data.oreCollection);
+            data.achievementClaims = NormalizeAchievementClaims(data.achievementClaims);
             data.stage = System.Math.Max(1, data.stage);
             data.furthestStage = System.Math.Max(data.stage, data.furthestStage);
             data.highestCompletedChapter = System.Math.Max(0, data.highestCompletedChapter);
@@ -63,6 +65,80 @@ namespace PocketForge.Save
                 {
                     nodeId = entry.Key,
                     level = entry.Value
+                };
+            }
+
+            return result;
+        }
+
+        private static OreCollectionData[] NormalizeOreCollection(OreCollectionData[] entries)
+        {
+            if (entries == null || entries.Length == 0)
+            {
+                return System.Array.Empty<OreCollectionData>();
+            }
+
+            var normalized = new System.Collections.Generic.Dictionary<string, long>();
+            foreach (var entry in entries)
+            {
+                if (entry == null || string.IsNullOrWhiteSpace(entry.contentId))
+                {
+                    continue;
+                }
+
+                var count = System.Math.Max(0L, entry.minedCount);
+                if (!normalized.TryGetValue(entry.contentId, out var existing) || count > existing)
+                {
+                    normalized[entry.contentId] = count;
+                }
+            }
+
+            var result = new OreCollectionData[normalized.Count];
+            var index = 0;
+            foreach (var entry in normalized)
+            {
+                result[index++] = new OreCollectionData
+                {
+                    contentId = entry.Key,
+                    minedCount = entry.Value
+                };
+            }
+
+            return result;
+        }
+
+        private static AchievementClaimData[] NormalizeAchievementClaims(
+            AchievementClaimData[] entries)
+        {
+            if (entries == null || entries.Length == 0)
+            {
+                return System.Array.Empty<AchievementClaimData>();
+            }
+
+            var normalized = new System.Collections.Generic.Dictionary<string, int>();
+            foreach (var entry in entries)
+            {
+                if (entry == null || string.IsNullOrWhiteSpace(entry.achievementId))
+                {
+                    continue;
+                }
+
+                var claimedTiers = System.Math.Max(0, entry.claimedTiers);
+                if (!normalized.TryGetValue(entry.achievementId, out var existing) ||
+                    claimedTiers > existing)
+                {
+                    normalized[entry.achievementId] = claimedTiers;
+                }
+            }
+
+            var result = new AchievementClaimData[normalized.Count];
+            var index = 0;
+            foreach (var entry in normalized)
+            {
+                result[index++] = new AchievementClaimData
+                {
+                    achievementId = entry.Key,
+                    claimedTiers = entry.Value
                 };
             }
 

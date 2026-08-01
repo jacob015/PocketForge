@@ -458,6 +458,10 @@ namespace PocketForge.Mining
             {
                 button.onClick.AddListener(ShowMinerRankSummary);
             }
+            else if (captured == ProgressionFeature.Museum)
+            {
+                button.onClick.AddListener(ShowCollection);
+            }
             else
             {
                 button.onClick.AddListener(() => ShowFeaturePlaceholder(captured));

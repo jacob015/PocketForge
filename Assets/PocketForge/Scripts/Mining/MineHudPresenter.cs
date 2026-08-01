@@ -23,6 +23,7 @@ namespace PocketForge.Mining
             view.Bind(Mine, Upgrade, OpenChapterSelection, SelectChapter);
             view.BindResearch(Research);
             view.BindEquipment(Equip, Unequip, Fuse, AutoEquip);
+            view.BindCollection(ClaimAchievement);
         }
 
         public event Action StateChanged;
@@ -114,6 +115,37 @@ namespace PocketForge.Mining
         private void AutoEquip()
         {
             ApplyEquipmentAction(gameService.AutoEquip(state), "equipment_auto_equipped_feedback");
+        }
+
+        private void ClaimAchievement(string achievementId)
+        {
+            var result = gameService.ClaimAchievement(state, achievementId);
+            if (result.Status != AchievementClaimStatus.Success)
+            {
+                var key = result.Status switch
+                {
+                    AchievementClaimStatus.FeatureLocked => "museum_locked",
+                    AchievementClaimStatus.RequirementNotMet => "achievement_incomplete",
+                    AchievementClaimStatus.AlreadyCompleted => "achievement_completed",
+                    _ => "achievement_unavailable"
+                };
+                view.ShowFeedback(LanguageService.Get(key), new Color(1f, 0.55f, 0.3f));
+                return;
+            }
+
+            Render();
+            StateChanged?.Invoke();
+            SaveRequested?.Invoke();
+            var rewardSymbol = result.RewardType switch
+            {
+                AchievementRewardType.Gems => "\u25C6",
+                AchievementRewardType.BlueprintCores => "CORE",
+                _ => "C"
+            };
+            view.ShowFeedback(
+                $"+{CompactNumberFormatter.Format(result.RewardAmount)} {rewardSymbol}",
+                new Color(1f, 0.82f, 0.3f));
+            GameAudioController.Instance?.PlayReward();
         }
 
         private void ApplyEquipmentAction(EquipmentActionStatus status, string successKey)

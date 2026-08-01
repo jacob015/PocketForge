@@ -87,7 +87,7 @@ namespace PocketForge.Tests.Editor
         }
 
         [Test]
-        public void SaveMigrationV9_NormalizesInventoryAndDanglingEquipmentReferences()
+        public void SaveMigration_NormalizesInventoryAndDanglingEquipmentReferences()
         {
             var player = GameSaveMigrator.Normalize(new GameSaveData
             {
@@ -107,7 +107,7 @@ namespace PocketForge.Tests.Editor
                 }
             });
 
-            Assert.That(player.version, Is.EqualTo(9));
+            Assert.That(player.version, Is.EqualTo(GameSaveMigrator.CurrentVersion));
             Assert.That(player.equipmentRewardSequence, Is.Zero);
             Assert.That(player.equipmentInventory, Has.Length.EqualTo(1));
             Assert.That(player.equipmentInventory[0].rarity, Is.EqualTo((int)EquipmentRarity.Legendary));

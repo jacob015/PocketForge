@@ -356,9 +356,12 @@ namespace PocketForge.Tests.Editor
                 lastSavedUnixSeconds = 100
             }, 1f);
 
+            var powerBeforeClaim = service.GetMiningPower(state).AutoPowerPerSecond;
+
             var result = service.ClaimOfflineProgress(state, 120);
 
-            Assert.That(service.GetMiningPower(state).AutoPowerPerSecond, Is.EqualTo(0.5f).Within(0.0001f));
+            Assert.That(powerBeforeClaim, Is.EqualTo(0.5f).Within(0.0001f));
+            Assert.That(service.GetMiningPower(state).AutoPowerPerSecond, Is.EqualTo(0.505f).Within(0.0001f));
             Assert.That(result.ProcessedOres, Is.EqualTo(1));
             Assert.That(result.RewardCredits, Is.EqualTo(2));
             Assert.That(state.Player.credits, Is.EqualTo(2));

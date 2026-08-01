@@ -146,5 +146,22 @@ namespace PocketForge.Tests.Editor
             Assert.That(LanguageService.Get("equipment_auto_equip"), Does.Not.Contain("equipment_auto_equip"));
             Assert.That(LanguageService.Get("equipment_need_three"), Does.Not.Contain("equipment_need_three"));
         }
+
+        [TestCase(SupportedLanguage.Korean)]
+        [TestCase(SupportedLanguage.English)]
+        [TestCase(SupportedLanguage.Japanese)]
+        [TestCase(SupportedLanguage.ChineseSimplified)]
+        public void SelectedLanguage_ResolvesCollectionAndAchievementLabels(SupportedLanguage language)
+        {
+            LanguageService.SetLanguage(language);
+
+            Assert.That(LanguageService.Get("collection_title"), Does.Not.Contain("collection_title"));
+            Assert.That(LanguageService.Get("museum_summary"), Does.Not.Contain("museum_summary"));
+            Assert.That(LanguageService.Get("achievement_summary"), Does.Not.Contain("achievement_summary"));
+            Assert.That(LanguageService.Get("achievement_mine_ores"), Does.Not.Contain("achievement_mine_ores"));
+            Assert.That(LanguageService.Get("achievement_collect_equipment"), Does.Not.Contain("achievement_collect_equipment"));
+            Assert.That(LanguageService.Get("ore_copper"), Does.Not.Contain("ore_copper"));
+            Assert.That(LanguageService.Get("claim"), Does.Not.Contain("claim"));
+        }
     }
 }

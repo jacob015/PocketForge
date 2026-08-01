@@ -15,6 +15,11 @@ namespace PocketForge.Content
         [SerializeField] private ChapterDefinition[] chapters = Array.Empty<ChapterDefinition>();
         [SerializeField] private ResearchNodeDefinition[] researchNodes = Array.Empty<ResearchNodeDefinition>();
         [SerializeField] private EquipmentDefinition[] equipment = Array.Empty<EquipmentDefinition>();
+        [SerializeField] private AchievementDefinition[] achievements = Array.Empty<AchievementDefinition>();
+        [Header("Collection")]
+        [SerializeField, Min(0f)] private float collectionDiscoveryPowerBonus = 0.01f;
+        [SerializeField] private int[] collectionMilestones = { 25, 100, 500 };
+        [SerializeField, Min(0f)] private float collectionMilestonePowerBonus = 0.01f;
         [SerializeField, Min(60)] private int maxOfflineRewardSeconds = 14400;
         [SerializeField, Min(1)] private int rewardedAdRewardMultiplier = 5;
         [SerializeField, Min(0.01f)] private float baseAutoPowerPerSecond = 0.5f;
@@ -39,6 +44,8 @@ namespace PocketForge.Content
             ResearchNodeDefinition.CreateRuntimeDefaults();
         private static readonly EquipmentDefinition[] RuntimeDefaultEquipment =
             EquipmentDefinition.CreateRuntimeDefaults();
+        private static readonly AchievementDefinition[] RuntimeDefaultAchievements =
+            AchievementDefinition.CreateRuntimeDefaults();
 
         public int MaxOfflineRewardSeconds => maxOfflineRewardSeconds;
         public int RewardedAdRewardMultiplier => rewardedAdRewardMultiplier;
@@ -57,6 +64,31 @@ namespace PocketForge.Content
         public int LevelRewardCreditsPerLevel => levelRewardCreditsPerLevel;
         public int MilestoneLevelInterval => milestoneLevelInterval;
         public int MilestoneRewardGems => milestoneRewardGems;
+        public float CollectionDiscoveryPowerBonus => Mathf.Max(0f, collectionDiscoveryPowerBonus);
+        public float CollectionMilestonePowerBonus => Mathf.Max(0f, collectionMilestonePowerBonus);
+
+        public IReadOnlyList<int> GetCollectionMilestones()
+        {
+            var configured = collectionMilestones
+                .Where(value => value > 0)
+                .Distinct()
+                .OrderBy(value => value)
+                .ToArray();
+            return configured.Length > 0 ? configured : new[] { 25, 100, 500 };
+        }
+
+        public IReadOnlyList<OreDefinition> GetOreDefinitions()
+        {
+            var configured = ores
+                .Where(candidate => candidate != null && !string.IsNullOrWhiteSpace(candidate.ContentId))
+                .GroupBy(candidate => candidate.ContentId, StringComparer.Ordinal)
+                .Select(group => group.OrderBy(candidate => candidate.StartStage).First())
+                .OrderBy(candidate => candidate.StartStage)
+                .ToArray();
+            return configured.Length > 0
+                ? configured
+                : new[] { OreDefinition.CreateRuntimeDefault() };
+        }
 
         public OreDefinition GetOreForStage(int stage)
         {
@@ -130,6 +162,24 @@ namespace PocketForge.Content
                 .FirstOrDefault(candidate => candidate.DefinitionId == definitionId);
         }
 
+        public IReadOnlyList<AchievementDefinition> GetAchievements()
+        {
+            var configured = achievements
+                .Where(candidate => candidate != null &&
+                                    !string.IsNullOrWhiteSpace(candidate.AchievementId) &&
+                                    candidate.Tiers.Length > 0)
+                .GroupBy(candidate => candidate.AchievementId, StringComparer.Ordinal)
+                .Select(group => group.First())
+                .ToArray();
+            return configured.Length > 0 ? configured : RuntimeDefaultAchievements;
+        }
+
+        public AchievementDefinition GetAchievement(string achievementId)
+        {
+            return GetAchievements()
+                .FirstOrDefault(candidate => candidate.AchievementId == achievementId);
+        }
+
         public static MiningContentCatalog CreateRuntimeDefault()
         {
             var catalog = CreateInstance<MiningContentCatalog>();
@@ -144,6 +194,7 @@ namespace PocketForge.Content
             catalog.chapters = new[] { ChapterDefinition.CreateRuntimeDefault() };
             catalog.researchNodes = ResearchNodeDefinition.CreateRuntimeDefaults();
             catalog.equipment = EquipmentDefinition.CreateRuntimeDefaults();
+            catalog.achievements = AchievementDefinition.CreateRuntimeDefaults();
             return catalog;
         }
 

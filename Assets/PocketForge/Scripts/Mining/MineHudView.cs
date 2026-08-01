@@ -230,6 +230,11 @@ namespace PocketForge.Mining
             equipmentAutoEquipAction = autoEquipAction;
         }
 
+        public void BindCollection(Action<string> claimAchievementAction)
+        {
+            achievementClaimAction = claimAchievementAction;
+        }
+
         public void BindIap(Action purchaseRemoveAdsAction, Action restorePurchasesAction)
         {
             removeAdsButton.onClick.AddListener(() => purchaseRemoveAdsAction());
@@ -327,6 +332,7 @@ namespace PocketForge.Mining
             RenderV5Hud(state, service);
             RenderResearch();
             RenderEquipment();
+            RenderCollection();
         }
 
         public void ShowOfflineReward(OfflineProgressResult result)
@@ -478,6 +484,7 @@ namespace PocketForge.Mining
             RenderChapterComplete();
             RenderResearch();
             RenderEquipment();
+            RenderCollection();
             if (chapterSelectionPanel != null && chapterSelectionPanel.activeSelf && lastState != null && lastService != null)
             {
                 chapterSelectionOptions = lastService.GetChapterSelectionOptions(lastState);
@@ -592,6 +599,7 @@ namespace PocketForge.Mining
             CreateChapterSelectionPanel();
             CreateResearchPanel();
             CreateEquipmentPanel();
+            CreateCollectionPanel();
             RenderSettings();
         }
 
@@ -767,6 +775,7 @@ namespace PocketForge.Mining
             ApplyLanguageIcon(SupportedLanguage.ChineseSimplified, "IconFlagChinese");
             ApplyV5HudSkin();
             ApplyEquipmentSkin();
+            ApplyCollectionSkin();
 
             DisableOutline(mineButton);
             DisableOutline(pickaxeButton);

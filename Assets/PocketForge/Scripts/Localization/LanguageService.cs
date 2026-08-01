@@ -54,7 +54,18 @@ namespace PocketForge.Localization
                 ["ore_health"] = "\uAD11\uC11D \uB0B4\uAD6C\uB3C4", ["boss_in_stages"] = "\uBCF4\uC2A4\uAE4C\uC9C0 {0} \uC2A4\uD14C\uC774\uC9C0",
                 ["offline_rewards"] = "\uBC29\uCE58 \uBCF4\uC0C1", ["home"] = "\uD648", ["coming_soon"] = "\uC900\uBE44 \uC911",
                 ["mine_crystal_cavern"] = "\uC218\uC815 \uB3D9\uAD74", ["mine_magma_depths"] = "\uB9C8\uADF8\uB9C8 \uC2EC\uCE35",
-                ["mine_ancient_city"] = "\uACE0\uB300 \uB3C4\uC2DC"
+                ["mine_ancient_city"] = "\uACE0\uB300 \uB3C4\uC2DC",
+                ["collection_title"] = "수집 기록", ["achievements"] = "업적",
+                ["museum_summary"] = "광물 도감 채굴력 +{0:0.#}%", ["museum_mined"] = "누적 채굴 {0}",
+                ["museum_bonus"] = "+{0:0.#}%", ["undiscovered"] = "미발견", ["museum_locked"] = "박물관은 광부 Lv. 3에 해금됩니다",
+                ["achievement_summary"] = "수령 가능한 업적 {0}개", ["achievement_all_complete"] = "모든 단계 완료",
+                ["claim"] = "수령", ["in_progress"] = "진행 중", ["completed"] = "완료",
+                ["achievement_incomplete"] = "아직 목표를 달성하지 못했습니다", ["achievement_completed"] = "이미 모든 보상을 수령했습니다",
+                ["achievement_unavailable"] = "업적을 이용할 수 없습니다",
+                ["achievement_mine_ores"] = "광석 채굴", ["achievement_clear_chapters"] = "챕터 정복",
+                ["achievement_upgrade_facilities"] = "시설 강화", ["achievement_raise_miner"] = "광부 성장",
+                ["achievement_complete_research"] = "연구 진행", ["achievement_collect_equipment"] = "장비 수집",
+                ["ore_copper"] = "구리 광석", ["ore_iron"] = "철 광석", ["ore_gold"] = "금 광석", ["ore_crystal"] = "수정 광석"
             },
             [SupportedLanguage.English] = new()
             {
@@ -90,7 +101,18 @@ namespace PocketForge.Localization
                 ["ore_health"] = "Ore Health", ["boss_in_stages"] = "Boss in {0} stages",
                 ["offline_rewards"] = "Offline Rewards", ["home"] = "Home", ["coming_soon"] = "Coming Soon",
                 ["mine_crystal_cavern"] = "Crystal Cavern", ["mine_magma_depths"] = "Magma Depths",
-                ["mine_ancient_city"] = "Ancient City"
+                ["mine_ancient_city"] = "Ancient City",
+                ["collection_title"] = "Collection", ["achievements"] = "Achievements",
+                ["museum_summary"] = "Museum power +{0:0.#}%", ["museum_mined"] = "Mined {0}",
+                ["museum_bonus"] = "+{0:0.#}%", ["undiscovered"] = "Undiscovered", ["museum_locked"] = "Museum unlocks at Miner Lv. 3",
+                ["achievement_summary"] = "{0} rewards ready", ["achievement_all_complete"] = "All tiers complete",
+                ["claim"] = "Claim", ["in_progress"] = "In Progress", ["completed"] = "Complete",
+                ["achievement_incomplete"] = "Requirement not met", ["achievement_completed"] = "All rewards already claimed",
+                ["achievement_unavailable"] = "Achievement unavailable",
+                ["achievement_mine_ores"] = "Mine Ores", ["achievement_clear_chapters"] = "Clear Chapters",
+                ["achievement_upgrade_facilities"] = "Upgrade Facilities", ["achievement_raise_miner"] = "Raise Miner",
+                ["achievement_complete_research"] = "Complete Research", ["achievement_collect_equipment"] = "Collect Equipment",
+                ["ore_copper"] = "Copper Ore", ["ore_iron"] = "Iron Ore", ["ore_gold"] = "Gold Ore", ["ore_crystal"] = "Crystal Ore"
             },
             [SupportedLanguage.Japanese] = new()
             {
@@ -129,7 +151,18 @@ namespace PocketForge.Localization
                 ["ore_health"] = "\u9271\u77F3\u8010\u4E45\u5EA6", ["boss_in_stages"] = "\u30DC\u30B9\u307E\u3067 {0} \u30B9\u30C6\u30FC\u30B8",
                 ["offline_rewards"] = "\u653E\u7F6E\u5831\u916C", ["home"] = "\u30DB\u30FC\u30E0", ["coming_soon"] = "\u6E96\u5099\u4E2D",
                 ["mine_crystal_cavern"] = "\u6C34\u6676\u306E\u6D1E\u7A9F", ["mine_magma_depths"] = "\u30DE\u30B0\u30DE\u6DF1\u5C64",
-                ["mine_ancient_city"] = "\u53E4\u4EE3\u90FD\u5E02"
+                ["mine_ancient_city"] = "\u53E4\u4EE3\u90FD\u5E02",
+                ["collection_title"] = "コレクション", ["achievements"] = "実績",
+                ["museum_summary"] = "博物館採掘力 +{0:0.#}%", ["museum_mined"] = "累計採掘 {0}",
+                ["museum_bonus"] = "+{0:0.#}%", ["undiscovered"] = "未発見", ["museum_locked"] = "博物館は鉱夫 Lv. 3 で解放",
+                ["achievement_summary"] = "受取可能な報酬 {0}", ["achievement_all_complete"] = "全段階完了",
+                ["claim"] = "受取", ["in_progress"] = "進行中", ["completed"] = "完了",
+                ["achievement_incomplete"] = "条件を満たしていません", ["achievement_completed"] = "すべて受取済みです",
+                ["achievement_unavailable"] = "実績を利用できません",
+                ["achievement_mine_ores"] = "鉱石採掘", ["achievement_clear_chapters"] = "チャプター攻略",
+                ["achievement_upgrade_facilities"] = "施設強化", ["achievement_raise_miner"] = "鉱夫育成",
+                ["achievement_complete_research"] = "研究進行", ["achievement_collect_equipment"] = "装備収集",
+                ["ore_copper"] = "銅鉱石", ["ore_iron"] = "鉄鉱石", ["ore_gold"] = "金鉱石", ["ore_crystal"] = "水晶鉱石"
             },
             [SupportedLanguage.ChineseSimplified] = new()
             {
@@ -166,7 +199,18 @@ namespace PocketForge.Localization
                 ["ore_health"] = "\u77FF\u77F3\u8010\u4E45\u5EA6", ["boss_in_stages"] = "\u8DDD\u9996\u9886\u8FD8\u6709 {0} \u5173",
                 ["offline_rewards"] = "\u79BB\u7EBF\u5956\u52B1", ["home"] = "\u4E3B\u9875", ["coming_soon"] = "\u656C\u8BF7\u671F\u5F85",
                 ["mine_crystal_cavern"] = "\u6C34\u6676\u6D1E\u7A9F", ["mine_magma_depths"] = "\u7194\u5CA9\u6DF1\u5904",
-                ["mine_ancient_city"] = "\u53E4\u4EE3\u57CE\u5E02"
+                ["mine_ancient_city"] = "\u53E4\u4EE3\u57CE\u5E02",
+                ["collection_title"] = "收藏记录", ["achievements"] = "成就",
+                ["museum_summary"] = "博物馆采矿力 +{0:0.#}%", ["museum_mined"] = "累计开采 {0}",
+                ["museum_bonus"] = "+{0:0.#}%", ["undiscovered"] = "未发现", ["museum_locked"] = "博物馆在矿工 Lv. 3 解锁",
+                ["achievement_summary"] = "可领取奖励 {0} 个", ["achievement_all_complete"] = "全部阶段完成",
+                ["claim"] = "领取", ["in_progress"] = "进行中", ["completed"] = "完成",
+                ["achievement_incomplete"] = "尚未达到目标", ["achievement_completed"] = "所有奖励已领取",
+                ["achievement_unavailable"] = "成就暂不可用",
+                ["achievement_mine_ores"] = "开采矿石", ["achievement_clear_chapters"] = "通关章节",
+                ["achievement_upgrade_facilities"] = "强化设施", ["achievement_raise_miner"] = "培养矿工",
+                ["achievement_complete_research"] = "推进研究", ["achievement_collect_equipment"] = "收集装备",
+                ["ore_copper"] = "铜矿石", ["ore_iron"] = "铁矿石", ["ore_gold"] = "金矿石", ["ore_crystal"] = "水晶矿石"
             }
         };
 

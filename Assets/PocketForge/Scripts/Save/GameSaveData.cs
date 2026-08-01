@@ -25,6 +25,20 @@ namespace PocketForge.Save
     }
 
     [Serializable]
+    public sealed class OreCollectionData
+    {
+        public string contentId = string.Empty;
+        public long minedCount;
+    }
+
+    [Serializable]
+    public sealed class AchievementClaimData
+    {
+        public string achievementId = string.Empty;
+        public int claimedTiers;
+    }
+
+    [Serializable]
     public sealed class GameSaveData
     {
         public int version = GameSaveMigrator.CurrentVersion;
@@ -35,6 +49,8 @@ namespace PocketForge.Save
         public EquipmentItemData[] equipmentInventory = Array.Empty<EquipmentItemData>();
         public EquippedItemData[] equippedEquipment = Array.Empty<EquippedItemData>();
         public int equipmentRewardSequence;
+        public OreCollectionData[] oreCollection = Array.Empty<OreCollectionData>();
+        public AchievementClaimData[] achievementClaims = Array.Empty<AchievementClaimData>();
         public int stage = 1;
         public int furthestStage = 1;
         public int highestCompletedChapter;

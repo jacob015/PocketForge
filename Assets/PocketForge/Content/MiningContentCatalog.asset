@@ -83,6 +83,14 @@ MonoBehaviour:
     baseCost: 4
     costStep: 4
     powerBonusPerLevel: 0.1
+  equipment: []
+  achievements: []
+  collectionDiscoveryPowerBonus: 0.01
+  collectionMilestones:
+  - 25
+  - 100
+  - 500
+  collectionMilestonePowerBonus: 0.01
   maxOfflineRewardSeconds: 14400
   rewardedAdRewardMultiplier: 5
   baseAutoPowerPerSecond: 0.5

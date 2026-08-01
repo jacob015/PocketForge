@@ -1,6 +1,6 @@
 # Pocket Forge 현재 아키텍처
 
-마지막 구현 확인: 2026-07-30
+마지막 구현 확인: 2026-08-01
 
 이 문서는 현재 소스·Unity Editor·테스트에서 확인한 구현 사실만 기록한다. 예정 기능은 `PROJECT_PLAN.md`, 현재 범위는 `TASKS.md`를 따른다.
 
@@ -11,9 +11,9 @@
 - 시작 씬: `Assets/PocketForge/Scenes/Mine.unity`
 - 패키지명: `com.jacob015.pocketforge`
 - 앱 버전: `0.1.0 (1)`
-- 저장 형식: `GameSaveMigrator.CurrentVersion = 8`
-- 검증 기준: Unity 컴파일 오류 0건, EditMode 121/121 통과
-- 이번 Task 13-3B 변경은 Android APK/AAB와 실기기에서 아직 검증하지 않았다.
+- 저장 형식: `GameSaveMigrator.CurrentVersion = 10`
+- 검증 기준: Unity 컴파일·Console 오류 0건, EditMode 151/151 통과
+- 이번 Task 13-5A 변경은 Android APK/AAB와 실기기에서 아직 검증하지 않았다.
 
 ## 계층과 책임
 
@@ -25,11 +25,16 @@ MineGameController (Unity composition root)
   │   ├─ UpgradeDefinition[]
   │   ├─ ChapterDefinition[]
   │   ├─ FeatureUnlockDefinition[]
-  │   └─ ResearchNodeDefinition[]
+  │   ├─ ResearchNodeDefinition[]
+  │   ├─ EquipmentDefinition[]
+  │   └─ AchievementDefinition[]
   ├─ MiningGameService
   │   ├─ MiningPowerService
   │   ├─ MinerProgressionService
   │   ├─ ResearchService
+  │   ├─ EquipmentService
+  │   ├─ CollectionService
+  │   ├─ AchievementService
   │   └─ MiningGameState / OreState
   ├─ MineHudPresenter → MineHudView
   │                         └─ CompactNumberFormatter
@@ -46,8 +51,11 @@ MineGameController (Unity composition root)
 | `MiningPowerService` | 자동 채굴력·탭 피해·능동 채굴력·보스 권장 채굴력 계산과 미래 성장 배율 합성 |
 | `MinerProgressionService` | 경험치 곡선·레벨업·1회 보상·기능 해금·광부 등급 배율 계산 |
 | `ResearchService` | 설계도 코어 연구의 잠금·비용·선행 조건·최대 레벨·영구 배율 계산 |
+| `EquipmentService` | 장비 인벤토리 정규화, 획득·장착·합성·자동 장착과 장비 배율 계산 |
+| `CollectionService` | 광석별 발견·누적 채굴 기록, 도감 정규화와 영구 배율 계산 |
+| `AchievementService` | 기존 성장 상태에서 업적 진행도를 파생하고 단계별 보상 수령을 검증 |
 | `MiningGameState` / `OreState` | 실행 중 플레이어·광석 상태 |
-| `MiningContentCatalog` | 현재 단계의 광석·챕터·강화·연구 노드 정의 선택 |
+| `MiningContentCatalog` | 현재 단계의 광석·챕터·강화·연구·장비·업적 정의 선택 |
 | `MineHudPresenter` | 서비스 결과를 UI 갱신·피드백·저장 요청으로 연결 |
 | `MineHudView` | UGUI 생성, Safe Area 레이아웃, 입력 이벤트, 설정·챕터·연구 모달 |
 | `CompactNumberFormatter` | 증가형 수치의 K/M/B/T/Qa/Qi 표시 정책 |
@@ -61,7 +69,7 @@ MineGameController (Unity composition root)
 ```text
 앱 시작
   → SaveService.Load
-  → GameSaveMigrator.Normalize(version 8)
+  → GameSaveMigrator.Normalize(version 10)
   → MiningGameService.CreateInitialState
   → 단계에 맞는 OreDefinition + ChapterDefinition 조회
   → MineGameController가 3D 광석과 HUD 표시
@@ -72,6 +80,7 @@ MineGameController (Unity composition root)
   → MiningGameService.Tick / Mine
   → 체력 감소
   → 파괴 시 Credits와 챕터 기준 XP 지급
+  → 일반·보스 광석의 content ID별 누적 채굴 수 기록
   → MinerProgressionService가 레벨업·1회 보상·기능 해금을 계산
   → 보스라면 보스 배율과 최초 클리어 보상 적용
   → 최초/반복 처치 정책에 따라 설계도 코어 지급
@@ -92,6 +101,7 @@ MineGameController (Unity composition root)
   → MiningPowerService의 AutoPowerPerSecond 사용
   → furthestStage 직전에서 가장 가까운 일반 stage 선택
   → 정수 개수의 일반 광석만 처리해 Credits·XP 지급
+  → 계산 시작 시점의 도감 배율로 생산량을 고정한 뒤 처리 광석 수를 도감에 기록
   → stage·furthestStage·챕터 완료·OreState는 변경하지 않음
   → 체크포인트를 현재 UTC로 전진시키고 즉시 저장
   → Presenter가 적용 시간·광석 수·Credits·XP를 네 언어로 표시
@@ -121,7 +131,7 @@ MineGameController (Unity composition root)
 - 능동 채굴력: `자동 채굴력 + 탭 피해 × 기준 초당 5회`
 - 보스 권장 채굴력: `보스 내구도 ÷ 제한 시간`
 
-현재 실제 저장 데이터에서는 곡괭이·드릴·로봇 레벨, 광부 등급, 연구, 장비가 기여한다. 광부 등급은 Lv.1을 기준으로 레벨당 총 채굴력 `+2%`를 `MinerRankMultiplier`에 전달한다. 연구 노드의 누적 보너스는 `ResearchMultiplier`, 장착 장비의 합산 보너스는 `EquipmentMultiplier`로 전달되므로 자동·탭·오프라인·보스 비교가 같은 계산 경계를 공유한다. 도감·일시 버프는 아직 `1`이며 각 후속 메타 시스템이 연결될 확장 지점이다. 기본 레벨의 능동 채굴력은 5.5/s이고 현재 챕터 보스 권장치는 각각 약 5.5/s, 14.58/s, 26/s다.
+현재 실제 저장 데이터에서는 곡괭이·드릴·로봇 레벨, 광부 등급, 연구, 장비, 광물 도감이 기여한다. 광부 등급은 Lv.1을 기준으로 레벨당 총 채굴력 `+2%`를 `MinerRankMultiplier`에 전달한다. 연구 노드의 누적 보너스는 `ResearchMultiplier`, 장착 장비의 합산 보너스는 `EquipmentMultiplier`, 도감 보너스는 `CollectionMultiplier`로 전달되므로 자동·탭·오프라인·보스 비교가 같은 계산 경계를 공유한다. 일시 버프는 아직 `1`인 후속 확장 지점이다. 기본 레벨의 능동 채굴력은 5.5/s이고 현재 챕터 보스 권장치는 각각 약 5.5/s, 14.58/s, 26/s다.
 
 ### 광부 경험치와 기능 해금
 
@@ -134,7 +144,7 @@ MineGameController (Unity composition root)
 - 자동 레벨업 보상: `새 레벨 × 25 Credits`, 5레벨마다 `1 Gem`
 - 해금: Lv.2 장비, Lv.3 박물관, Lv.4 연구, Lv.5 미션, Lv.6 상점, Lv.7 이벤트
 
-레벨업 보상은 `highestRewardedMinerLevel`보다 높은 레벨을 처음 통과할 때만 지급한다. 기능 상태는 별도 불리언을 저장하지 않고 현재 광부 레벨과 `FeatureUnlockDefinition`에서 파생해 콘텐츠 추가와 저장 호환을 단순화한다. 장비와 연구는 실제 화면과 규칙이 연결됐고 박물관·미션·상점·이벤트는 아직 Placeholder다.
+레벨업 보상은 `highestRewardedMinerLevel`보다 높은 레벨을 처음 통과할 때만 지급한다. 기능 상태는 별도 불리언을 저장하지 않고 현재 광부 레벨과 `FeatureUnlockDefinition`에서 파생해 콘텐츠 추가와 저장 호환을 단순화한다. 장비·박물관·연구는 실제 화면과 규칙이 연결됐고 미션·상점·이벤트는 아직 Placeholder다.
 
 ### 설계도 코어와 영구 연구
 
@@ -160,6 +170,17 @@ MineGameController (Unity composition root)
 - 보스 처치마다 카탈로그 순서로 다음 슬롯 장비 지급, 1~2챕터 Common·3챕터 이후 Rare 지급
 
 장비 획득은 확률 테이블이나 신규 재료 없이 초기 흐름만 제공한다. 미션·상점 획득처, 랜덤 옵션, 프리셋, 세트 효과, 유료 장비는 후속 범위다.
+
+### 광물 박물관과 업적
+
+`CollectionService`는 카탈로그에 존재하는 광석 ID만 보존하고 중복 항목은 가장 큰 누적 채굴 수 하나로 정규화한다. 온라인 광석 파괴와 오프라인 처리 광석을 같은 배열에 기록한다.
+
+- 광석 최초 발견: 총 채굴력 `+1%`
+- 광석별 누적 25·100·500개 달성: 단계마다 `+1%`
+- 광석 한 종류가 제공하는 현재 최대 보너스: `+4%`
+- 오프라인 생산은 청구 시작 시점 배율로 처리량을 계산한 뒤 도감 수를 기록해 한 번의 청구 안에서 자기 증폭하지 않는다.
+
+`AchievementService`는 별도 진행 카운터를 중복 저장하지 않고 채굴 수, 최고 완료 챕터, 시설 레벨 합, 광부 레벨, 연구 레벨 합, 장비 획득 수에서 진행도를 파생한다. 6개 업적은 각각 3단계이며 `achievementClaims[]`에는 업적 ID별 수령 완료 단계만 저장한다. 다음 단계 목표를 충족한 경우에만 Credits·Gem·설계도 코어를 지급하고 완료 단계 초과, 알 수 없는 ID, 잠긴 기능, 중복 수령을 차단한다.
 
 ### 오프라인 진행
 
@@ -198,12 +219,14 @@ MineGameController (Unity composition root)
 
 ## 저장 스키마
 
-`GameSaveData` 버전 9:
+`GameSaveData` 버전 10:
 
 - 64비트 증가형 재화 `credits`, `gems`, `blueprintCores`
 - 확장 가능한 `researchProgress[]` (`nodeId`, `level`)
 - 고유 ID 장비 인벤토리 `equipmentInventory[]` (`instanceId`, `definitionId`, `rarity`)
 - 슬롯 참조 `equippedEquipment[]` (`slot`, `instanceId`)과 `equipmentRewardSequence`
+- 광석별 누적 채굴 `oreCollection[]` (`contentId`, `minedCount`)
+- 업적별 수령 단계 `achievementClaims[]` (`achievementId`, `claimedTiers`)
 - `stage`, `furthestStage`
 - `highestCompletedChapter`
 - `pickaxeLevel`, `drillLevel`, `robotLevel`
@@ -211,7 +234,7 @@ MineGameController (Unity composition root)
 - `adsRemoved`
 - `lastSavedUnixSeconds`
 
-`GameSaveMigrator.Normalize`는 null과 음수 값을 안전한 기본값으로 정규화하고 현재 버전으로 올린다. 장비는 빈 ID를 제거하고 같은 인스턴스 ID 중 가장 높은 등급 하나만 남기며, 등급을 0~3으로 제한하고 존재하지 않는 장비를 가리키는 슬롯 참조를 제거한다. 카탈로그 정의와 슬롯 일치는 `EquipmentService.SanitizeAgainstCatalog`가 추가로 검증한다. 기존 JSON 정수 재화는 64비트 필드로 그대로 읽히며 더 이상 약 21억에서 포화되지 않는다. 광부 레벨과 마지막 보상 레벨은 최소 1이며 보상 레벨은 현재 광부 레벨보다 높아질 수 없다. `SaveService`는 기존 `lastSavedUnixSeconds`보다 과거 시각으로 저장하지 않는다. 최초 챕터 보상은 `highestCompletedChapter`보다 큰 챕터를 처음 완료할 때만 지급한다.
+`GameSaveMigrator.Normalize`는 null과 음수 값을 안전한 기본값으로 정규화하고 현재 버전으로 올린다. 장비는 빈 ID를 제거하고 같은 인스턴스 ID 중 가장 높은 등급 하나만 남기며, 등급을 0~3으로 제한하고 존재하지 않는 장비를 가리키는 슬롯 참조를 제거한다. 도감과 업적은 빈 ID를 제거하고 같은 ID의 가장 큰 누적 수·수령 단계를 보존하며 음수를 0으로 제한한다. 카탈로그 정의와의 일치는 각 서비스가 추가 검증한다. 기존 JSON 정수 재화는 64비트 필드로 그대로 읽히며 더 이상 약 21억에서 포화되지 않는다. 광부 레벨과 마지막 보상 레벨은 최소 1이며 보상 레벨은 현재 광부 레벨보다 높아질 수 없다. `SaveService`는 기존 `lastSavedUnixSeconds`보다 과거 시각으로 저장하지 않는다. 최초 챕터 보상은 `highestCompletedChapter`보다 큰 챕터를 처음 완료할 때만 지급한다.
 
 ## UI·비주얼
 
@@ -224,6 +247,7 @@ MineGameController (Unity composition root)
 - 진행 바 위 `ChapterStatus`는 일반 stage에서 챕터 내 진행도와 자동 채굴력, 보스에서 카운트다운과 현재/권장 채굴력을 네 언어로 표시한다. 보스 실패 후에는 `보스 준비` 상태와 현재/권장치를 표시하며 같은 버튼이 재도전 진입점이 된다.
 - 기존 자원 카운터 좌표를 이동하지 않고 헤더 왼쪽의 비어 있던 영역에 `MinerRankButton` 260×94를 배치했다. 현재 광부 레벨·XP를 표시하고 누르면 총 등급 보너스와 다음 기능 해금을 네 언어로 안내한다.
 - `MineHudViewEquipment` 부분 클래스가 V5 하단 장비 탭의 모달을 담당한다. 4개 장착 슬롯, 페이지당 6개 인벤토리 행, 현재 장비 대비 보너스, 장착·해제·3개 합성·자동 장착을 제공하며 기존 설정 모달의 Simple 스킨 자산을 재사용한다.
+- `MineHudViewCollection` 부분 클래스가 V5 하단 박물관 탭의 모달을 담당한다. 박물관에는 광석별 발견·누적 수·보너스를, 업적 탭에는 6개 목표의 진행·다음 보상·수령 상태를 표시하며 기존 Simple 모달 스킨을 재사용한다.
 - 기존 `OfflineRewardSurface`는 위치·크기를 유지하며 보상이 적용된 시간, 처리한 일반 광석 수, Credits와 XP를 두 줄로 표시한다.
 - 광석은 Meshy 생성 모델을 모바일용 Unity 메시·텍스처로 변환한 자산을 사용한다.
 - Task 13-1에서는 기존 모델을 보스일 때 확대할 뿐 전용 보스 그래픽은 아직 사용하지 않는다.
@@ -272,8 +296,8 @@ MineIapCoordinator
 
 ## 검증 경계
 
-- 2026-07-30 Unity Editor 컴파일 오류 0건
-- EditMode 105/105 통과
+- 2026-08-01 Unity Editor 컴파일·Console 오류 0건
+- EditMode 151/151 통과
 - 챕터 10번째 스테이지 보스 판정·내구도 검증
 - 최초 보스 클리어 보상과 재도전 중복 방지 검증
 - 자동 채굴력·탭 피해·능동 채굴력·미래 성장 배율 합성과 세 보스 권장치 검증
@@ -289,6 +313,11 @@ MineIapCoordinator
 - 적용 시간·처리 광석·Credits·XP의 네 언어 복귀 HUD와 기존 치수 유지 검증
 - 기존 자원 카운터를 이동하지 않는 광부 레벨·XP 헤더 표시와 Simple 이미지 타입 검증
 - 기존 HUD·설정·광고·IAP·현지화 회귀 테스트 통과
+- 저장 버전 10의 도감·업적 중복/음수/알 수 없는 ID 정규화 검증
+- 온라인·오프라인 광석 집계, 도감 단계 배율과 오프라인 자기 증폭 방지 검증
+- 업적 6종의 진행 파생, 3단계 보상, 잠금·미달·완료·중복 수령 방어 검증
+- 4개 언어 박물관·업적 문구와 V5 실제 내비게이션·수령 경로 검증
+- Device Simulator 1440×3088 동일 비율 세로 화면에서 광석 4행과 업적 6행의 모달 경계 검증
 - Play Mode에서 실제 저장 상태의 자동 채굴과 일반 stage `ChapterStatus`의 `5.6/s` 표시를 확인했다.
 - 저장 데이터를 변경하지 않는 런타임 시나리오로 보스 실패→직전 stage 파밍→명시적 재도전을 확인했고 Console 오류는 0건이다.
 - Play Mode 임시 저장에서 보스 stage 10을 유지한 채 stage 9 기준 1시간 결과 `광석 31 / 837 C`를 확인했다.

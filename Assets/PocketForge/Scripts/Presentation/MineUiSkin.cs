@@ -42,10 +42,12 @@ namespace PocketForge.Presentation
 
         public Texture2D Texture(string assetName)
         {
-            if (textures.TryGetValue(assetName, out var cached))
+            if (textures.TryGetValue(assetName, out var cached) && cached != null)
             {
                 return cached;
             }
+
+            textures.Remove(assetName);
 
             var texture = Resources.Load<Texture2D>(ResourceRoot + assetName);
             textures[assetName] = texture;
@@ -64,10 +66,12 @@ namespace PocketForge.Presentation
 
         public Texture2D V5Texture(string assetName)
         {
-            if (v5Textures.TryGetValue(assetName, out var cached))
+            if (v5Textures.TryGetValue(assetName, out var cached) && cached != null)
             {
                 return cached;
             }
+
+            v5Textures.Remove(assetName);
 
             var texture = Resources.Load<Texture2D>(V5ResourceRoot + assetName);
             v5Textures[assetName] = texture;
@@ -93,10 +97,12 @@ namespace PocketForge.Presentation
         private Sprite Create(string assetName, Vector4 normalizedBorder, string variant)
         {
             var cacheKey = assetName + ":" + variant;
-            if (sprites.TryGetValue(cacheKey, out var cached))
+            if (sprites.TryGetValue(cacheKey, out var cached) && cached != null)
             {
                 return cached;
             }
+
+            sprites.Remove(cacheKey);
 
             var texture = Texture(assetName);
             if (texture == null)
@@ -118,10 +124,12 @@ namespace PocketForge.Presentation
         private Sprite CreateV5(string assetName)
         {
             var cacheKey = "V5/" + assetName + ":simple";
-            if (sprites.TryGetValue(cacheKey, out var cached))
+            if (sprites.TryGetValue(cacheKey, out var cached) && cached != null)
             {
                 return cached;
             }
+
+            sprites.Remove(cacheKey);
 
             var texture = V5Texture(assetName);
             if (texture == null)

@@ -126,6 +126,8 @@ namespace PocketForge.Mining
         private readonly MinerProgressionService progressionService;
         private readonly ResearchService researchService;
         private readonly EquipmentService equipmentService;
+        private readonly CollectionService collectionService;
+        private readonly AchievementService achievementService;
 
         public MiningGameService(MiningContentCatalog catalog)
         {
@@ -134,12 +136,16 @@ namespace PocketForge.Mining
             progressionService = new MinerProgressionService(catalog);
             researchService = new ResearchService(catalog);
             equipmentService = new EquipmentService(catalog);
+            collectionService = new CollectionService(catalog);
+            achievementService = new AchievementService(catalog, collectionService);
         }
 
         public MiningGameState CreateInitialState(GameSaveData saveData, float rareRoll)
         {
             saveData.furthestStage = Mathf.Max(saveData.stage, saveData.furthestStage);
             equipmentService.SanitizeAgainstCatalog(saveData);
+            collectionService.SanitizeAgainstCatalog(saveData);
+            achievementService.SanitizeAgainstCatalog(saveData);
             return new MiningGameState(saveData, CreateOre(saveData.stage, rareRoll));
         }
 
@@ -275,7 +281,7 @@ namespace PocketForge.Mining
                     progressionService.GetRankPowerMultiplier(state.Player.minerLevel),
                     equipmentService.GetPowerMultiplier(state.Player),
                     researchService.GetPowerMultiplier(state.Player),
-                    1f,
+                    collectionService.GetPowerMultiplier(state.Player),
                     1f));
 
         public int GetRequiredMinerExperience(int minerLevel) =>
@@ -314,6 +320,28 @@ namespace PocketForge.Mining
 
         public float GetEquipmentPowerMultiplier(MiningGameState state) =>
             equipmentService.GetPowerMultiplier(state.Player);
+
+        public IReadOnlyList<OreCollectionState> GetCollectionStates(MiningGameState state) =>
+            collectionService.GetStates(state.Player);
+
+        public float GetCollectionPowerMultiplier(MiningGameState state) =>
+            collectionService.GetPowerMultiplier(state.Player);
+
+        public IReadOnlyList<int> GetCollectionMilestones() =>
+            catalog.GetCollectionMilestones();
+
+        public IReadOnlyList<AchievementState> GetAchievementStates(MiningGameState state) =>
+            achievementService.GetStates(state.Player);
+
+        public AchievementClaimResult ClaimAchievement(
+            MiningGameState state,
+            string achievementId) =>
+            achievementService.Claim(
+                state.Player,
+                achievementId,
+                progressionService.IsUnlocked(
+                    state.Player.minerLevel,
+                    ProgressionFeature.Museum));
 
         public EquipmentActionStatus TryEquip(MiningGameState state, string instanceId) =>
             equipmentService.TryEquip(
@@ -444,6 +472,7 @@ namespace PocketForge.Mining
             var progression = progressionService.GrantExperience(
                 player,
                 (int)System.Math.Min(int.MaxValue, System.Math.Max(0L, experienceLong)));
+            collectionService.RecordMinedOre(player, ore.ContentId, processedOresLong);
             var totalRewardCredits = SaturatingAdd(reward, progression.RewardCredits);
             player.lastSavedUnixSeconds = nowUnixSeconds;
             return new OfflineProgressResult(
@@ -524,6 +553,9 @@ namespace PocketForge.Mining
             var rewardEquipment = chapterCompleted
                 ? equipmentService.GrantBossReward(state.Player, completedChapter.ChapterNumber)
                 : null;
+            collectionService.RecordMinedOre(
+                state.Player,
+                state.Ore.Definition.ContentId);
             var nextStage = state.Player.stage + 1;
             var shouldRemainInFarmStage =
                 !state.Ore.IsBoss &&
