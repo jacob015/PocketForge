@@ -130,6 +130,8 @@ namespace PocketForge.Mining
         private readonly CollectionService collectionService;
         private readonly AchievementService achievementService;
         private readonly MissionService missionService;
+        private readonly ShopService shopService;
+        private readonly MiningEventService eventService;
         private readonly Func<long> utcNowProvider;
 
         public MiningGameService(MiningContentCatalog catalog, Func<long> utcNowProvider = null)
@@ -144,6 +146,8 @@ namespace PocketForge.Mining
             collectionService = new CollectionService(catalog);
             achievementService = new AchievementService(catalog, collectionService);
             missionService = new MissionService(catalog, equipmentService);
+            shopService = new ShopService(catalog);
+            eventService = new MiningEventService(catalog);
         }
 
         public MiningGameState CreateInitialState(GameSaveData saveData, float rareRoll)
@@ -392,6 +396,87 @@ namespace PocketForge.Mining
                 progressionService.IsUnlocked(
                     state.Player.minerLevel,
                     ProgressionFeature.Missions));
+
+        public bool RefreshCommerce(MiningGameState state, long nowUtcUnixSeconds = 0L)
+        {
+            var now = ResolveUtcNow(nowUtcUnixSeconds);
+            var shopChanged = shopService.Refresh(
+                state.Player,
+                now,
+                progressionService.IsUnlocked(state.Player.minerLevel, ProgressionFeature.Shop));
+            var eventChanged = eventService.Refresh(
+                state.Player,
+                now,
+                progressionService.IsUnlocked(state.Player.minerLevel, ProgressionFeature.Events));
+            return shopChanged || eventChanged;
+        }
+
+        public ShopBoardState GetShopBoard(
+            MiningGameState state,
+            long nowUtcUnixSeconds = 0L) =>
+            shopService.GetBoard(
+                state.Player,
+                ResolveUtcNow(nowUtcUnixSeconds),
+                progressionService.IsUnlocked(state.Player.minerLevel, ProgressionFeature.Shop));
+
+        public ShopActionResult ClaimDailyShopProduct(
+            MiningGameState state,
+            string productId,
+            long nowUtcUnixSeconds = 0L) =>
+            shopService.ClaimDaily(
+                state.Player,
+                productId,
+                ResolveUtcNow(nowUtcUnixSeconds),
+                progressionService.IsUnlocked(state.Player.minerLevel, ProgressionFeature.Shop));
+
+        public ShopActionResult GrantRewardedShopProduct(
+            MiningGameState state,
+            string productId,
+            long nowUtcUnixSeconds = 0L) =>
+            shopService.GrantRewarded(
+                state.Player,
+                productId,
+                ResolveUtcNow(nowUtcUnixSeconds),
+                progressionService.IsUnlocked(state.Player.minerLevel, ProgressionFeature.Shop));
+
+        public ShopActionResult PurchaseGemShopProduct(
+            MiningGameState state,
+            string productId,
+            long nowUtcUnixSeconds = 0L) =>
+            shopService.PurchaseWithGems(
+                state.Player,
+                productId,
+                ResolveUtcNow(nowUtcUnixSeconds),
+                progressionService.IsUnlocked(state.Player.minerLevel, ProgressionFeature.Shop));
+
+        public ShopActionResult GrantStarterPack(MiningGameState state) =>
+            shopService.GrantStarterPack(state.Player);
+
+        public MiningEventBoardState GetMiningEventBoard(
+            MiningGameState state,
+            long nowUtcUnixSeconds = 0L) =>
+            eventService.GetBoard(
+                state.Player,
+                ResolveUtcNow(nowUtcUnixSeconds),
+                progressionService.IsUnlocked(state.Player.minerLevel, ProgressionFeature.Events));
+
+        public EventActionResult ClaimMiningEventReward(
+            MiningGameState state,
+            string tierId,
+            long nowUtcUnixSeconds = 0L) =>
+            eventService.ClaimReward(
+                state.Player,
+                tierId,
+                ResolveUtcNow(nowUtcUnixSeconds),
+                progressionService.IsUnlocked(state.Player.minerLevel, ProgressionFeature.Events));
+
+        public EventActionResult PurchaseMiningEventExchange(
+            MiningGameState state,
+            long nowUtcUnixSeconds = 0L) =>
+            eventService.PurchaseExchange(
+                state.Player,
+                ResolveUtcNow(nowUtcUnixSeconds),
+                progressionService.IsUnlocked(state.Player.minerLevel, ProgressionFeature.Events));
 
         public EquipmentActionStatus TryEquip(MiningGameState state, string instanceId) =>
             equipmentService.TryEquip(

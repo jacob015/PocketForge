@@ -163,5 +163,25 @@ namespace PocketForge.Tests.Editor
             Assert.That(LanguageService.Get("ore_copper"), Does.Not.Contain("ore_copper"));
             Assert.That(LanguageService.Get("claim"), Does.Not.Contain("claim"));
         }
+
+        [TestCase(SupportedLanguage.Korean)]
+        [TestCase(SupportedLanguage.English)]
+        [TestCase(SupportedLanguage.Japanese)]
+        [TestCase(SupportedLanguage.ChineseSimplified)]
+        public void SelectedLanguage_ResolvesShopAndEventLabels(SupportedLanguage language)
+        {
+            LanguageService.SetLanguage(language);
+
+            var keys = new[]
+            {
+                "commerce_title", "shop_daily_supply", "shop_starter_pack",
+                "shop_locked", "watch_ad", "event_crystal_rush", "event_tokens",
+                "event_exchange", "event_not_enough_tokens"
+            };
+            foreach (var key in keys)
+            {
+                Assert.That(LanguageService.Get(key), Does.Not.Contain(key));
+            }
+        }
     }
 }

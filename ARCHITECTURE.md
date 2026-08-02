@@ -267,6 +267,7 @@ MineGameController (Unity composition root)
 - `MineHudViewEquipment` 부분 클래스가 V5 하단 장비 탭의 모달을 담당한다. 4개 장착 슬롯, 페이지당 6개 인벤토리 행, 현재 장비 대비 보너스, 장착·해제·3개 합성·자동 장착을 제공하며 기존 설정 모달의 Simple 스킨 자산을 재사용한다.
 - `MineHudViewCollection` 부분 클래스가 V5 하단 박물관 탭의 모달을 담당한다. 박물관에는 광석별 발견·누적 수·보너스를, 업적 탭에는 6개 목표의 진행·다음 보상·수령 상태를 표시하며 기존 Simple 모달 스킨을 재사용한다.
 - `MineHudViewMissions` 부분 클래스가 V5 미션 진입점의 일일·주간 탭, 4개 공용 행, 갱신 시간, 전체 완료 보상을 담당한다. 기존 Task13 표면·업적 아이콘·재화 아이콘을 재사용하며 전용 배너·미션 아이콘·완료 상자는 후속 교체 대상으로 분리한다.
+- `MineHudViewCommerce` 부분 클래스가 광부 Lv.6 상점과 Lv.7 주간 이벤트 탭을 담당한다. 상점 6행과 이벤트 4행은 아이콘·유동 텍스트·수치·고정 행동 열을 공유하고, 기존 Task13 표면과 버튼을 재사용한다.
 - 기존 `OfflineRewardSurface`는 위치·크기를 유지하며 보상이 적용된 시간, 처리한 일반 광석 수, Credits와 XP를 두 줄로 표시한다.
 - 광석은 Meshy 생성 모델을 모바일용 Unity 메시·텍스처로 변환한 자산을 사용한다.
 - Task 13-1에서는 기존 모델을 보스일 때 확대할 뿐 전용 보스 그래픽은 아직 사용하지 않는다.
@@ -283,6 +284,7 @@ MineAdCoordinator
 ```
 
 - 보상은 광고 SDK의 완료 콜백에서만 지급한다.
+- 상점 광고 상품은 표시 전에 `ShopService`의 UTC 일일 잔여 횟수를 검사하고 완료 콜백에서만 상품 보상을 지급한다.
 - 전면 광고 기본 조건은 광석 5개 파괴와 마지막 노출 후 180초 경과다.
 - 광고 로드·표시 실패는 채굴 진행을 막지 않는다.
 - `adsRemoved`가 참이면 강제 전면 광고만 건너뛰고 선택형 보상 광고는 유지한다.
@@ -295,15 +297,40 @@ MineAdCoordinator
 MineIapCoordinator
   ├─ IIapService
   │   └─ UnityIapService
-  ├─ GameSaveData.adsRemoved
+  ├─ GameSaveData.adsRemoved / starterPackPurchased
+  ├─ ShopService
   └─ MineHudView
 ```
 
 - Google Play 비소모성 상품 ID는 `remove_ads`다.
+- 신규 비소모성 상품 ID는 `starter_pack`이며 Credits·Gem·설계도 코어의 1회 지급을 포함한다.
 - 새 구매는 권한 저장 성공 후에만 Pending 주문을 승인한다.
+- 스타터 패키지는 지급 전 세 재화 스냅샷을 보관하고 저장 실패 시 전부 롤백한다.
 - 기존 구매 조회로 로컬 권한을 복원하며, 오프라인 조회 실패만으로 권한을 취소하지 않는다.
 - Play 내부 테스트에서 무청구 구매, 명시적 복원, 재설치 후 자동 복구를 검증했다.
 - 환불·취소 반영과 서버 영수증 검증은 운영 백엔드 범위다.
+- `starter_pack`은 Play Console 상품 생성 전에는 조회 결과가 비활성으로 표시되며 실제 구매·복원은 내부 테스트에서 별도 검증한다.
+
+## 상점·기간 이벤트 경계
+
+```text
+MiningContentCatalog
+  ├─ ShopProductDefinition[]
+  └─ MiningEventDefinition[]
+          ↓
+ShopService / MiningEventService
+          ↓
+MiningGameService → MineHudPresenter → MineHudViewCommerce
+          ↓
+GameSaveData v12
+```
+
+- `ShopService`는 무료·광고·Gem·IAP 상품 상태와 UTC 일일 갱신, 기기 시간 역행 방어를 계산한다.
+- `MiningEventService`는 주간 월요일 UTC 경계, 기간 시작 광석 기준선, 누적 토큰, 소비 잔액, 보상·교환 중복 방어를 담당한다.
+- 이벤트 누적 진척과 소비 잔액은 서로 다른 값이다. 교환 소비가 이미 달성한 누적 보상 단계를 되돌리지 않는다.
+- 서비스는 Unity UI와 SDK를 참조하지 않고 `GameSaveData`와 정의 데이터만 변경한다. 광고·IAP의 비동기 완료 경계는 각 Coordinator가 담당한다.
+- 저장 v12는 일일 상품·광고 횟수, 스타터 패키지 권한, 이벤트 기준선·토큰·보상·교환 상태를 정규화한다.
+- 현재 시간 정책은 서버 권위가 아닌 로컬 역행 방어다. 계정 보안, 여러 기기 동기화, 이벤트 운영 종료 처리는 별도 백엔드 범위다.
 
 ## 씬과 Inspector
 
@@ -315,8 +342,8 @@ MineIapCoordinator
 
 ## 검증 경계
 
-- 2026-08-02 Unity Editor 컴파일·Console 오류 0건
-- EditMode 163/163 통과
+- 2026-08-02 Unity Editor 컴파일 오류 0건
+- Task 13-6 구현 직후 EditMode 177/177, 불필요한 Unity Localization 제거 뒤 최종 EditMode 176/176 통과
 - 챕터 10번째 스테이지 보스 판정·내구도 검증
 - 최초 보스 클리어 보상과 재도전 중복 방지 검증
 - 자동 채굴력·탭 피해·능동 채굴력·미래 성장 배율 합성과 세 보스 권장치 검증
@@ -337,10 +364,17 @@ MineIapCoordinator
 - 업적 6종의 진행 파생, 3단계 보상, 잠금·미달·완료·중복 수령 방어 검증
 - 4개 언어 박물관·업적 문구와 V5 실제 내비게이션·수령 경로 검증
 - 일일·주간 기간 경계, 기기 시간 역행, 저장 v11, 개별·완료 보상 중복 방어와 4개 언어 미션 문구 검증
+- 일일 상점 갱신·광고 횟수·Gem 부족·중복 수령, 저장 v12 정규화와 기기 시간 역행 검증
+- 주간 이벤트 기준선·누적 보상·토큰 교환·기간 갱신·중복 수령 검증
+- `remove_ads`와 `starter_pack`의 상품별 Pending 주문, 저장 성공 후 승인, 저장 실패 롤백 검증
+- 1080×1920 세로 상점 6행의 아이콘·텍스트·수치·행동 열 비겹침과 이벤트 4행 탭 전환 검증
 - 1080×1920 Play Mode 세로 화면에서 미션 4행의 아이콘·유동 텍스트·보상·고정 수령 열과 하단 완료 보상 간격 검증
 - Device Simulator 1440×3088 동일 비율 세로 화면에서 광석 4행과 업적 6행의 모달 경계 검증
 - Play Mode에서 실제 저장 상태의 자동 채굴과 일반 stage `ChapterStatus`의 `5.6/s` 표시를 확인했다.
 - 저장 데이터를 변경하지 않는 런타임 시나리오로 보스 실패→직전 stage 파밍→명시적 재도전을 확인했고 Console 오류는 0건이다.
 - Play Mode 임시 저장에서 보스 stage 10을 유지한 채 stage 9 기준 1시간 결과 `광석 31 / 837 C`를 확인했다.
 - 같은 Play 세션에서 2분 백그라운드 복귀를 모사해 `광석 1 / 27 C` 추가와 HUD 갱신을 확인했고 검증 후 기존 PlayerPrefs 원문을 복원했다.
-- Android 빌드와 실기기 동작은 미검증
+- 서명 Android Release AAB `PocketForge-0.1.0.aab` 빌드 성공: `com.jacob015.pocketforge`, versionCode 1, versionName 0.1.0, 57,822,260 bytes
+- `bundletool validate`와 JAR 서명 검증을 통과했고 AAB 서명 지문은 기존 키스토어 복구 기록과 일치한다.
+- 사용하지 않는 Engine Diagnostics와 Unity Localization을 제거해 두 Android 빌드 오류를 해소했다. Google Mobile Ads 패키지의 iOS `.xcframework` 비호환 로그 1건은 성공한 Android 산출물과 무관한 비치명 패키지 경고로 남아 있다.
+- 신규 `starter_pack` 실제 구매·복원과 실기기 이벤트 입력은 미검증

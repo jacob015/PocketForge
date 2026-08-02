@@ -343,6 +343,7 @@ namespace PocketForge.Mining
             RenderEquipment();
             RenderCollection();
             RenderMissions();
+            RenderCommerce();
         }
 
         public void ShowOfflineReward(OfflineProgressResult result)
@@ -469,6 +470,7 @@ namespace PocketForge.Mining
             rewardedAdState = state;
             rewardedAdCredits = rewardCredits;
             RenderRewardedAdState();
+            RenderCommerce();
         }
 
         public void SetIapState(IapState state, string localizedPrice, bool ownsRemoveAds)
@@ -477,6 +479,7 @@ namespace PocketForge.Mining
             removeAdsPrice = localizedPrice ?? string.Empty;
             adsRemoved = ownsRemoveAds;
             RenderIapState();
+            RenderCommerce();
         }
 
         private void LateUpdate() => ApplySafeArea();
@@ -611,6 +614,7 @@ namespace PocketForge.Mining
             CreateEquipmentPanel();
             CreateCollectionPanel();
             CreateMissionsPanel();
+            CreateCommercePanel();
             RenderSettings();
         }
 
@@ -802,6 +806,7 @@ namespace PocketForge.Mining
             ApplyEquipmentSkin();
             ApplyCollectionSkin();
             ApplyMissionSkin();
+            ApplyCommerceSkin();
 
             DisableOutline(mineButton);
             DisableOutline(pickaxeButton);

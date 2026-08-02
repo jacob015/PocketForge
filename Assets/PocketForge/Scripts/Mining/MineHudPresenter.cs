@@ -25,11 +25,20 @@ namespace PocketForge.Mining
             view.BindEquipment(Equip, Unequip, Fuse, AutoEquip);
             view.BindCollection(ClaimAchievement);
             view.BindMissions(ClaimMission, ClaimMissionCompletion);
+            view.BindCommerce(
+                ClaimDailyShopProduct,
+                RequestRewardedShopProduct,
+                PurchaseGemShopProduct,
+                ClaimEventReward,
+                PurchaseEventExchange);
         }
 
         public event Action StateChanged;
         public event Action SaveRequested;
         public event Action OreBroken;
+        public event Action<string> RewardedShopRequested;
+
+        public MineHudView View => view;
 
         public void Render() => view.Render(state, gameService);
 
@@ -43,7 +52,7 @@ namespace PocketForge.Mining
 
         public void Tick(float deltaTime)
         {
-            if (gameService.RefreshMissions(state))
+            if (gameService.RefreshMissions(state) | gameService.RefreshCommerce(state))
             {
                 Render();
                 StateChanged?.Invoke();
@@ -198,6 +207,99 @@ namespace PocketForge.Mining
                 : $"+{CompactNumberFormatter.Format(result.RewardAmount)} {rewardSymbol}";
             view.ShowFeedback(message, new Color(1f, 0.82f, 0.3f));
             GameAudioController.Instance?.PlayReward();
+        }
+
+        private void ClaimDailyShopProduct(string productId)
+        {
+            HandleShopAction(gameService.ClaimDailyShopProduct(state, productId));
+        }
+
+        private void RequestRewardedShopProduct(string productId)
+        {
+            RewardedShopRequested?.Invoke(productId);
+        }
+
+        private void PurchaseGemShopProduct(string productId)
+        {
+            HandleShopAction(gameService.PurchaseGemShopProduct(state, productId));
+        }
+
+        private void HandleShopAction(ShopActionResult result)
+        {
+            if (result.Status != ShopActionStatus.Success)
+            {
+                var key = result.Status switch
+                {
+                    ShopActionStatus.FeatureLocked => "shop_locked",
+                    ShopActionStatus.DailyLimitReached => "shop_daily_limit",
+                    ShopActionStatus.InsufficientGems => "not_enough_gems",
+                    ShopActionStatus.AlreadyOwned => "owned",
+                    _ => "shop_unavailable"
+                };
+                view.ShowFeedback(LanguageService.Get(key), new Color(1f, 0.55f, 0.3f));
+                return;
+            }
+
+            Render();
+            StateChanged?.Invoke();
+            SaveRequested?.Invoke();
+            var message = FormatCommerceReward(
+                result.RewardCredits,
+                result.RewardGems,
+                result.RewardBlueprintCores);
+            view.ShowFeedback(message, new Color(1f, 0.82f, 0.3f));
+            GameAudioController.Instance?.PlayReward();
+        }
+
+        private void ClaimEventReward(string tierId)
+        {
+            HandleEventAction(gameService.ClaimMiningEventReward(state, tierId));
+        }
+
+        private void PurchaseEventExchange()
+        {
+            HandleEventAction(gameService.PurchaseMiningEventExchange(state));
+        }
+
+        private void HandleEventAction(EventActionResult result)
+        {
+            if (result.Status != EventActionStatus.Success)
+            {
+                var key = result.Status switch
+                {
+                    EventActionStatus.FeatureLocked => "events_locked",
+                    EventActionStatus.RequirementNotMet => "event_reward_locked",
+                    EventActionStatus.AlreadyClaimed => "claimed",
+                    EventActionStatus.InsufficientTokens => "event_not_enough_tokens",
+                    EventActionStatus.ExchangeLimitReached => "event_exchange_limit_reached",
+                    _ => "event_unavailable"
+                };
+                view.ShowFeedback(LanguageService.Get(key), new Color(1f, 0.55f, 0.3f));
+                return;
+            }
+
+            Render();
+            StateChanged?.Invoke();
+            SaveRequested?.Invoke();
+            var symbol = result.RewardType switch
+            {
+                EventRewardType.Gems => "\u25C6",
+                EventRewardType.BlueprintCores => "CORE",
+                _ => "C"
+            };
+            view.ShowFeedback(
+                $"+{CompactNumberFormatter.Format(result.RewardAmount)} {symbol}",
+                new Color(1f, 0.82f, 0.3f));
+            GameAudioController.Instance?.PlayReward();
+        }
+
+        private static string FormatCommerceReward(long credits, long gems, long cores)
+        {
+            var parts = new System.Collections.Generic.List<string>();
+            if (credits > 0) parts.Add($"+{CompactNumberFormatter.Format(credits)} C");
+            if (gems > 0) parts.Add($"+{CompactNumberFormatter.Format(gems)} \u25C6");
+            if (cores > 0) parts.Add($"+{CompactNumberFormatter.Format(cores)} CORE");
+            return string.Join("  ", parts);
         }
 
         private void ApplyEquipmentAction(EquipmentActionStatus status, string successKey)

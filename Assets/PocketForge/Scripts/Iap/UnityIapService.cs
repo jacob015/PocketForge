@@ -9,17 +9,24 @@ namespace PocketForge.Iap
     public sealed class UnityIapService : IIapService
     {
         public const string RemoveAdsProductId = "remove_ads";
+        public const string StarterPackProductId = "starter_pack";
 
         private StoreController storeController;
         private Product removeAdsProduct;
+        private Product starterPackProduct;
         private PendingOrder pendingRemoveAdsOrder;
+        private PendingOrder pendingStarterPackOrder;
         private bool disposed;
 
         public IapState State { get; private set; } = IapState.Initializing;
         public string LocalizedPrice { get; private set; } = string.Empty;
+        public string StarterPackLocalizedPrice { get; private set; } = string.Empty;
+        public bool RemoveAdsAvailable => removeAdsProduct?.availableToPurchase == true;
+        public bool StarterPackAvailable => starterPackProduct?.availableToPurchase == true;
 
         public event Action<IapState> StateChanged;
         public event Action<bool> RemoveAdsEntitlementReceived;
+        public event Action<bool> StarterPackEntitlementReceived;
 
         public async void Initialize()
         {
@@ -55,6 +62,20 @@ namespace PocketForge.Iap
             storeController.PurchaseProduct(removeAdsProduct);
         }
 
+        public void PurchaseStarterPack()
+        {
+            if (State is not (IapState.Ready or IapState.Cancelled or IapState.Purchased) ||
+                starterPackProduct == null ||
+                !starterPackProduct.availableToPurchase)
+            {
+                SetState(IapState.Failed);
+                return;
+            }
+
+            SetState(IapState.Purchasing);
+            storeController.PurchaseProduct(starterPackProduct);
+        }
+
         public void RestorePurchases()
         {
             if (storeController == null)
@@ -83,6 +104,18 @@ namespace PocketForge.Iap
 
             var order = pendingRemoveAdsOrder;
             pendingRemoveAdsOrder = null;
+            storeController.ConfirmPurchase(order);
+        }
+
+        public void ConfirmPendingStarterPack()
+        {
+            if (pendingStarterPackOrder == null)
+            {
+                return;
+            }
+
+            var order = pendingStarterPackOrder;
+            pendingStarterPackOrder = null;
             storeController.ConfirmPurchase(order);
         }
 
@@ -134,7 +167,8 @@ namespace PocketForge.Iap
         {
             storeController.FetchProducts(new List<ProductDefinition>
             {
-                new(RemoveAdsProductId, ProductType.NonConsumable)
+                new(RemoveAdsProductId, ProductType.NonConsumable),
+                new(StarterPackProductId, ProductType.NonConsumable)
             });
         }
 
@@ -147,8 +181,10 @@ namespace PocketForge.Iap
         private void HandleProductsFetched(List<Product> products)
         {
             removeAdsProduct = products.FirstOrDefault(product => product.definition.id == RemoveAdsProductId);
+            starterPackProduct = products.FirstOrDefault(product => product.definition.id == StarterPackProductId);
             LocalizedPrice = removeAdsProduct?.metadata?.localizedPriceString ?? string.Empty;
-            if (removeAdsProduct == null || !removeAdsProduct.availableToPurchase)
+            StarterPackLocalizedPrice = starterPackProduct?.metadata?.localizedPriceString ?? string.Empty;
+            if (!RemoveAdsAvailable && !StarterPackAvailable)
             {
                 SetState(IapState.Failed);
                 return;
@@ -165,13 +201,19 @@ namespace PocketForge.Iap
 
         private void HandlePurchasesFetched(Orders orders)
         {
-            var ownsRemoveAds = orders.ConfirmedOrders.Any(ContainsRemoveAds);
+            var ownsRemoveAds = orders.ConfirmedOrders.Any(order => ContainsProduct(order, RemoveAdsProductId));
+            var ownsStarterPack = orders.ConfirmedOrders.Any(order => ContainsProduct(order, StarterPackProductId));
             if (ownsRemoveAds)
             {
                 RemoveAdsEntitlementReceived?.Invoke(false);
             }
 
-            SetState(ownsRemoveAds ? IapState.Purchased : IapState.Ready);
+            if (ownsStarterPack)
+            {
+                StarterPackEntitlementReceived?.Invoke(false);
+            }
+
+            SetState(ownsRemoveAds && ownsStarterPack ? IapState.Purchased : IapState.Ready);
         }
 
         private void HandlePurchasesFetchFailed(PurchasesFetchFailureDescription failure)
@@ -182,13 +224,18 @@ namespace PocketForge.Iap
 
         private void HandlePurchasePending(PendingOrder order)
         {
-            if (!ContainsRemoveAds(order))
+            if (ContainsProduct(order, RemoveAdsProductId))
             {
+                pendingRemoveAdsOrder = order;
+                RemoveAdsEntitlementReceived?.Invoke(true);
                 return;
             }
 
-            pendingRemoveAdsOrder = order;
-            RemoveAdsEntitlementReceived?.Invoke(true);
+            if (ContainsProduct(order, StarterPackProductId))
+            {
+                pendingStarterPackOrder = order;
+                StarterPackEntitlementReceived?.Invoke(true);
+            }
         }
 
         private void HandlePurchaseConfirmed(Order order)
@@ -207,9 +254,10 @@ namespace PocketForge.Iap
             SetState(IapState.Deferred);
         }
 
-        private static bool ContainsRemoveAds(Order order)
+        private static bool ContainsProduct(Order order, string productId)
         {
-            return order?.CartOrdered?.Items().Any(item => item.Product?.definition?.id == RemoveAdsProductId) == true;
+            return order?.CartOrdered?.Items().Any(item =>
+                item.Product?.definition?.id == productId) == true;
         }
 
         private void SetState(IapState state)

@@ -58,6 +58,33 @@ namespace PocketForge.Save
     }
 
     [Serializable]
+    public sealed class ShopClaimCountData
+    {
+        public string productId = string.Empty;
+        public int count;
+    }
+
+    [Serializable]
+    public sealed class DailyShopData
+    {
+        public string periodKey = string.Empty;
+        public string[] claimedProductIds = Array.Empty<string>();
+        public ShopClaimCountData[] claimCounts = Array.Empty<ShopClaimCountData>();
+    }
+
+    [Serializable]
+    public sealed class MiningEventProgressData
+    {
+        public string eventId = string.Empty;
+        public string periodKey = string.Empty;
+        public long baselineOresMined;
+        public long earnedTokens;
+        public long tokenBalance;
+        public string[] claimedTierIds = Array.Empty<string>();
+        public int exchangePurchases;
+    }
+
+    [Serializable]
     public sealed class GameSaveData
     {
         public int version = GameSaveMigrator.CurrentVersion;
@@ -73,6 +100,11 @@ namespace PocketForge.Save
         public MissionPeriodData dailyMissions = new();
         public MissionPeriodData weeklyMissions = new();
         public long lastObservedMissionUnixSeconds;
+        public DailyShopData dailyShop = new();
+        public long lastObservedShopUnixSeconds;
+        public bool starterPackPurchased;
+        public MiningEventProgressData miningEvent = new();
+        public long lastObservedEventUnixSeconds;
         public long bossesDefeated;
         public int stage = 1;
         public int furthestStage = 1;

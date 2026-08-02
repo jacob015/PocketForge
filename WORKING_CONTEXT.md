@@ -731,3 +731,19 @@
 - 검증 결과: Unity 6000.5.4f1 Android 프로젝트에서 컴파일·최종 Console 오류 0건, 전체 EditMode 163/163을 통과했다. 시간 역행·일일/주간 독립 갱신·개별/완료 중복 수령·주간 장비 보상·저장 v11·4개 언어·미션 행 비겹침을 포함한다. 1080×1920 Play Mode 캡처 `Assets/PocketForge/Review/task13_5b_missions_1080x1920.png`에서 4행 고정 열과 하단 간격을 확인했다.
 - 미검증: Android APK/AAB 빌드와 실제 기기 입력·시간대 변경 검증은 이번 승인 범위에서 수행하지 않았다.
 - 다음 작업: Task 13-6 상점·광고·IAP 상품·기간 이벤트 확장의 로컬/서버 경계와 임시 보상 수치를 사용자와 조율한다.
+
+## 수정사항 64
+
+- 기록 시각: 2026-08-02
+- 작업 요청 요약: Task 13-6의 무료·광고·Gem·IAP 상점과 채굴 기반 주간 이벤트를 구현하고 에디터 회귀 테스트 뒤 Android 빌드까지 검증한다. 사용자의 이번 요청에 따라 Android 빌드 명령 직전에는 반드시 별도 승인을 받는다.
+- 상품 구조: `ShopProductDefinition`과 `ShopService`에 일일 무료 1종, 광고 보급 1종, Gem 교환 2종, 기존 `remove_ads`, 신규 `starter_pack`을 구성했다. 무료·광고 횟수는 UTC 일일 상태로 저장하고 기기 시간이 마지막 관찰 시각보다 과거면 이전 기간을 다시 열지 않는다. 보상 수치는 Task 14 밸런싱 전 임시값이다.
+- 이벤트 구조: `MiningEventDefinition`과 `MiningEventService`에 주간 `Crystal Rush`를 추가했다. 기간 시작 뒤 5광석당 1토큰, 10·30·60 토큰 누적 보상, 20토큰을 설계도 코어 4개로 바꾸는 주 2회 교환을 제공한다. 누적 획득량과 소비 잔액을 분리해 교환이 누적 보상 진척을 낮추지 않는다.
+- 저장·시간: 저장 버전을 12로 올리고 상품 수령 ID·광고 횟수·스타터 권한·주간 이벤트 기준선·토큰·수령·교환 상태를 정규화했다. 서버 시간이 없는 로컬 역행 방어이므로 계정 보안과 여러 기기 동기화는 제공하지 않는다.
+- 광고·IAP: 상점 광고는 잔여 횟수를 먼저 검사하고 광고 완료 콜백에서만 지급한다. `UnityIapService`는 `remove_ads`와 `starter_pack`을 각각 비소모성으로 조회하며, `MineIapCoordinator`는 저장 성공 후에만 상품별 Pending 주문을 승인한다. 스타터 지급 저장 실패 시 Credits·Gem·코어를 모두 롤백한다. Play Console에 `starter_pack`이 없거나 비활성이면 상품은 구매 불가로 표시된다.
+- UI·다국어: 광부 Lv.6 상점과 Lv.7 이벤트 탭을 `MineHudViewCommerce`로 추가했다. 상점 6행·이벤트 4행은 아이콘/제목·설명/수치/고정 행동 열을 공유하고 기존 Task13 자산으로 임시 마감했다. 한영일중 문구와 CompactNumberFormatter를 연결했다.
+- 외부 패키지 검토: LitMotion 공식 저장소(`https://github.com/annulusgames/LitMotion`)와 문서(`https://annulusgames.github.io/LitMotion/`)를 확인했다. Unity 2021.3+, Burst·Collections·Mathematics를 요구하고 struct 기반 트윈·시퀀스·Punch/Shake·UGUI/TMP 지원을 제공해 후속 UI 모션 폴리싱에 적합하다. 이번 도메인·저장·SDK 경계 구현에는 필수 의존성이 아니므로 설치하지 않았고, 도입 시에는 `main` 대신 검토한 릴리스 태그를 고정한다.
+- 패키지·설정 정리: 사용하지 않는 Unity Localization 1.5.12를 Package Manager로 제거하고 커스텀 `LanguageService`를 유지했다. Engine Diagnostics는 비활성화해 디버그 심볼 요구 로그를 제거했다. Google Mobile Ads 11.3.0의 iOS `.xcframework` Android 비호환 로그는 PackageCache를 수정하지 않고 비치명 패키지 경고로 기록했다.
+- 에디터 검증: Unity 6000.5.4f1에서 컴파일 오류 0건, 구현 직후 전체 EditMode 177/177과 패키지 정리 뒤 최종 176/176을 통과했다. 세로 Game View에서 상점 6행 전체가 모달 안에 표시됨을 육안 확인하고 `Assets/PocketForge/Review/task13_6_shop_portrait_full.png`를 남겼다.
+- Android 검증: 사용자 승인 뒤 서명 Release AAB `Builds/Android/PocketForge-0.1.0.aab`를 재빌드했다. 실제 파일은 57,822,260 bytes(57.82MB, 55.14MiB), SHA-256은 `3076EFC28B739023BE3FF7DFE997510093FF1B339BF62DE13D6EAD88B7E5BF3E`다. `bundletool validate`, 패키지 `com.jacob015.pocketforge`, versionCode 1, versionName 0.1.0, JAR 서명과 기존 복구 지문 일치를 확인했다.
+- 미검증: `starter_pack` 실제 Play 구매·복원, 운영 가격·영수증·환불, 실기기 이벤트 입력은 아직 검증하지 않았다.
+- 다음 작업: Task 14에서 성장·가격·보상·광고 빈도·세션 길이를 밸런싱하고, 이후 AAB 용량과 런타임 성능을 최적화한다.

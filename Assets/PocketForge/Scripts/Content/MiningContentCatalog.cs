@@ -17,6 +17,8 @@ namespace PocketForge.Content
         [SerializeField] private EquipmentDefinition[] equipment = Array.Empty<EquipmentDefinition>();
         [SerializeField] private AchievementDefinition[] achievements = Array.Empty<AchievementDefinition>();
         [SerializeField] private MissionDefinition[] missions = Array.Empty<MissionDefinition>();
+        [SerializeField] private ShopProductDefinition[] shopProducts = Array.Empty<ShopProductDefinition>();
+        [SerializeField] private MiningEventDefinition[] miningEvents = Array.Empty<MiningEventDefinition>();
         [Header("Collection")]
         [SerializeField, Min(0f)] private float collectionDiscoveryPowerBonus = 0.01f;
         [SerializeField] private int[] collectionMilestones = { 25, 100, 500 };
@@ -49,6 +51,10 @@ namespace PocketForge.Content
             AchievementDefinition.CreateRuntimeDefaults();
         private static readonly MissionDefinition[] RuntimeDefaultMissions =
             MissionDefinition.CreateRuntimeDefaults();
+        private static readonly ShopProductDefinition[] RuntimeDefaultShopProducts =
+            ShopProductDefinition.CreateRuntimeDefaults();
+        private static readonly MiningEventDefinition[] RuntimeDefaultMiningEvents =
+            MiningEventDefinition.CreateRuntimeDefaults();
 
         public int MaxOfflineRewardSeconds => maxOfflineRewardSeconds;
         public int RewardedAdRewardMultiplier => rewardedAdRewardMultiplier;
@@ -194,6 +200,28 @@ namespace PocketForge.Content
             return configured.Length > 0 ? configured : RuntimeDefaultMissions;
         }
 
+        public IReadOnlyList<ShopProductDefinition> GetShopProducts()
+        {
+            var configured = shopProducts
+                .Where(candidate => candidate != null &&
+                                    !string.IsNullOrWhiteSpace(candidate.ProductId))
+                .GroupBy(candidate => candidate.ProductId, StringComparer.Ordinal)
+                .Select(group => group.First())
+                .ToArray();
+            return configured.Length > 0 ? configured : RuntimeDefaultShopProducts;
+        }
+
+        public IReadOnlyList<MiningEventDefinition> GetMiningEvents()
+        {
+            var configured = miningEvents
+                .Where(candidate => candidate != null &&
+                                    !string.IsNullOrWhiteSpace(candidate.EventId))
+                .GroupBy(candidate => candidate.EventId, StringComparer.Ordinal)
+                .Select(group => group.First())
+                .ToArray();
+            return configured.Length > 0 ? configured : RuntimeDefaultMiningEvents;
+        }
+
         public static MiningContentCatalog CreateRuntimeDefault()
         {
             var catalog = CreateInstance<MiningContentCatalog>();
@@ -210,6 +238,8 @@ namespace PocketForge.Content
             catalog.equipment = EquipmentDefinition.CreateRuntimeDefaults();
             catalog.achievements = AchievementDefinition.CreateRuntimeDefaults();
             catalog.missions = MissionDefinition.CreateRuntimeDefaults();
+            catalog.shopProducts = ShopProductDefinition.CreateRuntimeDefaults();
+            catalog.miningEvents = MiningEventDefinition.CreateRuntimeDefaults();
             return catalog;
         }
 

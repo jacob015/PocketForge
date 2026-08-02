@@ -1031,6 +1031,71 @@ namespace PocketForge.Tests.Editor
             }
         }
 
+        [Test]
+        public void ShopNavigation_UsesSafeColumnsAndSwitchesToWeeklyEvent()
+        {
+            var now = new DateTimeOffset(2026, 8, 3, 12, 0, 0, TimeSpan.Zero)
+                .ToUnixTimeSeconds();
+            var catalog = MiningContentCatalog.CreateRuntimeDefault();
+            try
+            {
+                var service = new MiningGameService(catalog, () => now);
+                var state = service.CreateInitialState(new GameSaveData
+                {
+                    minerLevel = 7,
+                    highestRewardedMinerLevel = 7,
+                    gems = 20,
+                    oreCollection = new[]
+                    {
+                        new OreCollectionData { contentId = "copper", minedCount = 1 }
+                    }
+                }, 1f);
+                service.RefreshCommerce(state, now);
+                state.Player.oreCollection[0].minedCount += 50;
+                var presenter = new MineHudPresenter(view, service, state);
+                presenter.Render();
+                view.SetTheme(null, null, null, null, null);
+
+                FindRect("ShopNavigation").GetComponent<Button>().onClick.Invoke();
+
+                Assert.That(FindRect("CommerceBackdrop").gameObject.activeSelf, Is.True);
+                Assert.That(FindRect("CommerceCard").sizeDelta, Is.EqualTo(new Vector2(920f, 1700f)));
+                for (var index = 0; index < 6; index++)
+                {
+                    var row = FindRect($"CommerceRow{index}");
+                    Assert.That(row.gameObject.activeSelf, Is.True);
+                    Assert.That(row.sizeDelta, Is.EqualTo(new Vector2(824f, 160f)));
+                    AssertNoOverlap(
+                        FindChildRect(row, "CommerceIcon"),
+                        FindChildRect(row, "CommerceName"),
+                        "Commerce icon must not cover localized product text.");
+                    AssertNoOverlap(
+                        FindChildRect(row, "CommerceValue"),
+                        FindChildRect(row, "CommerceAction"),
+                        "Commerce value must not enter the fixed action column.");
+                }
+
+                FindChildRect(FindRect("CommerceRow0"), "CommerceAction")
+                    .GetComponent<Button>().onClick.Invoke();
+                Assert.That(state.Player.credits, Is.EqualTo(500));
+
+                FindRect("EventTab").GetComponent<Button>().onClick.Invoke();
+                for (var index = 0; index < 4; index++)
+                {
+                    Assert.That(FindRect($"CommerceRow{index}").gameObject.activeSelf, Is.True);
+                }
+                Assert.That(FindRect("CommerceRow4").gameObject.activeSelf, Is.False);
+                Assert.That(
+                    FindChildRect(FindRect("CommerceRow0"), "CommerceAction")
+                        .GetComponent<Button>().interactable,
+                    Is.True);
+            }
+            finally
+            {
+                Object.DestroyImmediate(catalog);
+            }
+        }
+
         private static RectTransform FindChildRect(RectTransform parent, string name)
         {
             return parent.GetComponentsInChildren<RectTransform>(true).Single(rect => rect.name == name);

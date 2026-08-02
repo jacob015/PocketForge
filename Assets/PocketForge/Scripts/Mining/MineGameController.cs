@@ -76,13 +76,26 @@ namespace PocketForge.Mining
                 new GoogleMobileAdsService(),
                 new InterstitialAdPolicy(5, 180f));
             hudPresenter.OreBroken += adCoordinator.RecordOreBroken;
+            hudPresenter.RewardedShopRequested += adCoordinator.RequestShopReward;
             adCoordinator.SaveRequested += SaveGame;
-            iapCoordinator = new MineIapCoordinator(new UnityIapService(), gameState.Player, SaveEntitlement);
+            iapCoordinator = new MineIapCoordinator(
+                new UnityIapService(),
+                gameState.Player,
+                SaveEntitlement,
+                gameService,
+                gameState);
             iapCoordinator.DisplayChanged += view.SetIapState;
+            iapCoordinator.StarterPackDisplayChanged += HandleStarterPackDisplayChanged;
             view.BindIap(iapCoordinator.PurchaseRemoveAds, iapCoordinator.RestorePurchases);
+            view.BindCommerceIap(
+                iapCoordinator.PurchaseRemoveAds,
+                iapCoordinator.PurchaseStarterPack);
 
             var nowUtcUnixSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             var missionCheckpointAdvanced = gameService.RefreshMissions(
+                gameState,
+                nowUtcUnixSeconds);
+            var commerceCheckpointAdvanced = gameService.RefreshCommerce(
                 gameState,
                 nowUtcUnixSeconds);
             var offlineProgress = gameService.ClaimOfflineProgress(
@@ -93,7 +106,9 @@ namespace PocketForge.Mining
             hudPresenter.ShowOfflineReward(offlineProgress);
             adCoordinator.Initialize();
             iapCoordinator.Initialize();
-            if (offlineProgress.CheckpointAdvanced || missionCheckpointAdvanced)
+            if (offlineProgress.CheckpointAdvanced ||
+                missionCheckpointAdvanced ||
+                commerceCheckpointAdvanced)
             {
                 SaveGame();
             }
@@ -140,12 +155,14 @@ namespace PocketForge.Mining
             if (hudPresenter != null && adCoordinator != null)
             {
                 hudPresenter.OreBroken -= adCoordinator.RecordOreBroken;
+                hudPresenter.RewardedShopRequested -= adCoordinator.RequestShopReward;
                 adCoordinator.SaveRequested -= SaveGame;
                 adCoordinator.Dispose();
             }
 
             if (iapCoordinator != null)
             {
+                iapCoordinator.StarterPackDisplayChanged -= HandleStarterPackDisplayChanged;
                 iapCoordinator.Dispose();
             }
 
@@ -196,6 +213,25 @@ namespace PocketForge.Mining
         private bool SaveEntitlement()
         {
             return gameState != null && SaveService.Save(gameState.Player);
+        }
+
+        private void HandleStarterPackDisplayChanged(
+            IapState state,
+            string localizedPrice,
+            bool owned,
+            bool available)
+        {
+            var view = hudPresenter?.View;
+            if (view == null)
+            {
+                return;
+            }
+
+            view.SetStarterPackState(state, localizedPrice, owned, available);
+            if (owned)
+            {
+                hudPresenter.Render();
+            }
         }
 
         private void CreateOreVisual()

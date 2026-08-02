@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using PocketForge.Iap;
+using PocketForge.Content;
+using PocketForge.Mining;
 using PocketForge.Save;
 
 namespace PocketForge.Tests.Editor
@@ -126,20 +128,72 @@ namespace PocketForge.Tests.Editor
             Assert.AreEqual(1, service.RestoreCount);
         }
 
+        [Test]
+        public void StarterPackPendingPurchase_GrantsSavesThenConfirms()
+        {
+            var catalog = MiningContentCatalog.CreateRuntimeDefault();
+            var gameService = new MiningGameService(catalog);
+            var data = new GameSaveData();
+            var state = gameService.CreateInitialState(data, 1f);
+            var service = new FakeIapService();
+            var saveCount = 0;
+            using var coordinator = new MineIapCoordinator(
+                service,
+                data,
+                () => { saveCount++; return true; },
+                gameService,
+                state);
+
+            service.DeliverStarterPackEntitlement(true);
+
+            Assert.IsTrue(data.starterPackPurchased);
+            Assert.That(data.credits, Is.EqualTo(10000));
+            Assert.That(data.gems, Is.EqualTo(50));
+            Assert.That(data.blueprintCores, Is.EqualTo(10));
+            Assert.That(saveCount, Is.EqualTo(1));
+            Assert.That(service.StarterConfirmCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void StarterPackFailedSave_RollsBackEveryReward()
+        {
+            var catalog = MiningContentCatalog.CreateRuntimeDefault();
+            var gameService = new MiningGameService(catalog);
+            var data = new GameSaveData { credits = 9, gems = 8, blueprintCores = 7 };
+            var state = gameService.CreateInitialState(data, 1f);
+            var service = new FakeIapService();
+            using var coordinator = new MineIapCoordinator(
+                service, data, () => false, gameService, state);
+
+            service.DeliverStarterPackEntitlement(true);
+
+            Assert.IsFalse(data.starterPackPurchased);
+            Assert.That(data.credits, Is.EqualTo(9));
+            Assert.That(data.gems, Is.EqualTo(8));
+            Assert.That(data.blueprintCores, Is.EqualTo(7));
+            Assert.That(service.StarterConfirmCount, Is.Zero);
+        }
+
         private sealed class FakeIapService : IIapService
         {
             public IapState State { get; private set; } = IapState.Ready;
             public string LocalizedPrice => "$1.99";
+            public string StarterPackLocalizedPrice => "$3.99";
+            public bool RemoveAdsAvailable => true;
+            public bool StarterPackAvailable => true;
             public int PurchaseCount { get; private set; }
             public int RestoreCount { get; private set; }
             public int ConfirmCount { get; private set; }
+            public int StarterConfirmCount { get; private set; }
             public Action Confirmed { get; set; }
 
             public event Action<IapState> StateChanged;
             public event Action<bool> RemoveAdsEntitlementReceived;
+            public event Action<bool> StarterPackEntitlementReceived;
 
             public void Initialize() => StateChanged?.Invoke(State);
             public void PurchaseRemoveAds() => PurchaseCount++;
+            public void PurchaseStarterPack() => PurchaseCount++;
             public void RestorePurchases() => RestoreCount++;
 
             public void ConfirmPendingRemoveAds()
@@ -148,9 +202,16 @@ namespace PocketForge.Tests.Editor
                 Confirmed?.Invoke();
             }
 
+            public void ConfirmPendingStarterPack() => StarterConfirmCount++;
+
             public void DeliverEntitlement(bool requiresConfirmation)
             {
                 RemoveAdsEntitlementReceived?.Invoke(requiresConfirmation);
+            }
+
+            public void DeliverStarterPackEntitlement(bool requiresConfirmation)
+            {
+                StarterPackEntitlementReceived?.Invoke(requiresConfirmation);
             }
 
             public void Dispose()

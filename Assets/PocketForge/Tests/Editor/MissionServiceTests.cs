@@ -155,7 +155,7 @@ namespace PocketForge.Tests.Editor
                 }
             });
 
-            Assert.That(player.version, Is.EqualTo(11));
+            Assert.That(player.version, Is.EqualTo(GameSaveMigrator.CurrentVersion));
             Assert.That(player.bossesDefeated, Is.EqualTo(2));
             Assert.That(player.lastObservedMissionUnixSeconds, Is.Zero);
             Assert.That(player.dailyMissions.periodKey, Is.Empty);

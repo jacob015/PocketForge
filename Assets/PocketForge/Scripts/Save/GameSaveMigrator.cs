@@ -1,8 +1,10 @@
+using System.Linq;
+
 namespace PocketForge.Save
 {
     public static class GameSaveMigrator
     {
-        public const int CurrentVersion = 11;
+        public const int CurrentVersion = 12;
 
         public static GameSaveData Normalize(GameSaveData data)
         {
@@ -23,6 +25,14 @@ namespace PocketForge.Save
             data.lastObservedMissionUnixSeconds = System.Math.Max(
                 0L,
                 data.lastObservedMissionUnixSeconds);
+            data.dailyShop = NormalizeDailyShop(data.dailyShop);
+            data.lastObservedShopUnixSeconds = System.Math.Max(
+                0L,
+                data.lastObservedShopUnixSeconds);
+            data.miningEvent = NormalizeMiningEvent(data.miningEvent);
+            data.lastObservedEventUnixSeconds = System.Math.Max(
+                0L,
+                data.lastObservedEventUnixSeconds);
             data.bossesDefeated = System.Math.Max(
                 System.Math.Max(0L, data.bossesDefeated),
                 data.highestCompletedChapter);
@@ -40,6 +50,44 @@ namespace PocketForge.Save
             data.lastSavedUnixSeconds = System.Math.Max(0, data.lastSavedUnixSeconds);
             data.version = CurrentVersion;
             return data;
+        }
+
+        private static DailyShopData NormalizeDailyShop(DailyShopData shop)
+        {
+            shop ??= new DailyShopData();
+            shop.periodKey ??= string.Empty;
+            shop.claimedProductIds = (shop.claimedProductIds ?? System.Array.Empty<string>())
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Distinct(System.StringComparer.Ordinal)
+                .ToArray();
+            shop.claimCounts = (shop.claimCounts ?? System.Array.Empty<ShopClaimCountData>())
+                .Where(entry => entry != null && !string.IsNullOrWhiteSpace(entry.productId))
+                .GroupBy(entry => entry.productId, System.StringComparer.Ordinal)
+                .Select(group => new ShopClaimCountData
+                {
+                    productId = group.Key,
+                    count = group.Max(entry => System.Math.Max(0, entry.count))
+                })
+                .ToArray();
+            return shop;
+        }
+
+        private static MiningEventProgressData NormalizeMiningEvent(MiningEventProgressData progress)
+        {
+            progress ??= new MiningEventProgressData();
+            progress.eventId ??= string.Empty;
+            progress.periodKey ??= string.Empty;
+            progress.baselineOresMined = System.Math.Max(0L, progress.baselineOresMined);
+            progress.earnedTokens = System.Math.Max(0L, progress.earnedTokens);
+            progress.tokenBalance = System.Math.Min(
+                progress.earnedTokens,
+                System.Math.Max(0L, progress.tokenBalance));
+            progress.claimedTierIds = (progress.claimedTierIds ?? System.Array.Empty<string>())
+                .Where(id => !string.IsNullOrWhiteSpace(id))
+                .Distinct(System.StringComparer.Ordinal)
+                .ToArray();
+            progress.exchangePurchases = System.Math.Max(0, progress.exchangePurchases);
+            return progress;
         }
 
         private static MissionPeriodData NormalizeMissionPeriod(MissionPeriodData period)

@@ -444,6 +444,10 @@ namespace PocketForge.Mining
             {
                 button.onClick.AddListener(ShowMissions);
             }
+            else if (captured == ProgressionFeature.Shop)
+            {
+                button.onClick.AddListener(ShowCommerce);
+            }
             else
             {
                 button.onClick.AddListener(() => ShowFeaturePlaceholder(captured));
