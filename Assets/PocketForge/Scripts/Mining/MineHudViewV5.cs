@@ -20,7 +20,6 @@ namespace PocketForge.Mining
         private Text bossWarningText;
         private Text oreHealthLabel;
         private Text oreHealthValue;
-        private Text mineActionText;
         private Text bossActionText;
         private Text offlineRewardTitle;
         private Text researchShortcutText;
@@ -36,7 +35,6 @@ namespace PocketForge.Mining
         private Image researchShortcutIcon;
         private Image researchCompletionBadge;
         private Image bottomNavigationBar;
-        private Image selectedNavigationTab;
         private Image researchNotificationBadge;
         private Button bossChallengeButton;
         private Button researchShortcutButton;
@@ -44,7 +42,6 @@ namespace PocketForge.Mining
         private readonly Dictionary<ProgressionFeature, Image> navigationLocks = new();
         private readonly Dictionary<ProgressionFeature, Button> navigationButtons = new();
         private readonly List<Image> navigationIcons = new();
-        private readonly List<Text> navigationLabels = new();
 
         private void BuildV5Hud(Transform hudRoot)
         {
@@ -56,7 +53,7 @@ namespace PocketForge.Mining
                 hudRoot,
                 new Vector2(0.5f, 1f),
                 new Vector2(0.5f, 1f),
-                new Vector2(-414f, -189f),
+                new Vector2(-379.5f, -191.5f),
                 new Vector2(144f, 144f),
                 Color.white);
             portraitImage = CreateSimpleImage(
@@ -69,19 +66,19 @@ namespace PocketForge.Mining
                 Color.white);
             portraitImage.transform.SetAsFirstSibling();
 
-            ConfigureRect(minerRankButton.GetComponent<RectTransform>(), new Vector2(0.5f, 1f), new Vector2(-250f, -189f), new Vector2(184f, 104f));
+            ConfigureRect(minerRankButton.GetComponent<RectTransform>(), new Vector2(0.5f, 1f), new Vector2(-231.9f, -185f), new Vector2(184f, 104f));
             minerRankButton.image.color = Color.clear;
             minerRankButton.GetComponent<Outline>().enabled = false;
             minerRankButton.GetComponent<Shadow>().enabled = false;
             minerRankText.rectTransform.anchorMin = minerRankText.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
-            minerRankText.rectTransform.anchoredPosition = new Vector2(-134f, -82f);
+            minerRankText.rectTransform.anchoredPosition = new Vector2(-146.3f, -86.7f);
             minerRankText.rectTransform.sizeDelta = new Vector2(142f, 42f);
             minerRankText.fontSize = 24;
-            minerExperienceText.rectTransform.anchoredPosition = new Vector2(8f, -2f);
+            minerExperienceText.rectTransform.anchoredPosition = Vector2.zero;
             minerExperienceText.rectTransform.sizeDelta = new Vector2(140f, 32f);
             minerExperienceText.fontSize = 18;
             var experienceTrack = minerExperienceProgress.transform.parent.GetComponent<RectTransform>();
-            experienceTrack.anchoredPosition = new Vector2(8f, 25f);
+            experienceTrack.anchoredPosition = new Vector2(0f, 23f);
             experienceTrack.sizeDelta = new Vector2(140f, 18f);
             minerExperienceProgress.rectTransform.anchoredPosition = new Vector2(7f, 0f);
             minerExperienceProgress.rectTransform.sizeDelta = new Vector2(MinerExperienceProgressWidth, 10f);
@@ -90,20 +87,20 @@ namespace PocketForge.Mining
                 minerRankButton.transform,
                 new Vector2(0.5f, 0.5f),
                 new Vector2(0.5f, 0.5f),
-                new Vector2(-62f, 8f),
+                new Vector2(-60.2f, -4.9f),
                 new Vector2(48f, 48f),
                 Color.white);
 
-            ConfigureRect(creditsCurrencyIcon.rectTransform, new Vector2(0.5f, 1f), new Vector2(-136f, -189f), new Vector2(48f, 48f));
-            ConfigureText(creditsText, new Vector2(0.5f, 1f), new Vector2(-51f, -186f), new Vector2(90f, 60f), 26, TextAnchor.MiddleLeft);
-            ConfigureRect(depthCurrencyIcon.rectTransform, new Vector2(0.5f, 1f), new Vector2(30f, -189f), new Vector2(48f, 48f));
-            ConfigureText(depthText, new Vector2(0.5f, 1f), new Vector2(104f, -186f), new Vector2(76f, 60f), 26, TextAnchor.MiddleLeft);
+            ConfigureRect(creditsCurrencyIcon.rectTransform, new Vector2(0.5f, 1f), new Vector2(-124f, -192f), new Vector2(48f, 48f));
+            ConfigureText(creditsText, new Vector2(0.5f, 1f), new Vector2(-55f, -189f), new Vector2(90f, 60f), 26, TextAnchor.MiddleLeft);
+            ConfigureRect(depthCurrencyIcon.rectTransform, new Vector2(0.5f, 1f), new Vector2(17.5f, -192f), new Vector2(48f, 48f));
+            ConfigureText(depthText, new Vector2(0.5f, 1f), new Vector2(83f, -189f), new Vector2(76f, 60f), 26, TextAnchor.MiddleLeft);
             blueprintCoreIcon = CreateSimpleImage(
                 "BlueprintCoreIcon",
                 hudRoot,
                 new Vector2(0.5f, 1f),
                 new Vector2(0.5f, 1f),
-                new Vector2(174f, -189f),
+                new Vector2(156f, -189f),
                 new Vector2(48f, 48f),
                 Color.white);
             blueprintCoreText = CreateText(
@@ -111,14 +108,14 @@ namespace PocketForge.Mining
                 hudRoot,
                 new Vector2(0.5f, 1f),
                 new Vector2(0.5f, 1f),
-                new Vector2(248f, -186f),
+                new Vector2(220.9f, -189f),
                 new Vector2(76f, 60f),
                 26,
                 TextAnchor.MiddleLeft);
 
-            ConfigureRect(settingsButton.GetComponent<RectTransform>(), new Vector2(0.5f, 1f), new Vector2(444f, -189f), new Vector2(84f, 84f));
+            ConfigureRect(settingsButton.GetComponent<RectTransform>(), new Vector2(0.5f, 1f), new Vector2(403f, -189f), new Vector2(84f, 84f));
             ConfigureRect(settingsIcon.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(74f, 74f));
-            ConfigureRect(rewardedAdButton.GetComponent<RectTransform>(), new Vector2(0.5f, 1f), new Vector2(322f, -189f), new Vector2(48f, 48f));
+            ConfigureRect(rewardedAdButton.GetComponent<RectTransform>(), new Vector2(0.5f, 1f), new Vector2(337f, -192f), new Vector2(48f, 48f));
             rewardedAdButton.GetComponentInChildren<Text>().gameObject.SetActive(false);
             rewardedVideoIcon.gameObject.SetActive(false);
             rewardedPlusIcon.rectTransform.anchorMin = rewardedPlusIcon.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
@@ -160,7 +157,7 @@ namespace PocketForge.Mining
                 chapterPanel.transform,
                 new Vector2(0.5f, 0.5f),
                 new Vector2(0.5f, 0.5f),
-                new Vector2(72f, -27f),
+                new Vector2(70f, -22.4f),
                 new Vector2(430f, 66f),
                 42,
                 TextAnchor.MiddleLeft);
@@ -228,7 +225,7 @@ namespace PocketForge.Mining
 
             ConfigureRect(progressBackground.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 1014f), new Vector2(560f, 86f));
             ConfigureRect(progressTrack.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(520f, 46f));
-            ConfigureRect(oreProgress.rectTransform, new Vector2(0f, 0.5f), new Vector2(16f, 0f), new Vector2(OreProgressWidth, 32f));
+            ConfigureRect(oreProgress.rectTransform, new Vector2(0f, 0.5f), new Vector2(16f, 0f), new Vector2(OreProgressWidth, 53f));
             oreProgress.rectTransform.pivot = new Vector2(0f, 0.5f);
             oreHealthLabel = CreateText(
                 "OreHealthLabel",
@@ -254,17 +251,7 @@ namespace PocketForge.Mining
         private void BuildV5ActionArea(Transform hudRoot)
         {
             ConfigureRect(mineButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(0f, 843f), new Vector2(450f, 186f));
-            ConfigureRect(mineIcon.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(-120f, 18f), new Vector2(148f, 148f));
-            mineActionText = CreateText(
-                "MineActionText",
-                mineButton.transform,
-                new Vector2(0.5f, 0.5f),
-                new Vector2(0.5f, 0.5f),
-                new Vector2(78f, 34f),
-                new Vector2(230f, 72f),
-                46,
-                TextAnchor.MiddleCenter);
-            mineActionText.font = UiFontProvider.GetCasual();
+            ConfigureRect(mineIcon.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(78.912f, 85.248f));
 
             ConfigureRect(offlineRewardSurface.rectTransform, new Vector2(0.5f, 0f), new Vector2(-363f, 843f), new Vector2(246f, 186f));
             offlineRewardSurface.GetComponent<Shadow>().enabled = false;
@@ -349,8 +336,8 @@ namespace PocketForge.Mining
                 bossChallengeButton.transform,
                 new Vector2(0.5f, 0.5f),
                 new Vector2(0.5f, 0.5f),
-                new Vector2(54f, 0f),
-                new Vector2(188f, 64f),
+                new Vector2(43.051f, 0f),
+                new Vector2(209.897f, 64f),
                 25,
                 TextAnchor.MiddleCenter);
             bossActionText.font = UiFontProvider.GetCasual();
@@ -358,9 +345,9 @@ namespace PocketForge.Mining
             ConfigureRect(pickaxeButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(-327f, 420f), new Vector2(302f, 330f));
             ConfigureRect(drillButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(0f, 420f), new Vector2(302f, 330f));
             ConfigureRect(robotButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(327f, 420f), new Vector2(302f, 330f));
-            ConfigureV5UpgradeCard(pickaxeButton, pickaxeIcon, "pickaxe");
-            ConfigureV5UpgradeCard(drillButton, drillIcon, "drill");
-            ConfigureV5UpgradeCard(robotButton, robotIcon, "robot");
+            ConfigureV5UpgradeCard(pickaxeButton, pickaxeIcon);
+            ConfigureV5UpgradeCard(drillButton, drillIcon);
+            ConfigureV5UpgradeCard(robotButton, robotIcon);
         }
 
         private void BuildV5Navigation(Transform hudRoot)
@@ -374,21 +361,17 @@ namespace PocketForge.Mining
                 new Vector2(948f, 160f),
                 Color.white);
             bottomNavigationBar.transform.SetSiblingIndex(1);
-            selectedNavigationTab = CreateSimpleImage(
-                "SelectedNavigationTab",
-                bottomNavigationBar.transform,
+            CreateNavigationSlot("EquipmentNavigation", bottomNavigationBar.transform, new Vector2(-296f, -28f), ProgressionFeature.Equipment);
+            CreateNavigationSlot("ResearchNavigation", bottomNavigationBar.transform, new Vector2(-162f, -28f), ProgressionFeature.Research);
+            CreateNavigationSlot("HomeNavigation", bottomNavigationBar.transform, new Vector2(0f, -13f), null);
+            CreateNavigationSlot("MuseumNavigation", bottomNavigationBar.transform, new Vector2(162f, -32f), ProgressionFeature.Museum);
+            CreateNavigationSlot("MissionsNavigation", bottomNavigationBar.transform, new Vector2(455f, 1529f), ProgressionFeature.Missions);
+            CreateNavigationSlot("ShopNavigation", bottomNavigationBar.transform, new Vector2(291f, -28f), ProgressionFeature.Shop);
+            ConfigureRect(
+                navigationButtons[ProgressionFeature.Missions].transform.Find("Icon").GetComponent<RectTransform>(),
                 new Vector2(0.5f, 0.5f),
-                new Vector2(0.5f, 0.5f),
-                new Vector2(-78f, 8f),
-                new Vector2(144f, 160f),
-                Color.white);
-
-            CreateNavigationSlot("EquipmentNavigation", bottomNavigationBar.transform, -390f, "feature_equipment", ProgressionFeature.Equipment);
-            CreateNavigationSlot("ResearchNavigation", bottomNavigationBar.transform, -234f, "feature_research", ProgressionFeature.Research);
-            CreateNavigationSlot("HomeNavigation", bottomNavigationBar.transform, -78f, "home", null);
-            CreateNavigationSlot("MuseumNavigation", bottomNavigationBar.transform, 78f, "feature_museum", ProgressionFeature.Museum);
-            CreateNavigationSlot("MissionsNavigation", bottomNavigationBar.transform, 234f, "feature_missions", ProgressionFeature.Missions);
-            CreateNavigationSlot("ShopNavigation", bottomNavigationBar.transform, 390f, "feature_shop", ProgressionFeature.Shop);
+                new Vector2(0f, 20f),
+                new Vector2(93.6f, 93.6f));
 
             researchNotificationBadge = CreateSimpleImage(
                 "ResearchNotificationBadge",
@@ -403,8 +386,7 @@ namespace PocketForge.Mining
         private void CreateNavigationSlot(
             string name,
             Transform parent,
-            float x,
-            string localizationKey,
+            Vector2 position,
             ProgressionFeature? feature)
         {
             var button = CreateButton(
@@ -412,7 +394,7 @@ namespace PocketForge.Mining
                 parent,
                 new Vector2(0.5f, 0.5f),
                 new Vector2(0.5f, 0.5f),
-                new Vector2(x, 0f),
+                position,
                 new Vector2(144f, 144f),
                 Color.clear);
             button.image.color = Color.clear;
@@ -429,19 +411,6 @@ namespace PocketForge.Mining
                 new Vector2(72f, 72f),
                 Color.white);
             navigationIcons.Add(icon);
-            var label = CreateText(
-                "NavigationLabel",
-                button.transform,
-                new Vector2(0.5f, 0.5f),
-                new Vector2(0.5f, 0.5f),
-                new Vector2(0f, -50f),
-                new Vector2(136f, 32f),
-                17,
-                TextAnchor.MiddleCenter);
-            label.text = localizationKey;
-            label.name = localizationKey;
-            navigationLabels.Add(label);
-
             if (!feature.HasValue)
             {
                 button.interactable = false;
@@ -478,32 +447,21 @@ namespace PocketForge.Mining
             navigationLocks[captured] = lockIcon;
         }
 
-        private void ConfigureV5UpgradeCard(Button button, RawImage icon, string localizationKey)
+        private void ConfigureV5UpgradeCard(Button button, RawImage icon)
         {
-            ConfigureRect(icon.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0f, 36f), new Vector2(190f, 148f));
-            var equipmentName = CreateText(
-                localizationKey,
-                button.transform,
-                new Vector2(0.5f, 0.5f),
-                new Vector2(0.5f, 0.5f),
-                new Vector2(0f, 146f),
-                new Vector2(240f, 34f),
-                23,
-                TextAnchor.MiddleCenter);
-            equipmentName.name = localizationKey;
-            navigationLabels.Add(equipmentName);
+            ConfigureRect(icon.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0f, 68f), new Vector2(190f, 148f));
             var level = button.transform.Find("Label").GetComponent<Text>();
             level.rectTransform.anchorMin = level.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
-            level.rectTransform.anchoredPosition = new Vector2(0f, -68f);
+            level.rectTransform.anchoredPosition = new Vector2(0f, -35f);
             level.rectTransform.sizeDelta = new Vector2(250f, 42f);
             level.fontSize = 27;
             var cost = button.transform.Find("CostText").GetComponent<Text>();
             cost.rectTransform.anchorMin = cost.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
-            cost.rectTransform.anchoredPosition = new Vector2(20f, -128f);
+            cost.rectTransform.anchoredPosition = new Vector2(11.8f, -120.7f);
             cost.rectTransform.sizeDelta = new Vector2(140f, 42f);
             cost.fontSize = 26;
             var costIcon = button.transform.Find("CostIcon").GetComponent<Image>();
-            ConfigureRect(costIcon.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(-66f, -128f), new Vector2(38f, 38f));
+            ConfigureRect(costIcon.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(-60.2f, -124.6f), new Vector2(38f, 38f));
             var action = button.transform.Find("UpgradeAction").GetComponent<Image>();
             ConfigureRect(action.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(101f, -128f), new Vector2(48f, 48f));
             action.color = Color.clear;
@@ -560,6 +518,7 @@ namespace PocketForge.Mining
             ApplyV5(researchCompletionBadge, "17_CompletionBadge");
             ApplyV5(mineButton.image, "18_MineButton");
             ApplyRawTexture(mineIcon, finalSkin.V5Texture("19_MinePickaxeIcon"), new Vector2(148f, 148f));
+            ConfigureRect(mineIcon.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(78.912f, 85.248f));
             ApplyV5(bossChallengeButton.image, "20_BossButton");
             ApplyV5(bossChallengeButton.transform.Find("BossChallengeIcon").GetComponent<Image>(), "21_BossChallengeIcon");
             ApplyV5(pickaxeButton.image, "22_UpgradeCard");
@@ -578,13 +537,15 @@ namespace PocketForge.Mining
             ApplyRawTexture(pickaxeIcon, finalSkin.V5Texture("25_PickaxeEquipmentIcon"), new Vector2(190f, 156f));
             ApplyRawTexture(drillIcon, finalSkin.V5Texture("26_DrillEquipmentIcon"), new Vector2(190f, 156f));
             ApplyRawTexture(robotIcon, finalSkin.V5Texture("27_RobotEquipmentIcon"), new Vector2(190f, 156f));
+            ConfigureRect(pickaxeIcon.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0f, 68f), new Vector2(144f, 156f));
+            ConfigureRect(drillIcon.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0f, 68f), new Vector2(164.255f, 140.79f));
+            ConfigureRect(robotIcon.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0f, 68f), new Vector2(117f, 156f));
             foreach (var icon in upgradeCostIcons)
             {
                 ApplyV5(icon, "04_CreditsIcon");
             }
 
             ApplyV5(bottomNavigationBar, "28_BottomNavigationBar");
-            ApplyV5(selectedNavigationTab, "29_SelectedNavigationTab");
             var navigationAssets = new[]
             {
                 "30_EquipmentMenuIcon",
@@ -652,7 +613,6 @@ namespace PocketForge.Mining
             oreHealthValue.text =
                 $"{CompactNumberFormatter.Format(ore.Health)} / {CompactNumberFormatter.Format(ore.Durability)}";
             oreProgress.fillAmount = Mathf.Clamp01(ore.Health / Mathf.Max(1f, ore.Durability));
-            mineActionText.text = LanguageService.Get("mine").ToUpper();
             bossActionText.text =
                 $"{LanguageService.Get("boss").ToUpper()}\n{LanguageService.Get("challenge").ToUpper()}";
             offlineRewardTitle.text = LanguageService.Get("offline_rewards").ToUpper();
@@ -688,7 +648,6 @@ namespace PocketForge.Mining
             }
 
             UpdateNavigationState(service, player.minerLevel);
-            UpdateNavigationLabels();
         }
 
         private void RenderV5OfflineReward(OfflineProgressResult result)
@@ -707,14 +666,6 @@ namespace PocketForge.Mining
             foreach (var pair in navigationLocks)
             {
                 pair.Value.gameObject.SetActive(!service.IsFeatureUnlocked(minerLevel, pair.Key));
-            }
-        }
-
-        private void UpdateNavigationLabels()
-        {
-            foreach (var label in navigationLabels)
-            {
-                label.text = LanguageService.Get(label.name).ToUpper();
             }
         }
 

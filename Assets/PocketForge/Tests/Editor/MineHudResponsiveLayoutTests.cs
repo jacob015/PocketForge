@@ -93,9 +93,10 @@ namespace PocketForge.Tests.Editor
         public void ApprovedSnapshotChrome_UsesMeasured1080WideGeometry()
         {
             AssertRect("TopSurface", new Vector2(0f, -189f), new Vector2(972f, 162f));
-            AssertRect("MinerRankButton", new Vector2(-250f, -189f), new Vector2(184f, 104f));
-            AssertRect("SettingsButton", new Vector2(444f, -189f), new Vector2(84f, 84f));
-            AssertRect("RewardedAdButton", new Vector2(322f, -189f), new Vector2(48f, 48f));
+            AssertRect("PortraitFrame", new Vector2(-379.5f, -191.5f), new Vector2(144f, 144f));
+            AssertRect("MinerRankButton", new Vector2(-231.9f, -185f), new Vector2(184f, 104f));
+            AssertRect("SettingsButton", new Vector2(403f, -189f), new Vector2(84f, 84f));
+            AssertRect("RewardedAdButton", new Vector2(337f, -192f), new Vector2(48f, 48f));
             AssertRect("ChapterInformationPanel", new Vector2(-168f, -394f), new Vector2(636f, 188f));
             AssertRect("PowerComparisonPanel", new Vector2(333f, -394f), new Vector2(306f, 188f));
             AssertRect("ProgressBackground", new Vector2(0f, 1014f), new Vector2(560f, 86f));
@@ -103,6 +104,22 @@ namespace PocketForge.Tests.Editor
             AssertRect("BossChallengeButton", new Vector2(0f, 650f), new Vector2(322f, 90f));
             AssertRect("PickaxeButton", new Vector2(-327f, 420f), new Vector2(302f, 330f));
             AssertRect("BottomNavigationBar", new Vector2(0f, 120f), new Vector2(948f, 160f));
+            AssertRect("EquipmentNavigation", new Vector2(-296f, -28f), new Vector2(144f, 144f));
+            AssertRect("ResearchNavigation", new Vector2(-162f, -28f), new Vector2(144f, 144f));
+            AssertRect("HomeNavigation", new Vector2(0f, -13f), new Vector2(144f, 144f));
+            AssertRect("MuseumNavigation", new Vector2(162f, -32f), new Vector2(144f, 144f));
+            AssertRect("MissionsNavigation", new Vector2(455f, 1529f), new Vector2(144f, 144f));
+            AssertRect("ShopNavigation", new Vector2(291f, -28f), new Vector2(144f, 144f));
+            AssertRect("ProgressFill", new Vector2(16f, 0f), new Vector2(468f, 53f));
+            AssertRect("MineIcon", Vector2.zero, new Vector2(78.912f, 85.248f));
+            AssertMissing("MineActionText");
+            AssertMissing("SelectedNavigationTab");
+            AssertMissing("feature_equipment");
+            AssertMissing("feature_research");
+            AssertMissing("home");
+            AssertMissing("feature_museum");
+            AssertMissing("feature_missions");
+            AssertMissing("feature_shop");
             AssertRect("SettingsCard", new Vector2(0f, 53f), new Vector2(900f, 1344f));
             AssertRect("CloseSettingsButton", new Vector2(0f, 66f), new Vector2(326f, 88f));
         }
@@ -144,7 +161,8 @@ namespace PocketForge.Tests.Editor
 
             Assert.That(pip.gameObject.activeSelf, Is.False);
             Assert.That(VerticalRange(level).Min, Is.GreaterThanOrEqualTo(VerticalRange(cost).Max));
-            Assert.That(cost.anchoredPosition.y, Is.EqualTo(action.anchoredPosition.y));
+            Assert.That(cost.anchoredPosition.y, Is.EqualTo(-120.7f).Within(0.01f));
+            Assert.That(Mathf.Abs(cost.anchoredPosition.y - action.anchoredPosition.y), Is.LessThan(8f));
             Assert.That(cost.anchoredPosition.x, Is.LessThan(action.anchoredPosition.x));
         }
 
@@ -538,8 +556,8 @@ namespace PocketForge.Tests.Editor
 
                 Assert.That(FindRect("MinerRank").GetComponent<Text>().text, Does.Contain("3"));
                 Assert.That(FindRect("MinerExperience").GetComponent<Text>().text, Does.Contain("12"));
-                AssertRect("CreditsCurrencyIcon", new Vector2(-136f, -189f), new Vector2(48f, 48f));
-                AssertRect("DepthCurrencyIcon", new Vector2(30f, -189f), new Vector2(48f, 48f));
+                AssertRect("CreditsCurrencyIcon", new Vector2(-124f, -192f), new Vector2(48f, 48f));
+                AssertRect("DepthCurrencyIcon", new Vector2(17.5f, -192f), new Vector2(48f, 48f));
                 Assert.That(FindRect("BlueprintCoreIcon"), Is.Not.Null);
             }
             finally
@@ -948,6 +966,14 @@ namespace PocketForge.Tests.Editor
             var rect = FindRect(name);
             Assert.That(rect.anchoredPosition, Is.EqualTo(position), $"{name} position drifted from the approved snapshot.");
             Assert.That(rect.sizeDelta, Is.EqualTo(size), $"{name} size drifted from the approved snapshot.");
+        }
+
+        private void AssertMissing(string name)
+        {
+            Assert.That(
+                view.GetComponentsInChildren<Transform>(true).Any(child => child.name == name),
+                Is.False,
+                $"{name} was intentionally removed from the approved HUD and must not be recreated.");
         }
 
         private void AssertTextureAspect(string name)

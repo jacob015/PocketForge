@@ -18,7 +18,7 @@ namespace PocketForge.Mining
 {
     public sealed partial class MineHudView : MonoBehaviour
     {
-        private const float OreProgressWidth = 488f;
+        private const float OreProgressWidth = 468f;
         private const float MinerExperienceProgressWidth = 160f;
 
         private sealed class ChapterRowView

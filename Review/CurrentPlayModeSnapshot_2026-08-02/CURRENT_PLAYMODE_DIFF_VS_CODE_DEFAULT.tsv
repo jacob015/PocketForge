@@ -1,0 +1,169 @@
+SUMMARY	pathsChanged=89	propertyChanges=156	deleted=11	extra=0
+kind	path	property	codeDefault	currentPlayMode
+CHANGED	SafeArea/BlueprintCoreIcon	anchoredPosition	(174.000, -189.000)	(156.000, -189.000)
+CHANGED	SafeArea/BlueprintCoreIcon	Image.preserveAspect	False	True
+CHANGED	SafeArea/BlueprintCoreValue	anchoredPosition	(248.000, -186.000)	(220.900, -189.000)
+CHANGED	SafeArea/BossChallengeButton	Image.preserveAspect	False	True
+CHANGED	SafeArea/BossChallengeButton	Image.color	RGBA(0.920, 0.320, 0.260, 1.000)	RGBA(1.000, 1.000, 1.000, 1.000)
+CHANGED	SafeArea/BossChallengeButton/BossActionText	anchoredPosition	(54.000, 0.000)	(43.051, 0.000)
+CHANGED	SafeArea/BossChallengeButton/BossActionText	sizeDelta	(188.000, 64.000)	(209.897, 64.000)
+CHANGED	SafeArea/BossChallengeButton/BossChallengeIcon	Image.preserveAspect	False	True
+CHANGED	SafeArea/BossWarningPanel	Image.preserveAspect	False	True
+CHANGED	SafeArea/BottomNavigationBar	Image.preserveAspect	False	True
+CHANGED	SafeArea/BottomNavigationBar/EquipmentNavigation	sibling	1	0
+CHANGED	SafeArea/BottomNavigationBar/EquipmentNavigation	anchoredPosition	(-390.000, 0.000)	(-296.000, -28.000)
+DELETED	SafeArea/BottomNavigationBar/EquipmentNavigation/feature_equipment	object	present	absent
+CHANGED	SafeArea/BottomNavigationBar/EquipmentNavigation/Icon	Image.preserveAspect	False	True
+CHANGED	SafeArea/BottomNavigationBar/EquipmentNavigation/LockedIcon	sibling	3	2
+CHANGED	SafeArea/BottomNavigationBar/EquipmentNavigation/LockedIcon	activeSelf	True	False
+CHANGED	SafeArea/BottomNavigationBar/EquipmentNavigation/LockedIcon	Image.preserveAspect	False	True
+CHANGED	SafeArea/BottomNavigationBar/HomeNavigation	sibling	3	2
+CHANGED	SafeArea/BottomNavigationBar/HomeNavigation	anchoredPosition	(-78.000, 0.000)	(0.000, -13.000)
+DELETED	SafeArea/BottomNavigationBar/HomeNavigation/home	object	present	absent
+CHANGED	SafeArea/BottomNavigationBar/HomeNavigation/Icon	Image.preserveAspect	False	True
+CHANGED	SafeArea/BottomNavigationBar/MissionsNavigation	sibling	5	4
+CHANGED	SafeArea/BottomNavigationBar/MissionsNavigation	anchoredPosition	(234.000, 0.000)	(455.000, 1529.000)
+DELETED	SafeArea/BottomNavigationBar/MissionsNavigation/feature_missions	object	present	absent
+CHANGED	SafeArea/BottomNavigationBar/MissionsNavigation/Icon	sizeDelta	(72.000, 72.000)	(93.600, 93.600)
+CHANGED	SafeArea/BottomNavigationBar/MissionsNavigation/Icon	Image.preserveAspect	False	True
+CHANGED	SafeArea/BottomNavigationBar/MissionsNavigation/LockedIcon	sibling	3	2
+CHANGED	SafeArea/BottomNavigationBar/MissionsNavigation/LockedIcon	activeSelf	True	False
+CHANGED	SafeArea/BottomNavigationBar/MissionsNavigation/LockedIcon	Image.preserveAspect	False	True
+CHANGED	SafeArea/BottomNavigationBar/MuseumNavigation	sibling	4	3
+CHANGED	SafeArea/BottomNavigationBar/MuseumNavigation	anchoredPosition	(78.000, 0.000)	(162.000, -32.000)
+DELETED	SafeArea/BottomNavigationBar/MuseumNavigation/feature_museum	object	present	absent
+CHANGED	SafeArea/BottomNavigationBar/MuseumNavigation/Icon	Image.preserveAspect	False	True
+CHANGED	SafeArea/BottomNavigationBar/MuseumNavigation/LockedIcon	sibling	3	2
+CHANGED	SafeArea/BottomNavigationBar/MuseumNavigation/LockedIcon	activeSelf	True	False
+CHANGED	SafeArea/BottomNavigationBar/MuseumNavigation/LockedIcon	Image.preserveAspect	False	True
+CHANGED	SafeArea/BottomNavigationBar/ResearchNavigation	sibling	2	1
+CHANGED	SafeArea/BottomNavigationBar/ResearchNavigation	anchoredPosition	(-234.000, 0.000)	(-162.000, -28.000)
+DELETED	SafeArea/BottomNavigationBar/ResearchNavigation/feature_research	object	present	absent
+CHANGED	SafeArea/BottomNavigationBar/ResearchNavigation/Icon	Image.preserveAspect	False	True
+CHANGED	SafeArea/BottomNavigationBar/ResearchNavigation/LockedIcon	sibling	3	2
+CHANGED	SafeArea/BottomNavigationBar/ResearchNavigation/LockedIcon	activeSelf	True	False
+CHANGED	SafeArea/BottomNavigationBar/ResearchNavigation/LockedIcon	Image.preserveAspect	False	True
+CHANGED	SafeArea/BottomNavigationBar/ResearchNavigation/ResearchNotificationBadge	sibling	4	3
+CHANGED	SafeArea/BottomNavigationBar/ResearchNavigation/ResearchNotificationBadge	activeSelf	True	False
+CHANGED	SafeArea/BottomNavigationBar/ResearchNavigation/ResearchNotificationBadge	Image.preserveAspect	False	True
+DELETED	SafeArea/BottomNavigationBar/SelectedNavigationTab	object	present	absent
+CHANGED	SafeArea/BottomNavigationBar/ShopNavigation	sibling	6	5
+CHANGED	SafeArea/BottomNavigationBar/ShopNavigation	anchoredPosition	(390.000, 0.000)	(291.000, -28.000)
+DELETED	SafeArea/BottomNavigationBar/ShopNavigation/feature_shop	object	present	absent
+CHANGED	SafeArea/BottomNavigationBar/ShopNavigation/Icon	Image.preserveAspect	False	True
+CHANGED	SafeArea/BottomNavigationBar/ShopNavigation/LockedIcon	sibling	3	2
+CHANGED	SafeArea/BottomNavigationBar/ShopNavigation/LockedIcon	activeSelf	True	False
+CHANGED	SafeArea/BottomNavigationBar/ShopNavigation/LockedIcon	Image.preserveAspect	False	True
+CHANGED	SafeArea/ChapterInformationPanel	Image.preserveAspect	False	True
+CHANGED	SafeArea/ChapterInformationPanel/MineName	anchoredPosition	(72.000, -27.000)	(70.000, -22.400)
+CHANGED	SafeArea/Credits	anchoredPosition	(-51.000, -186.000)	(-55.000, -189.000)
+CHANGED	SafeArea/CreditsCurrencyIcon	anchoredPosition	(-136.000, -189.000)	(-124.000, -192.000)
+CHANGED	SafeArea/CreditsCurrencyIcon	Image.preserveAspect	False	True
+CHANGED	SafeArea/Depth	anchoredPosition	(104.000, -186.000)	(83.000, -189.000)
+CHANGED	SafeArea/DepthCurrencyIcon	anchoredPosition	(30.000, -189.000)	(17.500, -192.000)
+CHANGED	SafeArea/DepthCurrencyIcon	Image.preserveAspect	False	True
+CHANGED	SafeArea/DrillButton	Image.preserveAspect	False	True
+CHANGED	SafeArea/DrillButton	Image.color	RGBA(0.140, 0.300, 0.520, 1.000)	RGBA(1.000, 1.000, 1.000, 1.000)
+CHANGED	SafeArea/DrillButton/CostIcon	anchoredPosition	(-66.000, -128.000)	(-60.200, -124.600)
+CHANGED	SafeArea/DrillButton/CostIcon	Image.preserveAspect	False	True
+CHANGED	SafeArea/DrillButton/CostText	anchoredPosition	(20.000, -128.000)	(11.800, -120.700)
+DELETED	SafeArea/DrillButton/drill	object	present	absent
+CHANGED	SafeArea/DrillButton/DrillIcon	anchoredPosition	(0.000, 36.000)	(0.000, 68.000)
+CHANGED	SafeArea/DrillButton/DrillIcon	sizeDelta	(190.000, 148.000)	(164.255, 140.790)
+CHANGED	SafeArea/DrillButton/Label	anchoredPosition	(0.000, -68.000)	(0.000, -35.000)
+CHANGED	SafeArea/DrillButton/LevelPip1	Image.color	RGBA(0.035, 0.080, 0.180, 0.950)	RGBA(0.780, 0.380, 1.000, 1.000)
+CHANGED	SafeArea/DrillButton/RecommendationBadge	sibling	9	8
+CHANGED	SafeArea/DrillButton/RecommendationBadge	activeSelf	True	False
+CHANGED	SafeArea/DrillButton/RecommendationBadge	Image.preserveAspect	False	True
+CHANGED	SafeArea/DrillButton/UpgradeAction/UpgradeArrow	Image.preserveAspect	False	True
+CHANGED	SafeArea/MineButton	Image.preserveAspect	False	True
+CHANGED	SafeArea/MineButton	Image.color	RGBA(1.000, 0.480, 0.120, 1.000)	RGBA(1.000, 1.000, 1.000, 1.000)
+DELETED	SafeArea/MineButton/MineActionText	object	present	absent
+CHANGED	SafeArea/MineButton/MineIcon	anchoredPosition	(-120.000, 18.000)	(0.000, 0.000)
+CHANGED	SafeArea/MineButton/MineIcon	sizeDelta	(148.000, 148.000)	(78.912, 85.248)
+CHANGED	SafeArea/MinerRankButton	anchoredPosition	(-250.000, -189.000)	(-231.900, -185.000)
+CHANGED	SafeArea/MinerRankButton/MinerExperience	anchoredPosition	(8.000, -2.000)	(0.000, 0.000)
+CHANGED	SafeArea/MinerRankButton/MinerExperienceIcon	anchoredPosition	(-62.000, 8.000)	(-60.200, -4.900)
+CHANGED	SafeArea/MinerRankButton/MinerExperienceIcon	Image.preserveAspect	False	True
+CHANGED	SafeArea/MinerRankButton/MinerExperienceTrack	anchoredPosition	(8.000, 25.000)	(0.000, 23.000)
+CHANGED	SafeArea/MinerRankButton/MinerExperienceTrack/MinerExperienceProgress	sizeDelta	(160.000, 10.000)	(31.441, 10.000)
+CHANGED	SafeArea/MinerRankButton/MinerRank	anchoredPosition	(-134.000, -82.000)	(-146.300, -86.700)
+CHANGED	SafeArea/OfflineRewardSurface	activeSelf	False	True
+CHANGED	SafeArea/OfflineRewardSurface	Image.preserveAspect	False	True
+CHANGED	SafeArea/OfflineRewardSurface	Image.color	RGBA(0.040, 0.200, 0.160, 0.960)	RGBA(1.000, 1.000, 1.000, 1.000)
+CHANGED	SafeArea/OfflineRewardSurface/OfflineChestIcon	Image.preserveAspect	False	True
+CHANGED	SafeArea/OfflineRewardSurface/OfflineReward	activeSelf	False	True
+CHANGED	SafeArea/PickaxeButton	Image.preserveAspect	False	True
+CHANGED	SafeArea/PickaxeButton	Image.color	RGBA(0.140, 0.300, 0.520, 1.000)	RGBA(1.000, 1.000, 1.000, 1.000)
+CHANGED	SafeArea/PickaxeButton/CostIcon	anchoredPosition	(-66.000, -128.000)	(-60.200, -124.600)
+CHANGED	SafeArea/PickaxeButton/CostIcon	Image.preserveAspect	False	True
+CHANGED	SafeArea/PickaxeButton/CostText	anchoredPosition	(20.000, -128.000)	(11.800, -120.700)
+CHANGED	SafeArea/PickaxeButton/Label	anchoredPosition	(0.000, -68.000)	(0.000, -35.000)
+CHANGED	SafeArea/PickaxeButton/LevelPip1	Image.color	RGBA(0.035, 0.080, 0.180, 0.950)	RGBA(0.280, 0.720, 1.000, 1.000)
+DELETED	SafeArea/PickaxeButton/pickaxe	object	present	absent
+CHANGED	SafeArea/PickaxeButton/PickaxeIcon	anchoredPosition	(0.000, 36.000)	(0.000, 68.000)
+CHANGED	SafeArea/PickaxeButton/PickaxeIcon	sizeDelta	(190.000, 148.000)	(144.000, 156.000)
+CHANGED	SafeArea/PickaxeButton/RecommendationBadge	sibling	9	8
+CHANGED	SafeArea/PickaxeButton/RecommendationBadge	Image.preserveAspect	False	True
+CHANGED	SafeArea/PickaxeButton/UpgradeAction/UpgradeArrow	Image.preserveAspect	False	True
+CHANGED	SafeArea/PortraitFrame	anchoredPosition	(-414.000, -189.000)	(-379.500, -191.500)
+CHANGED	SafeArea/PortraitFrame	Image.preserveAspect	False	True
+CHANGED	SafeArea/PortraitFrame/MinerPortrait	Image.preserveAspect	False	True
+CHANGED	SafeArea/PowerComparisonPanel	Image.preserveAspect	False	True
+CHANGED	SafeArea/ProgressBackground	Image.preserveAspect	False	True
+CHANGED	SafeArea/ProgressBackground	Image.color	RGBA(0.050, 0.100, 0.240, 0.980)	RGBA(1.000, 1.000, 1.000, 1.000)
+CHANGED	SafeArea/ProgressBackground/ProgressTrack	Image.color	RGBA(0.015, 0.040, 0.110, 1.000)	RGBA(0.000, 0.000, 0.000, 0.000)
+CHANGED	SafeArea/ProgressBackground/ProgressTrack/ProgressFill	sizeDelta	(488.000, 32.000)	(488.000, 53.000)
+CHANGED	SafeArea/ProgressBackground/ProgressTrack/ProgressFill	Image.type	Simple	Filled
+CHANGED	SafeArea/ResearchShortcut	Image.preserveAspect	False	True
+CHANGED	SafeArea/ResearchShortcut/ResearchCompletionBadge	Image.preserveAspect	False	True
+CHANGED	SafeArea/ResearchShortcut/ResearchShortcutIcon	Image.preserveAspect	False	True
+CHANGED	SafeArea/RewardedAdButton	anchoredPosition	(322.000, -189.000)	(337.000, -192.000)
+CHANGED	SafeArea/RewardedAdButton	Image.color	RGBA(0.080, 0.160, 0.340, 1.000)	RGBA(0.000, 0.000, 0.000, 0.000)
+CHANGED	SafeArea/RewardedAdButton/PlusIcon	Image.preserveAspect	False	True
+CHANGED	SafeArea/RewardedAdButton/VideoIcon	Image.preserveAspect	False	True
+CHANGED	SafeArea/RobotButton	Image.preserveAspect	False	True
+CHANGED	SafeArea/RobotButton	Image.color	RGBA(0.140, 0.300, 0.520, 1.000)	RGBA(1.000, 1.000, 1.000, 1.000)
+CHANGED	SafeArea/RobotButton/CostIcon	anchoredPosition	(-66.000, -128.000)	(-60.200, -124.600)
+CHANGED	SafeArea/RobotButton/CostIcon	Image.preserveAspect	False	True
+CHANGED	SafeArea/RobotButton/CostText	anchoredPosition	(20.000, -128.000)	(11.800, -120.700)
+CHANGED	SafeArea/RobotButton/Label	anchoredPosition	(0.000, -68.000)	(0.000, -35.000)
+CHANGED	SafeArea/RobotButton/LevelPip1	Image.color	RGBA(0.035, 0.080, 0.180, 0.950)	RGBA(1.000, 0.700, 0.160, 1.000)
+CHANGED	SafeArea/RobotButton/RecommendationBadge	sibling	9	8
+CHANGED	SafeArea/RobotButton/RecommendationBadge	activeSelf	True	False
+CHANGED	SafeArea/RobotButton/RecommendationBadge	Image.preserveAspect	False	True
+DELETED	SafeArea/RobotButton/robot	object	present	absent
+CHANGED	SafeArea/RobotButton/RobotIcon	anchoredPosition	(0.000, 36.000)	(0.000, 68.000)
+CHANGED	SafeArea/RobotButton/RobotIcon	sizeDelta	(190.000, 148.000)	(117.000, 156.000)
+CHANGED	SafeArea/RobotButton/UpgradeAction/UpgradeArrow	Image.preserveAspect	False	True
+CHANGED	SafeArea/SettingsButton	anchoredPosition	(444.000, -189.000)	(403.000, -189.000)
+CHANGED	SafeArea/SettingsButton	Image.preserveAspect	False	True
+CHANGED	SafeArea/SettingsButton	Image.color	RGBA(0.120, 0.200, 0.300, 1.000)	RGBA(1.000, 1.000, 1.000, 1.000)
+CHANGED	SafeArea/SettingsButton/SettingsIcon	activeSelf	True	False
+CHANGED	SafeArea/SettingsButton/SettingsIcon	Image.preserveAspect	False	True
+CHANGED	SafeArea/SuccessSpark1	anchoredPosition	(0.000, 0.000)	(445.000, -680.625)
+CHANGED	SafeArea/SuccessSpark1	localScale	(1.000, 1.000, 1.000)	(0.350, 0.350, 0.350)
+CHANGED	SafeArea/SuccessSpark1	Image.color	RGBA(0.000, 0.000, 0.000, 0.000)	RGBA(1.000, 0.700, 0.160, 0.000)
+CHANGED	SafeArea/SuccessSpark2	anchoredPosition	(0.000, 0.000)	(424.581, -583.044)
+CHANGED	SafeArea/SuccessSpark2	localScale	(1.000, 1.000, 1.000)	(0.350, 0.350, 0.350)
+CHANGED	SafeArea/SuccessSpark2	Image.color	RGBA(0.000, 0.000, 0.000, 0.000)	RGBA(1.000, 0.700, 0.160, 0.000)
+CHANGED	SafeArea/SuccessSpark3	anchoredPosition	(0.000, 0.000)	(327.000, -562.625)
+CHANGED	SafeArea/SuccessSpark3	localScale	(1.000, 1.000, 1.000)	(0.350, 0.350, 0.350)
+CHANGED	SafeArea/SuccessSpark3	Image.color	RGBA(0.000, 0.000, 0.000, 0.000)	RGBA(1.000, 0.700, 0.160, 0.000)
+CHANGED	SafeArea/SuccessSpark4	anchoredPosition	(0.000, 0.000)	(229.419, -583.044)
+CHANGED	SafeArea/SuccessSpark4	localScale	(1.000, 1.000, 1.000)	(0.350, 0.350, 0.350)
+CHANGED	SafeArea/SuccessSpark4	Image.color	RGBA(0.000, 0.000, 0.000, 0.000)	RGBA(1.000, 0.700, 0.160, 0.000)
+CHANGED	SafeArea/SuccessSpark5	anchoredPosition	(0.000, 0.000)	(209.000, -680.625)
+CHANGED	SafeArea/SuccessSpark5	localScale	(1.000, 1.000, 1.000)	(0.350, 0.350, 0.350)
+CHANGED	SafeArea/SuccessSpark5	Image.color	RGBA(0.000, 0.000, 0.000, 0.000)	RGBA(1.000, 0.700, 0.160, 0.000)
+CHANGED	SafeArea/SuccessSpark6	anchoredPosition	(0.000, 0.000)	(229.419, -778.206)
+CHANGED	SafeArea/SuccessSpark6	localScale	(1.000, 1.000, 1.000)	(0.350, 0.350, 0.350)
+CHANGED	SafeArea/SuccessSpark6	Image.color	RGBA(0.000, 0.000, 0.000, 0.000)	RGBA(1.000, 0.700, 0.160, 0.000)
+CHANGED	SafeArea/SuccessSpark7	anchoredPosition	(0.000, 0.000)	(327.000, -798.625)
+CHANGED	SafeArea/SuccessSpark7	localScale	(1.000, 1.000, 1.000)	(0.350, 0.350, 0.350)
+CHANGED	SafeArea/SuccessSpark7	Image.color	RGBA(0.000, 0.000, 0.000, 0.000)	RGBA(1.000, 0.700, 0.160, 0.000)
+CHANGED	SafeArea/SuccessSpark8	anchoredPosition	(0.000, 0.000)	(424.581, -778.206)
+CHANGED	SafeArea/SuccessSpark8	localScale	(1.000, 1.000, 1.000)	(0.350, 0.350, 0.350)
+CHANGED	SafeArea/SuccessSpark8	Image.color	RGBA(0.000, 0.000, 0.000, 0.000)	RGBA(1.000, 0.700, 0.160, 0.000)
+CHANGED	SafeArea/TopSurface	Image.preserveAspect	False	True
+CHANGED	SafeArea/TopSurface	Image.color	RGBA(0.060, 0.100, 0.240, 0.980)	RGBA(1.000, 1.000, 1.000, 1.000)

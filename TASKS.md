@@ -4,6 +4,27 @@
 
 ## 현재 작업
 
+### Task 13 사용자 Play Mode HUD 배치 영구 반영
+
+상태: 완료
+
+완료 내용:
+
+- 1440×3088 Play Mode 화면의 SafeArea 하위 RectTransform 125개를 전수 기록하고 코드 기본 생성값과 비교
+- 구조상 변경된 66개 경로를 기준으로 상단 HUD, 액션, 업그레이드 카드, 하단 내비게이션 좌표·크기를 영구 반영
+- 사용자가 삭제한 채굴 문구, 선택 탭, 내비게이션 문구 6개, 업그레이드 이름 3개를 생성 코드에서도 제거
+- 미션 버튼을 전투력 패널 아래 위치 `455,1529`, 144×144로 유지하고 하단은 5개 슬롯 배치로 변경
+- `ProgressFill`을 왼쪽 원점 유지 상태에서 488×53에서 468×53으로 축소
+- 삭제된 내비게이션 텍스트 참조를 순회하던 코드를 제거해 반복 `MissingReferenceException` 해결
+
+검증:
+
+- Unity 컴파일 오류 0건, Console 오류 0건
+- `MineHudResponsiveLayoutTests` EditMode 30/30 통과
+- 전체 EditMode 154/154 통과
+- 기준 스크린샷·전수 manifest·코드 기본값 diff를 `Review/CurrentPlayModeSnapshot_2026-08-02/`에 보관
+- Play Mode 재실행, Android APK/AAB, 실기기 검증은 이번 반영 범위에서 미실행
+
 ### Task 13 UI 겹침·9-slice 후속 교정
 
 상태: 완료
