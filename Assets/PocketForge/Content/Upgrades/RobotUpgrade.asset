@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: RobotUpgrade
   m_EditorClassIdentifier: Assembly-CSharp::PocketForge.Content.UpgradeDefinition
   type: 2
-  baseCost: 50
-  costGrowth: 1.65
-  effectPerLevel: 0.1
+  baseCost: 35
+  costGrowth: 1.55
+  effectPerLevel: 0.08

@@ -332,6 +332,26 @@ GameSaveData v12
 - 저장 v12는 일일 상품·광고 횟수, 스타터 패키지 권한, 이벤트 기준선·토큰·보상·교환 상태를 정규화한다.
 - 현재 시간 정책은 서버 권위가 아닌 로컬 역행 방어다. 계정 보안, 여러 기기 동기화, 이벤트 운영 종료 처리는 별도 백엔드 범위다.
 
+## 밸런스 시뮬레이션 경계
+
+```text
+MiningContentCatalog
+        ↓
+ProgressionBalanceSimulator
+        ↓ 실제 규칙 재생
+MiningGameService → MiningPowerService / Progression / Collection
+        ↓
+ProgressionBalanceResult
+  ├─ 첫 강화·첫 보스·챕터 완료 시간
+  ├─ 채굴 수·보스 실패·강화 구매 수
+  └─ 최종 시설 레벨·현재/권장 채굴력
+```
+
+- `ProgressionBalanceSimulator`는 별도의 축약 공식을 복제하지 않고 실제 채굴·강화·경험치·도감·보스 실패/재도전 서비스를 결정론적으로 재생한다.
+- 희귀 판정은 항상 실패하는 값으로 고정해 운이 나쁠 때도 목표 시간 안에 들어오는 보수적 기준선을 만든다.
+- 능동 모드는 기준 탭 속도, 자동 모드는 자동 채굴력만 사용하며, 보스 실패 뒤에는 권장 채굴력에 도달할 때까지 마지막 일반 스테이지를 반복한다.
+- UI나 저장소에 연결되지 않는 분석 경계이므로 런타임 진행을 변경하지 않고 콘텐츠 자산 조정의 회귀 테스트로 사용한다.
+
 ## 씬과 Inspector
 
 - `Mine.unity`에는 Main Camera, Directional Light, 배경·지면, `MineGameController`가 있다.
@@ -342,8 +362,8 @@ GameSaveData v12
 
 ## 검증 경계
 
-- 2026-08-02 Unity Editor 컴파일 오류 0건
-- Task 13-6 구현 직후 EditMode 177/177, 불필요한 Unity Localization 제거 뒤 최종 EditMode 176/176 통과
+- 2026-08-03 Unity Editor 컴파일 오류 0건
+- Task 14-1 결정론적 능동·자동 진행 기준과 전체 EditMode 179/179 통과
 - 챕터 10번째 스테이지 보스 판정·내구도 검증
 - 최초 보스 클리어 보상과 재도전 중복 방지 검증
 - 자동 채굴력·탭 피해·능동 채굴력·미래 성장 배율 합성과 세 보스 권장치 검증

@@ -30,7 +30,7 @@ MonoBehaviour:
     firstClearGems: 5
     firstClearBlueprintCores: 3
     repeatClearBlueprintCores: 1
-    bossDurabilityMultiplier: 3
+    bossDurabilityMultiplier: 2
     bossRewardMultiplier: 5
     bossVisualScaleMultiplier: 1.2
     bossTimeLimitSeconds: 30
@@ -93,8 +93,8 @@ MonoBehaviour:
   collectionMilestonePowerBonus: 0.01
   maxOfflineRewardSeconds: 14400
   rewardedAdRewardMultiplier: 5
-  baseAutoPowerPerSecond: 0.5
-  baseTapDamage: 1
+  baseAutoPowerPerSecond: 1.5
+  baseTapDamage: 0.08
   baseTapAssistSeconds: 0.05
   tapAssistSecondsPerPickaxeLevel: 0.005
   maxTapAssistSeconds: 0.1

@@ -735,7 +735,7 @@ namespace PocketForge.Tests.Editor
             var status = FindRect("BossWarning").GetComponent<Text>().text;
             Assert.That(status, Does.Contain(LanguageService.Get("boss_ready").ToUpper()));
 
-            Assert.That(FindRect("PowerValue").GetComponent<Text>().text, Does.Contain("5.5"));
+            Assert.That(FindRect("PowerValue").GetComponent<Text>().text, Does.Contain("1.9"));
             FindRect("ChapterInformationPanel").GetComponent<Button>().onClick.Invoke();
             var chapterOneAction = FindChildRect(
                     FindRect("ChapterRow1"),

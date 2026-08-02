@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: DrillUpgrade
   m_EditorClassIdentifier: Assembly-CSharp::PocketForge.Content.UpgradeDefinition
   type: 1
-  baseCost: 25
-  costGrowth: 1.65
-  effectPerLevel: 0.5
+  baseCost: 18
+  costGrowth: 1.55
+  effectPerLevel: 0.35

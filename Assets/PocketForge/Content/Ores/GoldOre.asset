@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PocketForge.Content.OreDefinition
   contentId: gold
   startStage: 7
-  baseDurability: 44
-  durabilityPerStage: 7
+  baseDurability: 110
+  durabilityPerStage: 25
   rareChance: 0.12
   normalRewardMultiplier: 3
   rareRewardMultiplier: 7

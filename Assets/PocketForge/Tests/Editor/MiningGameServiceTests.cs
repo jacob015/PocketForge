@@ -51,7 +51,7 @@ namespace PocketForge.Tests.Editor
 
             Assert.IsNotNull(catalog);
             Assert.AreEqual("crystal", catalog.GetOreForStage(10).ContentId);
-            Assert.AreEqual(55f, catalog.GetOreForStage(10).GetDurability(10));
+            Assert.AreEqual(60f, catalog.GetOreForStage(10).GetDurability(10));
         }
 
         [Test]
@@ -339,10 +339,10 @@ namespace PocketForge.Tests.Editor
             Assert.That(result.ElapsedSeconds, Is.EqualTo(catalog.MaxOfflineRewardSeconds * 2L));
             Assert.That(result.RewardedSeconds, Is.EqualTo(catalog.MaxOfflineRewardSeconds));
             Assert.That(result.FarmStage, Is.EqualTo(1));
-            Assert.That(result.ProcessedOres, Is.EqualTo(1440));
-            Assert.That(result.Progression.ExperienceGained, Is.EqualTo(1440));
-            Assert.That(result.Progression.CurrentLevel, Is.EqualTo(14));
-            Assert.That(result.RewardCredits, Is.EqualTo(5480));
+            Assert.That(result.ProcessedOres, Is.EqualTo(1065));
+            Assert.That(result.Progression.ExperienceGained, Is.EqualTo(1065));
+            Assert.That(result.Progression.CurrentLevel, Is.EqualTo(12));
+            Assert.That(result.RewardCredits, Is.EqualTo(4055));
             Assert.That(state.Player.credits, Is.EqualTo(result.RewardCredits));
         }
 

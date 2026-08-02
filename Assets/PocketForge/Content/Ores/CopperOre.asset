@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PocketForge.Content.OreDefinition
   contentId: copper
   startStage: 1
-  baseDurability: 10
-  durabilityPerStage: 5
+  baseDurability: 25
+  durabilityPerStage: 12
   rareChance: 0.08
   normalRewardMultiplier: 2
   rareRewardMultiplier: 5

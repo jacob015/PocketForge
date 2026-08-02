@@ -71,13 +71,13 @@ namespace PocketForge.Tests.Editor
             var chapterTwo = gameService.CreateInitialState(new GameSaveData { stage = 20 }, 1f);
             var chapterThree = gameService.CreateInitialState(new GameSaveData { stage = 30 }, 1f);
 
-            Assert.That(gameService.GetBossRecommendedPower(chapterOne), Is.EqualTo(5.5f).Within(0.01f));
-            Assert.That(gameService.GetBossRecommendedPower(chapterTwo), Is.EqualTo(14.583f).Within(0.01f));
-            Assert.That(gameService.GetBossRecommendedPower(chapterThree), Is.EqualTo(26f).Within(0.01f));
+            Assert.That(gameService.GetBossRecommendedPower(chapterOne), Is.EqualTo(4f).Within(0.01f));
+            Assert.That(gameService.GetBossRecommendedPower(chapterTwo), Is.EqualTo(15.167f).Within(0.01f));
+            Assert.That(gameService.GetBossRecommendedPower(chapterThree), Is.EqualTo(26.667f).Within(0.01f));
         }
 
         [Test]
-        public void BaseActivePower_CanReachFirstBossButNotLaterBosses()
+        public void BaseActivePower_CannotReachFirstOrLaterBosses()
         {
             var catalog = AssetDatabase.LoadAssetAtPath<MiningContentCatalog>(
                 "Assets/PocketForge/Content/MiningContentCatalog.asset");
@@ -89,7 +89,7 @@ namespace PocketForge.Tests.Editor
 
             Assert.That(
                 basePower.ActivePowerPerSecond,
-                Is.GreaterThanOrEqualTo(gameService.GetBossRecommendedPower(chapterOne)));
+                Is.LessThan(gameService.GetBossRecommendedPower(chapterOne)));
             Assert.That(
                 basePower.ActivePowerPerSecond,
                 Is.LessThan(gameService.GetBossRecommendedPower(chapterTwo)));

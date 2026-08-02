@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PocketForge.Content.OreDefinition
   contentId: crystal
   startStage: 10
-  baseDurability: 55
+  baseDurability: 60
   durabilityPerStage: 7
   rareChance: 0.08
   normalRewardMultiplier: 3

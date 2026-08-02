@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PocketForge.Content.OreDefinition
   contentId: iron
   startStage: 4
-  baseDurability: 28
-  durabilityPerStage: 6
+  baseDurability: 60
+  durabilityPerStage: 15
   rareChance: 0.1
   normalRewardMultiplier: 2
   rareRewardMultiplier: 6
