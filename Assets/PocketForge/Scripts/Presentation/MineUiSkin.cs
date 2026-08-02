@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,6 +15,32 @@ namespace PocketForge.Presentation
         private const string Task13ResourceRoot = "PocketForge/UI/Task13/";
 
         private static MineUiSkin shared;
+
+        // Borders are measured at the first straight pixel after each rounded corner.
+        // Keeping them here prevents call sites from guessing values that cut through curves.
+        private static readonly IReadOnlyDictionary<string, Vector4> Task13SliceBorders =
+            new Dictionary<string, Vector4>(StringComparer.Ordinal)
+            {
+                ["UiCollectionModalBody"] = new Vector4(39f, 39f, 39f, 39f),
+                ["UiEquipmentModalBody"] = new Vector4(40f, 42f, 40f, 42f),
+                ["UiEquipmentSlotCardBase"] = new Vector4(38f, 38f, 38f, 38f),
+                ["UiEquipmentInventoryCardClean"] = new Vector4(33f, 33f, 33f, 33f),
+                ["OverlayEquipmentRarityCommon"] = new Vector4(33f, 34f, 33f, 34f),
+                ["OverlayEquipmentRarityRare"] = new Vector4(33f, 34f, 33f, 34f),
+                ["OverlayEquipmentRarityEpic"] = new Vector4(33f, 34f, 33f, 34f),
+                ["OverlayEquipmentRarityLegendary"] = new Vector4(33f, 34f, 33f, 34f),
+                ["OverlayEquipmentSelected"] = new Vector4(33f, 34f, 33f, 34f),
+                ["ButtonEquipmentUnequipRuntime"] = new Vector4(27f, 27f, 27f, 27f),
+                ["ButtonEquipmentEquipRuntime"] = new Vector4(32f, 31f, 32f, 31f),
+                ["ButtonEquipmentMergeRuntime"] = new Vector4(41f, 42f, 41f, 42f),
+                ["ButtonEquipmentAutoEquipRuntime"] = new Vector4(38f, 38f, 38f, 38f),
+                ["ButtonAchievementClaimRuntime"] = new Vector4(27f, 27f, 27f, 27f),
+                ["TabCollectionActive"] = new Vector4(29f, 30f, 29f, 30f),
+                ["TabCollectionInactive"] = new Vector4(30f, 31f, 30f, 31f),
+                ["UiMuseumExhibitCardClean"] = new Vector4(34f, 34f, 34f, 34f),
+                ["UiAchievementInProgressState"] = new Vector4(27f, 27f, 27f, 27f),
+                ["UiTask13HorizontalPanelClean"] = new Vector4(35f, 35f, 35f, 35f)
+            };
 
         private readonly Dictionary<string, Texture2D> textures = new();
         private readonly Dictionary<string, Texture2D> v5Textures = new();
@@ -137,11 +164,23 @@ namespace PocketForge.Presentation
         }
 
         /// <summary>
-        /// Creates a Task 13 sprite with measured pixel borders.
-        /// Vector4 order is left, bottom, right, top to match Sprite.Create.
+        /// Creates a Task 13 sprite using the measured border catalog.
+        /// Border order is left, bottom, right, top to match Sprite.Create.
         /// </summary>
-        public Sprite Task13Sliced(string assetName, Vector4 borderPixels)
+        public Sprite Task13Sliced(string assetName)
         {
+            if (!TryGetTask13SliceBorder(assetName, out var borderPixels))
+            {
+                if (missingAssets.Add("Task13 border/" + assetName))
+                {
+                    Debug.LogWarning(
+                        $"Pocket Forge Task13 asset has no measured slice border: {assetName}. " +
+                        "Falling back to a Simple sprite.");
+                }
+
+                return Task13Simple(assetName);
+            }
+
             var cacheKey = $"Task13/{assetName}:sliced:" +
                            $"{borderPixels.x:F1},{borderPixels.y:F1}," +
                            $"{borderPixels.z:F1},{borderPixels.w:F1}";
@@ -187,6 +226,11 @@ namespace PocketForge.Presentation
                 borderPixels);
             sprites[cacheKey] = sprite;
             return sprite;
+        }
+
+        public static bool TryGetTask13SliceBorder(string assetName, out Vector4 borderPixels)
+        {
+            return Task13SliceBorders.TryGetValue(assetName, out borderPixels);
         }
 
         public Sprite Sliced(string assetName, Vector4 normalizedBorder)

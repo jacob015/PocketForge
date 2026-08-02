@@ -514,14 +514,16 @@ namespace PocketForge.Mining
                     : Color.white;
                 row.Details.text = $"{GetRarityName(item.Rarity)}  +{item.PowerBonus * 100f:0.#}%";
                 row.Button.image.color = Color.white;
-                row.RarityOverlay.sprite = finalSkin?.Task13Simple(item.Rarity switch
+                row.RarityOverlay.sprite = finalSkin?.Task13Sliced(item.Rarity switch
                 {
                     EquipmentRarity.Rare => "OverlayEquipmentRarityRare",
                     EquipmentRarity.Epic => "OverlayEquipmentRarityEpic",
                     EquipmentRarity.Legendary => "OverlayEquipmentRarityLegendary",
                     _ => "OverlayEquipmentRarityCommon"
                 });
-                row.RarityOverlay.type = Image.Type.Simple;
+                row.RarityOverlay.type = Image.Type.Sliced;
+                row.RarityOverlay.preserveAspect = false;
+                row.RarityOverlay.fillCenter = true;
                 row.SelectionOverlay.gameObject.SetActive(
                     item.Item.instanceId == selectedEquipmentInstanceId);
                 row.EquippedBadge.gameObject.SetActive(item.IsEquipped);
@@ -607,13 +609,13 @@ namespace PocketForge.Mining
 
             ApplyBorderedSprite(
                 equipmentCard,
-                finalSkin.Task13Sliced("UiEquipmentModalBody", new Vector4(30f, 30f, 30f, 30f)),
+                finalSkin.Task13Sliced("UiEquipmentModalBody"),
                 Color.white);
             ApplySimpleSprite(equipmentTitleSurface, finalSkin.Task13Simple("UiEquipmentTitlePlaque"));
             ApplySimpleSprite(equipmentCapacitySurface, finalSkin.Task13Simple("UiEquipmentCapacityCapsule"));
             ApplyBorderedSprite(
                 equipmentCompareSurface,
-                finalSkin.Task13Sliced("UiEquipmentModalBody", new Vector4(30f, 30f, 30f, 30f)),
+                finalSkin.Task13Sliced("UiTask13HorizontalPanelClean"),
                 Color.white);
             ApplySimpleSprite(
                 closeEquipmentCornerButton.image,
@@ -630,16 +632,24 @@ namespace PocketForge.Mining
             {
                 ApplyBorderedSprite(
                     button.image,
-                    finalSkin.Task13Sliced("UiEquipmentSlotCardBase", new Vector4(32f, 32f, 32f, 32f)),
+                    finalSkin.Task13Sliced("UiEquipmentSlotCardBase"),
                     Color.white);
             }
 
             foreach (var row in equipmentRows)
             {
-                ApplySimpleSprite(row.Button.image, finalSkin.Task13Simple("UiEquipmentInventoryCardBase"));
-                row.SelectionOverlay.sprite = finalSkin.Task13Simple("OverlayEquipmentSelected");
-                row.SelectionOverlay.type = Image.Type.Simple;
-                row.SelectionOverlay.preserveAspect = true;
+                ApplyBorderedSprite(
+                    row.Button.image,
+                    finalSkin.Task13Sliced("UiEquipmentInventoryCardClean"),
+                    Color.white);
+                ApplyBorderedSprite(
+                    row.RarityOverlay,
+                    finalSkin.Task13Sliced("OverlayEquipmentRarityCommon"),
+                    Color.white);
+                ApplyBorderedSprite(
+                    row.SelectionOverlay,
+                    finalSkin.Task13Sliced("OverlayEquipmentSelected"),
+                    Color.white);
                 row.EquippedBadge.sprite = finalSkin.Task13Simple("BadgeEquipmentEquipped");
                 row.EquippedBadge.type = Image.Type.Simple;
                 row.EquippedBadge.preserveAspect = true;
@@ -653,27 +663,27 @@ namespace PocketForge.Mining
 
             ApplyBorderedSprite(
                 equipmentPreviousButton.image,
-                finalSkin.Task13Sliced("ButtonEquipmentUnequip", new Vector4(36f, 28f, 36f, 28f)),
+                finalSkin.Task13Sliced("ButtonEquipmentUnequipRuntime"),
                 Color.white);
             ApplyBorderedSprite(
                 equipmentNextButton.image,
-                finalSkin.Task13Sliced("ButtonEquipmentUnequip", new Vector4(36f, 28f, 36f, 28f)),
+                finalSkin.Task13Sliced("ButtonEquipmentUnequipRuntime"),
                 Color.white);
             ApplyBorderedSprite(
                 equipmentPrimaryButton.image,
-                finalSkin.Task13Sliced("ButtonEquipmentEquip", new Vector4(36f, 28f, 36f, 28f)),
+                finalSkin.Task13Sliced("ButtonEquipmentEquipRuntime"),
                 Color.white);
             ApplyBorderedSprite(
                 equipmentFuseButton.image,
-                finalSkin.Task13Sliced("ButtonEquipmentMerge", new Vector4(42f, 34f, 42f, 34f)),
+                finalSkin.Task13Sliced("ButtonEquipmentMergeRuntime"),
                 Color.white);
             ApplyBorderedSprite(
                 equipmentAutoEquipButton.image,
-                finalSkin.Task13Sliced("ButtonEquipmentAutoEquip", new Vector4(48f, 44f, 48f, 44f)),
+                finalSkin.Task13Sliced("ButtonEquipmentAutoEquipRuntime"),
                 Color.white);
             ApplyBorderedSprite(
                 closeEquipmentButton.image,
-                finalSkin.Task13Sliced("ButtonEquipmentUnequip", new Vector4(36f, 28f, 36f, 28f)),
+                finalSkin.Task13Sliced("ButtonEquipmentUnequipRuntime"),
                 Color.white);
 
             for (var index = 0; index < equipmentSlotIcons.Count; index++)

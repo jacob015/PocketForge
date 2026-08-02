@@ -287,16 +287,20 @@ namespace PocketForge.Tests.Editor
                 "UiEquipmentModalBody",
                 "UiEquipmentSlotCardBase",
                 "UiEquipmentInventoryCardBase",
+                "UiEquipmentInventoryCardClean",
                 "UiEquipmentComparisonTray",
+                "UiTask13HorizontalPanelClean",
                 "UiCollectionModalBody",
                 "UiMuseumSummaryCard",
                 "UiMuseumExhibitCardBase",
+                "UiMuseumExhibitCardClean",
                 "UiMuseumNextRewardStrip",
                 "UiAchievementSummaryCard",
                 "UiAchievementRowBase",
                 "UiAchievementProgressTrack",
                 "UiAchievementProgressFill",
                 "ButtonAchievementClaim",
+                "ButtonAchievementClaimRuntime",
                 "BadgeAchievementComplete",
                 "IconAchievementEquipment"
             };
@@ -315,10 +319,14 @@ namespace PocketForge.Tests.Editor
             {
                 "EquipmentCard",
                 "EquipmentSlotPickaxe",
+                "EquipmentInventoryRow1",
+                "EquipmentCompareSurface",
                 "EquipmentPrimary",
                 "EquipmentFuse",
                 "EquipmentAutoEquip",
                 "CollectionCard",
+                "CollectionSummarySurface",
+                "MuseumNextRewardSurface",
                 "MuseumTab",
                 "AchievementsTab",
                 "ResearchCard",
@@ -330,11 +338,15 @@ namespace PocketForge.Tests.Editor
             AssertValidSliced(
                 FindChildRect(FindRect("ResearchRow1"), "ResearchPurchaseButton").GetComponent<Image>(),
                 "ResearchPurchaseButton");
+            AssertValidSliced(
+                FindChildRect(FindRect("EquipmentInventoryRow1"), "RarityOverlay").GetComponent<Image>(),
+                "RarityOverlay");
+            AssertValidSliced(
+                FindChildRect(FindRect("EquipmentInventoryRow1"), "SelectionOverlay").GetComponent<Image>(),
+                "SelectionOverlay");
 
             AssertSimple(FindRect("EquipmentTitleSurface").GetComponent<Image>(), "EquipmentTitleSurface");
-            AssertSimple(FindRect("EquipmentInventoryRow1").GetComponent<Image>(), "EquipmentInventoryRow1");
             AssertSimple(FindRect("CollectionTitleSurface").GetComponent<Image>(), "CollectionTitleSurface");
-            AssertSimple(FindRect("CollectionSummarySurface").GetComponent<Image>(), "CollectionSummarySurface");
             Assert.That(
                 FindRect("EquipmentCompareSurface").GetComponent<Image>().sprite.texture.name,
                 Is.Not.EqualTo("UiEquipmentComparisonTray"),
@@ -481,8 +493,32 @@ namespace PocketForge.Tests.Editor
             var border = image.sprite.border;
             Assert.That(border.x + border.z, Is.GreaterThan(0f), $"{name} has no horizontal border.");
             Assert.That(border.y + border.w, Is.GreaterThan(0f), $"{name} has no vertical border.");
-            Assert.That(image.rectTransform.sizeDelta.x, Is.GreaterThanOrEqualTo(border.x + border.z + 16f));
-            Assert.That(image.rectTransform.sizeDelta.y, Is.GreaterThanOrEqualTo(border.y + border.w + 16f));
+            var size = ResolvedRectSize(image.rectTransform);
+            Assert.That(size.x, Is.GreaterThanOrEqualTo(border.x + border.z + 16f));
+            Assert.That(size.y, Is.GreaterThanOrEqualTo(border.y + border.w + 16f));
+        }
+
+        private static Vector2 ResolvedRectSize(RectTransform rectTransform)
+        {
+            var parent = rectTransform.parent as RectTransform;
+            var parentSize = parent != null ? parent.rect.size : Vector2.zero;
+            if (parent != null)
+            {
+                if (parentSize.x <= 0.01f)
+                {
+                    parentSize.x = Mathf.Abs(parent.sizeDelta.x);
+                }
+
+                if (parentSize.y <= 0.01f)
+                {
+                    parentSize.y = Mathf.Abs(parent.sizeDelta.y);
+                }
+            }
+
+            var anchorSpan = rectTransform.anchorMax - rectTransform.anchorMin;
+            return new Vector2(
+                Mathf.Abs(parentSize.x * anchorSpan.x + rectTransform.sizeDelta.x),
+                Mathf.Abs(parentSize.y * anchorSpan.y + rectTransform.sizeDelta.y));
         }
 
         private static Rect LocalRect(RectTransform rect)

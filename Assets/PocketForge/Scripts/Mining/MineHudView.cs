@@ -764,12 +764,12 @@ namespace PocketForge.Mining
 
             ApplyBorderedSprite(
                 researchCard,
-                finalSkin.Task13Sliced("UiCollectionModalBody", new Vector4(30f, 30f, 30f, 30f)),
+                finalSkin.Task13Sliced("UiCollectionModalBody"),
                 Color.white);
             ApplySimpleSprite(researchTitleSurface, finalSkin.Task13Simple("UiCollectionTitlePlaque"));
             ApplyBorderedSprite(
                 closeResearchButton.image,
-                finalSkin.Task13Sliced("ButtonAchievementClaim", new Vector4(36f, 28f, 36f, 28f)),
+                finalSkin.Task13Sliced("ButtonAchievementClaimRuntime"),
                 Color.white);
             ApplySimpleSprite(
                 closeResearchCornerButton.image,
@@ -828,11 +828,11 @@ namespace PocketForge.Mining
 
             ApplyBorderedSprite(
                 row.Surface,
-                finalSkin.Task13Sliced("UiCollectionModalBody", new Vector4(30f, 30f, 30f, 30f)),
+                finalSkin.Task13Sliced("UiTask13HorizontalPanelClean"),
                 Color.white);
             ApplyBorderedSprite(
                 row.PurchaseButton.image,
-                finalSkin.Task13Sliced("ButtonEquipmentEquip", new Vector4(36f, 28f, 36f, 28f)),
+                finalSkin.Task13Sliced("ButtonEquipmentEquipRuntime"),
                 Color.white);
             DisableOutline(row.PurchaseButton);
         }
@@ -933,9 +933,9 @@ namespace PocketForge.Mining
                 hasHorizontalBorder && hasVerticalBorder,
                 $"{image.name} cannot use Image.Type.Sliced because {sprite.name} has a zero border.");
 
-            var size = image.rectTransform.sizeDelta;
-            var width = Mathf.Abs(size.x);
-            var height = Mathf.Abs(size.y);
+            var size = ResolveRectSize(image.rectTransform);
+            var width = size.x;
+            var height = size.y;
             Debug.Assert(
                 width + 0.01f >= border.x + border.z + minimumCenterWidth,
                 $"{image.name} width {width:0.#} is smaller than the sliced minimum " +
@@ -951,6 +951,35 @@ namespace PocketForge.Mining
             image.fillCenter = true;
             image.pixelsPerUnitMultiplier = 1f;
             image.color = color;
+        }
+
+        private static Vector2 ResolveRectSize(RectTransform rectTransform)
+        {
+            var rectSize = rectTransform.rect.size;
+            if (rectSize.x > 0.01f && rectSize.y > 0.01f)
+            {
+                return new Vector2(Mathf.Abs(rectSize.x), Mathf.Abs(rectSize.y));
+            }
+
+            var parentRect = rectTransform.parent as RectTransform;
+            var parentSize = parentRect != null ? parentRect.rect.size : Vector2.zero;
+            if (parentRect != null)
+            {
+                if (parentSize.x <= 0.01f)
+                {
+                    parentSize.x = Mathf.Abs(parentRect.sizeDelta.x);
+                }
+
+                if (parentSize.y <= 0.01f)
+                {
+                    parentSize.y = Mathf.Abs(parentRect.sizeDelta.y);
+                }
+            }
+
+            var anchorSpan = rectTransform.anchorMax - rectTransform.anchorMin;
+            return new Vector2(
+                Mathf.Abs(parentSize.x * anchorSpan.x + rectTransform.sizeDelta.x),
+                Mathf.Abs(parentSize.y * anchorSpan.y + rectTransform.sizeDelta.y));
         }
 
         private void ApplyUpgradeButton(Texture2D texture)

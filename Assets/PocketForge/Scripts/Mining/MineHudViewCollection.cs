@@ -505,21 +505,29 @@ namespace PocketForge.Mining
             ApplyBorderedSprite(
                 museumTabButton.image,
                 finalSkin?.Task13Sliced(
-                    showMuseum ? "TabCollectionActive" : "TabCollectionInactive",
-                    new Vector4(28f, 18f, 28f, 18f)),
+                    showMuseum ? "TabCollectionActive" : "TabCollectionInactive"),
                 Color.white);
             ApplyBorderedSprite(
                 achievementsTabButton.image,
                 finalSkin?.Task13Sliced(
-                    showMuseum ? "TabCollectionInactive" : "TabCollectionActive",
-                    new Vector4(28f, 18f, 28f, 18f)),
+                    showMuseum ? "TabCollectionInactive" : "TabCollectionActive"),
                 Color.white);
             collectionSummarySurface.rectTransform.sizeDelta = showMuseum
                 ? new Vector2(824f, 247f)
                 : new Vector2(824f, 255f);
-            ApplySimpleSprite(
-                collectionSummarySurface,
-                finalSkin?.Task13Simple(showMuseum ? "UiMuseumSummaryCard" : "UiAchievementSummaryCard"));
+            if (showMuseum)
+            {
+                ApplyBorderedSprite(
+                    collectionSummarySurface,
+                    finalSkin?.Task13Sliced("UiTask13HorizontalPanelClean"),
+                    Color.white);
+            }
+            else
+            {
+                ApplySimpleSprite(
+                    collectionSummarySurface,
+                    finalSkin?.Task13Simple("UiAchievementSummaryCard"));
+            }
             collectionSummaryIcon.sprite = finalSkin?.Task13Simple(
                 showMuseum ? "IconMuseumTab" : "IconAchievementTab");
             collectionSummaryIcon.type = Image.Type.Simple;
@@ -579,6 +587,7 @@ namespace PocketForge.Mining
                 row.Icon.type = Image.Type.Simple;
                 row.Icon.preserveAspect = true;
                 row.LockedOverlay.gameObject.SetActive(!state.IsDiscovered);
+                row.ProgressTrack.gameObject.SetActive(state.IsDiscovered);
                 row.Pedestal.color = state.IsDiscovered
                     ? Color.white
                     : new Color(0.35f, 0.38f, 0.55f, 0.75f);
@@ -665,10 +674,7 @@ namespace PocketForge.Mining
                 ApplyBorderedSprite(
                     row.ClaimButton.image,
                     finalSkin?.Task13Sliced(
-                        state.CanClaim ? "ButtonAchievementClaim" : "UiAchievementInProgressState",
-                        state.CanClaim
-                            ? new Vector4(36f, 28f, 36f, 28f)
-                            : new Vector4(24f, 16f, 24f, 16f)),
+                        state.CanClaim ? "ButtonAchievementClaimRuntime" : "UiAchievementInProgressState"),
                     Color.white);
                 row.ClaimButton.GetComponentInChildren<Text>().text = LanguageService.Get(
                     state.CanClaim ? "claim" : "in_progress").ToUpper();
@@ -739,25 +745,31 @@ namespace PocketForge.Mining
 
             ApplyBorderedSprite(
                 collectionCard,
-                finalSkin.Task13Sliced("UiCollectionModalBody", new Vector4(30f, 30f, 30f, 30f)),
+                finalSkin.Task13Sliced("UiCollectionModalBody"),
                 Color.white);
             ApplySimpleSprite(collectionTitleSurface, finalSkin.Task13Simple("UiCollectionTitlePlaque"));
-            ApplySimpleSprite(collectionSummarySurface, finalSkin.Task13Simple("UiMuseumSummaryCard"));
-            ApplySimpleSprite(museumNextRewardSurface, finalSkin.Task13Simple("UiMuseumNextRewardStrip"));
+            ApplyBorderedSprite(
+                collectionSummarySurface,
+                finalSkin.Task13Sliced("UiTask13HorizontalPanelClean"),
+                Color.white);
+            ApplyBorderedSprite(
+                museumNextRewardSurface,
+                finalSkin.Task13Sliced("UiTask13HorizontalPanelClean"),
+                Color.white);
             museumNextRewardIcon.sprite = finalSkin.Task13Simple("IconMuseumMysteryMineral");
             museumNextRewardIcon.type = Image.Type.Simple;
             museumNextRewardIcon.preserveAspect = true;
             ApplyBorderedSprite(
                 museumTabButton.image,
-                finalSkin.Task13Sliced("TabCollectionActive", new Vector4(28f, 18f, 28f, 18f)),
+                finalSkin.Task13Sliced("TabCollectionActive"),
                 Color.white);
             ApplyBorderedSprite(
                 achievementsTabButton.image,
-                finalSkin.Task13Sliced("TabCollectionInactive", new Vector4(28f, 18f, 28f, 18f)),
+                finalSkin.Task13Sliced("TabCollectionInactive"),
                 Color.white);
             ApplyBorderedSprite(
                 closeCollectionButton.image,
-                finalSkin.Task13Sliced("ButtonAchievementClaim", new Vector4(36f, 28f, 36f, 28f)),
+                finalSkin.Task13Sliced("ButtonAchievementClaimRuntime"),
                 Color.white);
             ApplySimpleSprite(
                 closeCollectionCornerButton.image,
@@ -790,7 +802,7 @@ namespace PocketForge.Mining
 
             ApplyBorderedSprite(
                 row.Surface,
-                finalSkin.Task13Sliced("UiMuseumExhibitCardBase", new Vector4(30f, 30f, 30f, 30f)),
+                finalSkin.Task13Sliced("UiMuseumExhibitCardClean"),
                 Color.white);
             row.Pedestal.sprite = finalSkin.Task13Simple("UiMuseumPedestal");
             row.Pedestal.type = Image.Type.Simple;
@@ -824,7 +836,7 @@ namespace PocketForge.Mining
             row.RewardSlot.type = Image.Type.Simple;
             ApplyBorderedSprite(
                 row.ClaimButton.image,
-                finalSkin.Task13Sliced("UiAchievementInProgressState", new Vector4(24f, 16f, 24f, 16f)),
+                finalSkin.Task13Sliced("UiAchievementInProgressState"),
                 Color.white);
             row.CompleteBadge.sprite = finalSkin.Task13Simple("BadgeAchievementComplete");
             row.CompleteBadge.type = Image.Type.Simple;
