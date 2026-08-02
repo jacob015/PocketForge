@@ -36,6 +36,7 @@ namespace PocketForge.Mining
         private Image researchCompletionBadge;
         private Image bottomNavigationBar;
         private Image researchNotificationBadge;
+        private Image missionNotificationBadge;
         private Button bossChallengeButton;
         private Button researchShortcutButton;
         private readonly List<Image> recommendationBadges = new();
@@ -381,6 +382,14 @@ namespace PocketForge.Mining
                 new Vector2(-18f, -18f),
                 new Vector2(38f, 38f),
                 Color.white);
+            missionNotificationBadge = CreateSimpleImage(
+                "MissionNotificationBadge",
+                navigationButtons[ProgressionFeature.Missions].transform,
+                new Vector2(1f, 1f),
+                new Vector2(1f, 1f),
+                new Vector2(-18f, -18f),
+                new Vector2(38f, 38f),
+                Color.white);
         }
 
         private void CreateNavigationSlot(
@@ -430,6 +439,10 @@ namespace PocketForge.Mining
             else if (captured == ProgressionFeature.Museum)
             {
                 button.onClick.AddListener(ShowCollection);
+            }
+            else if (captured == ProgressionFeature.Missions)
+            {
+                button.onClick.AddListener(ShowMissions);
             }
             else
             {
@@ -561,6 +574,7 @@ namespace PocketForge.Mining
             }
 
             ApplyV5(researchNotificationBadge, "36_NotificationBadge");
+            ApplyV5(missionNotificationBadge, "36_NotificationBadge");
             foreach (var lockIcon in navigationLocks.Values)
             {
                 ApplyV5(lockIcon, "37_LockedIcon");
@@ -622,6 +636,24 @@ namespace PocketForge.Mining
             researchNotificationBadge.gameObject.SetActive(
                 service.IsFeatureUnlocked(player.minerLevel, ProgressionFeature.Research) &&
                 player.blueprintCores > 0);
+            if (service.IsFeatureUnlocked(player.minerLevel, ProgressionFeature.Missions))
+            {
+                var dailyMissions = service.GetMissionBoard(
+                    state,
+                    PocketForge.Content.MissionPeriod.Daily);
+                var weeklyMissions = service.GetMissionBoard(
+                    state,
+                    PocketForge.Content.MissionPeriod.Weekly);
+                missionNotificationBadge.gameObject.SetActive(
+                    dailyMissions.ClaimableCount > 0 ||
+                    weeklyMissions.ClaimableCount > 0 ||
+                    dailyMissions.CanClaimCompletion ||
+                    weeklyMissions.CanClaimCompletion);
+            }
+            else
+            {
+                missionNotificationBadge.gameObject.SetActive(false);
+            }
             bossChallengeButton.gameObject.SetActive(bossReady || ore.IsBoss);
             bossChallengeButton.interactable = bossReady && !ore.IsBoss;
 

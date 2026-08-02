@@ -20,6 +20,15 @@ namespace PocketForge.Localization
         {
             [SupportedLanguage.Korean] = new()
             {
+                ["daily"] = "\uC77C\uC77C", ["weekly"] = "\uC8FC\uAC04",
+                ["mission_summary"] = "\uC218\uB839 \uC644\uB8CC {0}/{1}", ["mission_refresh_in"] = "\uAC31\uC2E0\uAE4C\uC9C0 {0}",
+                ["mission_completion_reward"] = "\uBBF8\uC158 {0}\uAC1C \uC644\uB8CC \uBCF4\uC0C1: {1}",
+                ["mission_mine_ores"] = "\uAD11\uC11D \uCC44\uAD74", ["mission_upgrade_facilities"] = "\uC2DC\uC124 \uAC15\uD654",
+                ["mission_complete_research"] = "\uC5F0\uAD6C \uC644\uB8CC", ["mission_defeat_bosses"] = "\uBCF4\uC2A4 \uCC98\uCE58",
+                ["mission_collect_equipment"] = "\uC7A5\uBE44 \uD68D\uB4DD", ["missions_locked"] = "\uBBF8\uC158\uC740 \uAD11\uBD80 Lv. 5\uC5D0 \uD574\uAE08\uB429\uB2C8\uB2E4",
+                ["mission_incomplete"] = "\uC544\uC9C1 \uBBF8\uC158 \uBAA9\uD45C\uB97C \uB2EC\uC131\uD558\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4", ["mission_already_claimed"] = "\uC774\uBBF8 \uC218\uB839\uD55C \uBBF8\uC158\uC785\uB2C8\uB2E4",
+                ["mission_completion_not_ready"] = "\uBAA8\uB4E0 \uBBF8\uC158 \uBCF4\uC0C1\uC744 \uBA3C\uC800 \uC218\uB839\uD558\uC138\uC694", ["mission_completion_claimed"] = "\uC644\uB8CC \uBCF4\uC0C1\uC744 \uC774\uBBF8 \uC218\uB839\uD588\uC2B5\uB2C8\uB2E4",
+                ["missions_unavailable"] = "\uBBF8\uC158\uC744 \uC774\uC6A9\uD560 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4",
                 ["credits"] = "\uD06C\uB808\uB527", ["depth"] = "\uC2EC\uB3C4", ["ore"] = "\uAD11\uC11D", ["mine"] = "\uCC44\uAD74",
                 ["pickaxe"] = "\uACE1\uAD2D\uC774", ["drill"] = "\uB4DC\uB9B4", ["robot"] = "\uB85C\uBD07", ["tap"] = "\uD0ED",
                 ["auto"] = "\uC790\uB3D9", ["reward"] = "\uBCF4\uC0C1", ["rare"] = "\uD76C\uADC0", ["free_reward"] = "\uBB34\uB8CC \uBCF4\uC0C1",
@@ -69,6 +78,15 @@ namespace PocketForge.Localization
             },
             [SupportedLanguage.English] = new()
             {
+                ["daily"] = "Daily", ["weekly"] = "Weekly",
+                ["mission_summary"] = "Claimed {0}/{1}", ["mission_refresh_in"] = "Refresh in {0}",
+                ["mission_completion_reward"] = "Complete {0} missions: {1}",
+                ["mission_mine_ores"] = "Mine Ores", ["mission_upgrade_facilities"] = "Upgrade Facilities",
+                ["mission_complete_research"] = "Complete Research", ["mission_defeat_bosses"] = "Defeat Bosses",
+                ["mission_collect_equipment"] = "Collect Equipment", ["missions_locked"] = "Missions unlock at Miner Lv. 5",
+                ["mission_incomplete"] = "Mission objective not met", ["mission_already_claimed"] = "Mission reward already claimed",
+                ["mission_completion_not_ready"] = "Claim every mission reward first", ["mission_completion_claimed"] = "Completion reward already claimed",
+                ["missions_unavailable"] = "Missions unavailable",
                 ["credits"] = "Credits", ["depth"] = "Depth", ["ore"] = "Ore", ["mine"] = "Mine", ["pickaxe"] = "Pickaxe",
                 ["drill"] = "Drill", ["robot"] = "Robot", ["tap"] = "Tap", ["auto"] = "Auto", ["reward"] = "Reward", ["rare"] = "Rare",
                 ["free_reward"] = "Free reward", ["ad_loading"] = "Loading ad", ["ad_showing"] = "Playing ad", ["ad_retry"] = "Retry ad",
@@ -116,6 +134,15 @@ namespace PocketForge.Localization
             },
             [SupportedLanguage.Japanese] = new()
             {
+                ["daily"] = "\u30C7\u30A4\u30EA\u30FC", ["weekly"] = "\u30A6\u30A3\u30FC\u30AF\u30EA\u30FC",
+                ["mission_summary"] = "\u53D7\u53D6\u6E08\u307F {0}/{1}", ["mission_refresh_in"] = "\u66F4\u65B0\u307E\u3067 {0}",
+                ["mission_completion_reward"] = "{0}\u500B\u5B8C\u4E86\u5831\u916C: {1}",
+                ["mission_mine_ores"] = "\u9271\u77F3\u3092\u63A1\u6398", ["mission_upgrade_facilities"] = "\u65BD\u8A2D\u3092\u5F37\u5316",
+                ["mission_complete_research"] = "\u7814\u7A76\u3092\u5B8C\u4E86", ["mission_defeat_bosses"] = "\u30DC\u30B9\u3092\u8A0E\u4F10",
+                ["mission_collect_equipment"] = "\u88C5\u5099\u3092\u7372\u5F97", ["missions_locked"] = "\u30DF\u30C3\u30B7\u30E7\u30F3\u306F\u9271\u592B Lv. 5 \u3067\u89E3\u653E",
+                ["mission_incomplete"] = "\u30DF\u30C3\u30B7\u30E7\u30F3\u672A\u9054\u6210", ["mission_already_claimed"] = "\u5831\u916C\u306F\u53D7\u53D6\u6E08\u307F\u3067\u3059",
+                ["mission_completion_not_ready"] = "\u5148\u306B\u3059\u3079\u3066\u306E\u5831\u916C\u3092\u53D7\u3051\u53D6\u3063\u3066\u304F\u3060\u3055\u3044", ["mission_completion_claimed"] = "\u5B8C\u4E86\u5831\u916C\u306F\u53D7\u53D6\u6E08\u307F\u3067\u3059",
+                ["missions_unavailable"] = "\u30DF\u30C3\u30B7\u30E7\u30F3\u3092\u5229\u7528\u3067\u304D\u307E\u305B\u3093",
                 ["credits"] = "\u30AF\u30EC\u30B8\u30C3\u30C8", ["depth"] = "\u6DF1\u5EA6", ["ore"] = "\u9271\u77F3", ["mine"] = "\u63A1\u6398",
                 ["pickaxe"] = "\u3064\u308B\u306F\u3057", ["drill"] = "\u30C9\u30EA\u30EB", ["robot"] = "\u30ED\u30DC\u30C3\u30C8", ["tap"] = "\u30BF\u30C3\u30D7",
                 ["auto"] = "\u81EA\u52D5", ["reward"] = "\u5831\u916C", ["rare"] = "\u30EC\u30A2", ["free_reward"] = "\u7121\u6599\u5831\u916C",
@@ -166,6 +193,15 @@ namespace PocketForge.Localization
             },
             [SupportedLanguage.ChineseSimplified] = new()
             {
+                ["daily"] = "\u6BCF\u65E5", ["weekly"] = "\u6BCF\u5468",
+                ["mission_summary"] = "\u5DF2\u9886\u53D6 {0}/{1}", ["mission_refresh_in"] = "\u8DDD\u79BB\u5237\u65B0 {0}",
+                ["mission_completion_reward"] = "\u5B8C\u6210 {0} \u4E2A\u4EFB\u52A1: {1}",
+                ["mission_mine_ores"] = "\u5F00\u91C7\u77FF\u77F3", ["mission_upgrade_facilities"] = "\u5F3A\u5316\u8BBE\u65BD",
+                ["mission_complete_research"] = "\u5B8C\u6210\u7814\u7A76", ["mission_defeat_bosses"] = "\u51FB\u8D25\u9996\u9886",
+                ["mission_collect_equipment"] = "\u83B7\u5F97\u88C5\u5907", ["missions_locked"] = "\u4EFB\u52A1\u5728\u77FF\u5DE5 Lv. 5 \u89E3\u9501",
+                ["mission_incomplete"] = "\u4EFB\u52A1\u76EE\u6807\u5C1A\u672A\u5B8C\u6210", ["mission_already_claimed"] = "\u4EFB\u52A1\u5956\u52B1\u5DF2\u9886\u53D6",
+                ["mission_completion_not_ready"] = "\u8BF7\u5148\u9886\u53D6\u6240\u6709\u4EFB\u52A1\u5956\u52B1", ["mission_completion_claimed"] = "\u5B8C\u6210\u5956\u52B1\u5DF2\u9886\u53D6",
+                ["missions_unavailable"] = "\u4EFB\u52A1\u6682\u4E0D\u53EF\u7528",
                 ["credits"] = "\u91D1\u5E01", ["depth"] = "\u6DF1\u5EA6", ["ore"] = "\u77FF\u77F3", ["mine"] = "\u91C7\u77FF", ["pickaxe"] = "\u9550",
                 ["drill"] = "\u94BB\u673A", ["robot"] = "\u673A\u5668\u4EBA", ["tap"] = "\u70B9\u51FB", ["auto"] = "\u81EA\u52A8", ["reward"] = "\u5956\u52B1",
                 ["rare"] = "\u7A00\u6709", ["free_reward"] = "\u514D\u8D39\u5956\u52B1", ["ad_loading"] = "\u6B63\u5728\u52A0\u8F7D\u5E7F\u544A",

@@ -236,6 +236,14 @@ namespace PocketForge.Mining
             achievementClaimAction = claimAchievementAction;
         }
 
+        public void BindMissions(
+            Action<string> claimMissionAction,
+            Action<MissionPeriod> claimMissionCompletionAction)
+        {
+            missionClaimAction = claimMissionAction;
+            missionCompletionClaimAction = claimMissionCompletionAction;
+        }
+
         public void BindIap(Action purchaseRemoveAdsAction, Action restorePurchasesAction)
         {
             removeAdsButton.onClick.AddListener(() => purchaseRemoveAdsAction());
@@ -334,6 +342,7 @@ namespace PocketForge.Mining
             RenderResearch();
             RenderEquipment();
             RenderCollection();
+            RenderMissions();
         }
 
         public void ShowOfflineReward(OfflineProgressResult result)
@@ -601,6 +610,7 @@ namespace PocketForge.Mining
             CreateResearchPanel();
             CreateEquipmentPanel();
             CreateCollectionPanel();
+            CreateMissionsPanel();
             RenderSettings();
         }
 
@@ -791,6 +801,7 @@ namespace PocketForge.Mining
             ApplyV5HudSkin();
             ApplyEquipmentSkin();
             ApplyCollectionSkin();
+            ApplyMissionSkin();
 
             DisableOutline(mineButton);
             DisableOutline(pickaxeButton);

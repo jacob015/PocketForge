@@ -39,6 +39,25 @@ namespace PocketForge.Save
     }
 
     [Serializable]
+    public sealed class MissionProgressSnapshotData
+    {
+        public long oresMined;
+        public long facilityUpgrades;
+        public long researchCompleted;
+        public long bossesDefeated;
+        public long equipmentAcquired;
+    }
+
+    [Serializable]
+    public sealed class MissionPeriodData
+    {
+        public string periodKey = string.Empty;
+        public MissionProgressSnapshotData baseline = new();
+        public string[] claimedMissionIds = Array.Empty<string>();
+        public bool completionRewardClaimed;
+    }
+
+    [Serializable]
     public sealed class GameSaveData
     {
         public int version = GameSaveMigrator.CurrentVersion;
@@ -51,6 +70,10 @@ namespace PocketForge.Save
         public int equipmentRewardSequence;
         public OreCollectionData[] oreCollection = Array.Empty<OreCollectionData>();
         public AchievementClaimData[] achievementClaims = Array.Empty<AchievementClaimData>();
+        public MissionPeriodData dailyMissions = new();
+        public MissionPeriodData weeklyMissions = new();
+        public long lastObservedMissionUnixSeconds;
+        public long bossesDefeated;
         public int stage = 1;
         public int furthestStage = 1;
         public int highestCompletedChapter;

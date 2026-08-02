@@ -81,15 +81,19 @@ namespace PocketForge.Mining
             iapCoordinator.DisplayChanged += view.SetIapState;
             view.BindIap(iapCoordinator.PurchaseRemoveAds, iapCoordinator.RestorePurchases);
 
+            var nowUtcUnixSeconds = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var missionCheckpointAdvanced = gameService.RefreshMissions(
+                gameState,
+                nowUtcUnixSeconds);
             var offlineProgress = gameService.ClaimOfflineProgress(
                 gameState,
-                DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+                nowUtcUnixSeconds);
             CreateOreVisual();
             hudPresenter.Render();
             hudPresenter.ShowOfflineReward(offlineProgress);
             adCoordinator.Initialize();
             iapCoordinator.Initialize();
-            if (offlineProgress.CheckpointAdvanced)
+            if (offlineProgress.CheckpointAdvanced || missionCheckpointAdvanced)
             {
                 SaveGame();
             }

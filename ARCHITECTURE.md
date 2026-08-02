@@ -27,7 +27,8 @@ MineGameController (Unity composition root)
   │   ├─ FeatureUnlockDefinition[]
   │   ├─ ResearchNodeDefinition[]
   │   ├─ EquipmentDefinition[]
-  │   └─ AchievementDefinition[]
+  │   ├─ AchievementDefinition[]
+  │   └─ MissionDefinition[]
   ├─ MiningGameService
   │   ├─ MiningPowerService
   │   ├─ MinerProgressionService
@@ -35,6 +36,7 @@ MineGameController (Unity composition root)
   │   ├─ EquipmentService
   │   ├─ CollectionService
   │   ├─ AchievementService
+  │   ├─ MissionService
   │   └─ MiningGameState / OreState
   ├─ MineHudPresenter → MineHudView
   │                         └─ CompactNumberFormatter
@@ -54,8 +56,9 @@ MineGameController (Unity composition root)
 | `EquipmentService` | 장비 인벤토리 정규화, 획득·장착·합성·자동 장착과 장비 배율 계산 |
 | `CollectionService` | 광석별 발견·누적 채굴 기록, 도감 정규화와 영구 배율 계산 |
 | `AchievementService` | 기존 성장 상태에서 업적 진행도를 파생하고 단계별 보상 수령을 검증 |
+| `MissionService` | UTC 일일·주간 기간, 시작 기준선, 시간 역행, 개별·완료 보상과 중복 수령을 검증 |
 | `MiningGameState` / `OreState` | 실행 중 플레이어·광석 상태 |
-| `MiningContentCatalog` | 현재 단계의 광석·챕터·강화·연구·장비·업적 정의 선택 |
+| `MiningContentCatalog` | 현재 단계의 광석·챕터·강화·연구·장비·업적·미션 정의 선택 |
 | `MineHudPresenter` | 서비스 결과를 UI 갱신·피드백·저장 요청으로 연결 |
 | `MineHudView` | UGUI 생성, Safe Area 레이아웃, 입력 이벤트, 설정·챕터·연구 모달 |
 | `CompactNumberFormatter` | 증가형 수치의 K/M/B/T/Qa/Qi 표시 정책 |
@@ -69,7 +72,7 @@ MineGameController (Unity composition root)
 ```text
 앱 시작
   → SaveService.Load
-  → GameSaveMigrator.Normalize(version 10)
+  → GameSaveMigrator.Normalize(version 11)
   → MiningGameService.CreateInitialState
   → 단계에 맞는 OreDefinition + ChapterDefinition 조회
   → MineGameController가 3D 광석과 HUD 표시
@@ -182,6 +185,19 @@ MineGameController (Unity composition root)
 
 `AchievementService`는 별도 진행 카운터를 중복 저장하지 않고 채굴 수, 최고 완료 챕터, 시설 레벨 합, 광부 레벨, 연구 레벨 합, 장비 획득 수에서 진행도를 파생한다. 6개 업적은 각각 3단계이며 `achievementClaims[]`에는 업적 ID별 수령 완료 단계만 저장한다. 다음 단계 목표를 충족한 경우에만 Credits·Gem·설계도 코어를 지급하고 완료 단계 초과, 알 수 없는 ID, 잠긴 기능, 중복 수령을 차단한다.
 
+### 일일·주간 미션
+
+`MissionService`는 Unity 표시 계층과 분리된 기간 목표 규칙이다. `MissionDefinition[]`은 기간, 진행 지표, 목표, 기존 보상 타입을 데이터로 보유한다. 채굴·시설·연구·장비는 `MissionPeriodData.baseline`에 저장한 기간 시작 스냅샷과 현재 누적 상태의 차이를 사용하므로 기존 시스템과 진행 이벤트를 중복 집계하지 않는다. 반복 보스 처치는 기존 누적 상태가 없어 `bossesDefeated` 하나만 추가했다.
+
+- 일일 기간: UTC 날짜 키, 다음 UTC 00:00 갱신
+- 주간 기간: 월요일 UTC 날짜 키, 다음 월요일 UTC 00:00 갱신
+- 시간 역행: `lastObservedMissionUnixSeconds`보다 과거인 기기 시각은 마지막 관찰 시각으로 고정해 이전 기간을 재개하지 않음
+- 개별 수령: 기간별 `claimedMissionIds[]`
+- 전체 완료 수령: 기간별 `completionRewardClaimed`
+- 주간 장비 완료 보상: 새 지급 체계를 만들지 않고 `EquipmentService.GrantBossReward` 재사용
+
+기간 초기화는 광부 Lv.5 해금 상태에서 게임 시작과 실행 중 경계 통과 시 수행한다. 경계가 바뀌면 즉시 저장을 요청하며, 일반 저장과 앱 일시정지 저장이 마지막 관찰 시각을 함께 보존한다. 서버 기준 시각이나 계정 간 동기화는 제공하지 않는다.
+
 ### 오프라인 진행
 
 `OfflineProgressResult`는 실제 경과 시간, 보상이 적용된 시간, 파밍 stage, 처리 광석 수, Credits와 `MinerProgressionResult`를 반환한다.
@@ -219,13 +235,15 @@ MineGameController (Unity composition root)
 
 ## 저장 스키마
 
-`GameSaveData` 버전 10:
+`GameSaveData` 버전 11:
 
 - 64비트 증가형 재화 `credits`, `gems`, `blueprintCores`
 - 확장 가능한 `researchProgress[]` (`nodeId`, `level`)
 - 고유 ID 장비 인벤토리 `equipmentInventory[]` (`instanceId`, `definitionId`, `rarity`)
 - 슬롯 참조 `equippedEquipment[]` (`slot`, `instanceId`)과 `equipmentRewardSequence`
 - 광석별 누적 채굴 `oreCollection[]` (`contentId`, `minedCount`)
+- 일일·주간 기간 상태 `dailyMissions`, `weeklyMissions` (`periodKey`, `baseline`, `claimedMissionIds`, `completionRewardClaimed`)
+- 로컬 시간 역행 기준 `lastObservedMissionUnixSeconds`와 반복 보스 누적 `bossesDefeated`
 - 업적별 수령 단계 `achievementClaims[]` (`achievementId`, `claimedTiers`)
 - `stage`, `furthestStage`
 - `highestCompletedChapter`
@@ -234,7 +252,7 @@ MineGameController (Unity composition root)
 - `adsRemoved`
 - `lastSavedUnixSeconds`
 
-`GameSaveMigrator.Normalize`는 null과 음수 값을 안전한 기본값으로 정규화하고 현재 버전으로 올린다. 장비는 빈 ID를 제거하고 같은 인스턴스 ID 중 가장 높은 등급 하나만 남기며, 등급을 0~3으로 제한하고 존재하지 않는 장비를 가리키는 슬롯 참조를 제거한다. 도감과 업적은 빈 ID를 제거하고 같은 ID의 가장 큰 누적 수·수령 단계를 보존하며 음수를 0으로 제한한다. 카탈로그 정의와의 일치는 각 서비스가 추가 검증한다. 기존 JSON 정수 재화는 64비트 필드로 그대로 읽히며 더 이상 약 21억에서 포화되지 않는다. 광부 레벨과 마지막 보상 레벨은 최소 1이며 보상 레벨은 현재 광부 레벨보다 높아질 수 없다. `SaveService`는 기존 `lastSavedUnixSeconds`보다 과거 시각으로 저장하지 않는다. 최초 챕터 보상은 `highestCompletedChapter`보다 큰 챕터를 처음 완료할 때만 지급한다.
+`GameSaveMigrator.Normalize`는 null과 음수 값을 안전한 기본값으로 정규화하고 현재 버전으로 올린다. 장비는 빈 ID를 제거하고 같은 인스턴스 ID 중 가장 높은 등급 하나만 남기며, 등급을 0~3으로 제한하고 존재하지 않는 장비를 가리키는 슬롯 참조를 제거한다. 도감과 업적은 빈 ID를 제거하고 같은 ID의 가장 큰 누적 수·수령 단계를 보존하며 음수를 0으로 제한한다. 미션은 null 기준선과 중복·빈 수령 ID를 정규화하고 음수 진행·시각·보스 수를 0 이상으로 제한한다. 카탈로그 정의와의 일치는 각 서비스가 추가 검증한다. 기존 JSON 정수 재화는 64비트 필드로 그대로 읽히며 더 이상 약 21억에서 포화되지 않는다. 광부 레벨과 마지막 보상 레벨은 최소 1이며 보상 레벨은 현재 광부 레벨보다 높아질 수 없다. `SaveService`는 기존 `lastSavedUnixSeconds`보다 과거 시각으로 저장하지 않는다. 최초 챕터 보상은 `highestCompletedChapter`보다 큰 챕터를 처음 완료할 때만 지급한다.
 
 ## UI·비주얼
 
@@ -248,6 +266,7 @@ MineGameController (Unity composition root)
 - 기존 자원 카운터 좌표를 이동하지 않고 헤더 왼쪽의 비어 있던 영역에 `MinerRankButton` 260×94를 배치했다. 현재 광부 레벨·XP를 표시하고 누르면 총 등급 보너스와 다음 기능 해금을 네 언어로 안내한다.
 - `MineHudViewEquipment` 부분 클래스가 V5 하단 장비 탭의 모달을 담당한다. 4개 장착 슬롯, 페이지당 6개 인벤토리 행, 현재 장비 대비 보너스, 장착·해제·3개 합성·자동 장착을 제공하며 기존 설정 모달의 Simple 스킨 자산을 재사용한다.
 - `MineHudViewCollection` 부분 클래스가 V5 하단 박물관 탭의 모달을 담당한다. 박물관에는 광석별 발견·누적 수·보너스를, 업적 탭에는 6개 목표의 진행·다음 보상·수령 상태를 표시하며 기존 Simple 모달 스킨을 재사용한다.
+- `MineHudViewMissions` 부분 클래스가 V5 미션 진입점의 일일·주간 탭, 4개 공용 행, 갱신 시간, 전체 완료 보상을 담당한다. 기존 Task13 표면·업적 아이콘·재화 아이콘을 재사용하며 전용 배너·미션 아이콘·완료 상자는 후속 교체 대상으로 분리한다.
 - 기존 `OfflineRewardSurface`는 위치·크기를 유지하며 보상이 적용된 시간, 처리한 일반 광석 수, Credits와 XP를 두 줄로 표시한다.
 - 광석은 Meshy 생성 모델을 모바일용 Unity 메시·텍스처로 변환한 자산을 사용한다.
 - Task 13-1에서는 기존 모델을 보스일 때 확대할 뿐 전용 보스 그래픽은 아직 사용하지 않는다.
@@ -296,8 +315,8 @@ MineIapCoordinator
 
 ## 검증 경계
 
-- 2026-08-01 Unity Editor 컴파일·Console 오류 0건
-- EditMode 151/151 통과
+- 2026-08-02 Unity Editor 컴파일·Console 오류 0건
+- EditMode 163/163 통과
 - 챕터 10번째 스테이지 보스 판정·내구도 검증
 - 최초 보스 클리어 보상과 재도전 중복 방지 검증
 - 자동 채굴력·탭 피해·능동 채굴력·미래 성장 배율 합성과 세 보스 권장치 검증
@@ -317,6 +336,8 @@ MineIapCoordinator
 - 온라인·오프라인 광석 집계, 도감 단계 배율과 오프라인 자기 증폭 방지 검증
 - 업적 6종의 진행 파생, 3단계 보상, 잠금·미달·완료·중복 수령 방어 검증
 - 4개 언어 박물관·업적 문구와 V5 실제 내비게이션·수령 경로 검증
+- 일일·주간 기간 경계, 기기 시간 역행, 저장 v11, 개별·완료 보상 중복 방어와 4개 언어 미션 문구 검증
+- 1080×1920 Play Mode 세로 화면에서 미션 4행의 아이콘·유동 텍스트·보상·고정 수령 열과 하단 완료 보상 간격 검증
 - Device Simulator 1440×3088 동일 비율 세로 화면에서 광석 4행과 업적 6행의 모달 경계 검증
 - Play Mode에서 실제 저장 상태의 자동 채굴과 일반 stage `ChapterStatus`의 `5.6/s` 표시를 확인했다.
 - 저장 데이터를 변경하지 않는 런타임 시나리오로 보스 실패→직전 stage 파밍→명시적 재도전을 확인했고 Console 오류는 0건이다.

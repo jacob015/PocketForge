@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using NUnit.Framework;
 using PocketForge.Content;
@@ -8,6 +9,7 @@ using PocketForge.Save;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 namespace PocketForge.Tests.Editor
 {
@@ -980,6 +982,48 @@ namespace PocketForge.Tests.Editor
                 Assert.That(state.Player.credits, Is.EqualTo(100));
                 Assert.That(state.Player.achievementClaims, Has.Length.EqualTo(1));
                 Assert.That(state.Player.achievementClaims[0].claimedTiers, Is.EqualTo(1));
+            }
+            finally
+            {
+                Object.DestroyImmediate(catalog);
+            }
+        }
+
+        [Test]
+        public void MissionsNavigation_UsesFourSharedRowsAndFixedActionColumns()
+        {
+            var now = new DateTimeOffset(2026, 8, 3, 12, 0, 0, TimeSpan.Zero)
+                .ToUnixTimeSeconds();
+            var catalog = MiningContentCatalog.CreateRuntimeDefault();
+            try
+            {
+                var service = new MiningGameService(catalog, () => now);
+                var state = service.CreateInitialState(new GameSaveData
+                {
+                    minerLevel = 5,
+                    highestRewardedMinerLevel = 5
+                }, 1f);
+                service.RefreshMissions(state, now);
+                var presenter = new MineHudPresenter(view, service, state);
+                presenter.Render();
+                view.SetTheme(null, null, null, null, null);
+
+                FindRect("MissionsNavigation").GetComponent<Button>().onClick.Invoke();
+
+                Assert.That(FindRect("MissionsBackdrop").gameObject.activeSelf, Is.True);
+                Assert.That(FindRect("MissionsCard").sizeDelta, Is.EqualTo(new Vector2(920f, 1700f)));
+                for (var index = 0; index < 4; index++)
+                {
+                    var row = FindRect($"MissionRow{index}");
+                    var icon = FindChildRect(row, "MissionIcon");
+                    var name = FindChildRect(row, "MissionName");
+                    var reward = FindChildRect(row, "MissionReward");
+                    var claim = FindChildRect(row, "MissionClaimButton");
+                    Assert.That(row.sizeDelta, Is.EqualTo(new Vector2(824f, 226f)));
+                    Assert.That(claim.sizeDelta.y, Is.GreaterThanOrEqualTo(99f));
+                    AssertNoOverlap(icon, name, "Mission icon must not cover localized objective text.");
+                    AssertNoOverlap(reward, claim, "Mission reward must not enter the fixed action column.");
+                }
             }
             finally
             {

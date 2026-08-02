@@ -24,6 +24,7 @@ namespace PocketForge.Mining
             view.BindResearch(Research);
             view.BindEquipment(Equip, Unequip, Fuse, AutoEquip);
             view.BindCollection(ClaimAchievement);
+            view.BindMissions(ClaimMission, ClaimMissionCompletion);
         }
 
         public event Action StateChanged;
@@ -42,6 +43,13 @@ namespace PocketForge.Mining
 
         public void Tick(float deltaTime)
         {
+            if (gameService.RefreshMissions(state))
+            {
+                Render();
+                StateChanged?.Invoke();
+                SaveRequested?.Invoke();
+            }
+
             Apply(gameService.Tick(state, deltaTime, UnityEngine.Random.value));
         }
 
@@ -145,6 +153,50 @@ namespace PocketForge.Mining
             view.ShowFeedback(
                 $"+{CompactNumberFormatter.Format(result.RewardAmount)} {rewardSymbol}",
                 new Color(1f, 0.82f, 0.3f));
+            GameAudioController.Instance?.PlayReward();
+        }
+
+        private void ClaimMission(string missionId)
+        {
+            HandleMissionClaim(gameService.ClaimMission(state, missionId));
+        }
+
+        private void ClaimMissionCompletion(MissionPeriod period)
+        {
+            HandleMissionClaim(gameService.ClaimMissionCompletion(state, period));
+        }
+
+        private void HandleMissionClaim(MissionClaimResult result)
+        {
+            if (result.Status != MissionClaimStatus.Success)
+            {
+                var key = result.Status switch
+                {
+                    MissionClaimStatus.FeatureLocked => "missions_locked",
+                    MissionClaimStatus.RequirementNotMet => "mission_incomplete",
+                    MissionClaimStatus.AlreadyClaimed => "mission_already_claimed",
+                    MissionClaimStatus.CompletionNotReady => "mission_completion_not_ready",
+                    MissionClaimStatus.CompletionAlreadyClaimed => "mission_completion_claimed",
+                    _ => "missions_unavailable"
+                };
+                view.ShowFeedback(LanguageService.Get(key), new Color(1f, 0.55f, 0.3f));
+                return;
+            }
+
+            Render();
+            StateChanged?.Invoke();
+            SaveRequested?.Invoke();
+            var rewardSymbol = result.RewardType switch
+            {
+                MissionRewardType.Gems => "\u25C6",
+                MissionRewardType.BlueprintCores => "CORE",
+                MissionRewardType.Equipment => LanguageService.Get("equipment_drop"),
+                _ => "C"
+            };
+            var message = result.RewardType == MissionRewardType.Equipment
+                ? $"+{rewardSymbol}"
+                : $"+{CompactNumberFormatter.Format(result.RewardAmount)} {rewardSymbol}";
+            view.ShowFeedback(message, new Color(1f, 0.82f, 0.3f));
             GameAudioController.Instance?.PlayReward();
         }
 

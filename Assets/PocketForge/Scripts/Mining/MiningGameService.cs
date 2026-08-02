@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using PocketForge.Content;
 using PocketForge.Economy;
@@ -128,16 +129,21 @@ namespace PocketForge.Mining
         private readonly EquipmentService equipmentService;
         private readonly CollectionService collectionService;
         private readonly AchievementService achievementService;
+        private readonly MissionService missionService;
+        private readonly Func<long> utcNowProvider;
 
-        public MiningGameService(MiningContentCatalog catalog)
+        public MiningGameService(MiningContentCatalog catalog, Func<long> utcNowProvider = null)
         {
             this.catalog = catalog;
+            this.utcNowProvider = utcNowProvider ??
+                                  (() => DateTimeOffset.UtcNow.ToUnixTimeSeconds());
             powerService = new MiningPowerService(catalog);
             progressionService = new MinerProgressionService(catalog);
             researchService = new ResearchService(catalog);
             equipmentService = new EquipmentService(catalog);
             collectionService = new CollectionService(catalog);
             achievementService = new AchievementService(catalog, collectionService);
+            missionService = new MissionService(catalog, equipmentService);
         }
 
         public MiningGameState CreateInitialState(GameSaveData saveData, float rareRoll)
@@ -342,6 +348,50 @@ namespace PocketForge.Mining
                 progressionService.IsUnlocked(
                     state.Player.minerLevel,
                     ProgressionFeature.Museum));
+
+        public bool RefreshMissions(MiningGameState state, long nowUtcUnixSeconds = 0L) =>
+            missionService.Refresh(
+                state.Player,
+                ResolveUtcNow(nowUtcUnixSeconds),
+                progressionService.IsUnlocked(
+                    state.Player.minerLevel,
+                    ProgressionFeature.Missions));
+
+        public MissionBoardState GetMissionBoard(
+            MiningGameState state,
+            MissionPeriod period,
+            long nowUtcUnixSeconds = 0L) =>
+            missionService.GetBoard(
+                state.Player,
+                period,
+                ResolveUtcNow(nowUtcUnixSeconds),
+                progressionService.IsUnlocked(
+                    state.Player.minerLevel,
+                    ProgressionFeature.Missions));
+
+        public MissionClaimResult ClaimMission(
+            MiningGameState state,
+            string missionId,
+            long nowUtcUnixSeconds = 0L) =>
+            missionService.Claim(
+                state.Player,
+                missionId,
+                ResolveUtcNow(nowUtcUnixSeconds),
+                progressionService.IsUnlocked(
+                    state.Player.minerLevel,
+                    ProgressionFeature.Missions));
+
+        public MissionClaimResult ClaimMissionCompletion(
+            MiningGameState state,
+            MissionPeriod period,
+            long nowUtcUnixSeconds = 0L) =>
+            missionService.ClaimCompletion(
+                state.Player,
+                period,
+                ResolveUtcNow(nowUtcUnixSeconds),
+                progressionService.IsUnlocked(
+                    state.Player.minerLevel,
+                    ProgressionFeature.Missions));
 
         public EquipmentActionStatus TryEquip(MiningGameState state, string instanceId) =>
             equipmentService.TryEquip(
@@ -553,6 +603,12 @@ namespace PocketForge.Mining
             var rewardEquipment = chapterCompleted
                 ? equipmentService.GrantBossReward(state.Player, completedChapter.ChapterNumber)
                 : null;
+            if (chapterCompleted)
+            {
+                state.Player.bossesDefeated = SaturatingAdd(
+                    state.Player.bossesDefeated,
+                    1L);
+            }
             collectionService.RecordMinedOre(
                 state.Player,
                 state.Ore.Definition.ContentId);
@@ -659,5 +715,8 @@ namespace PocketForge.Mining
 
             return left > long.MaxValue / right ? long.MaxValue : left * right;
         }
+
+        private long ResolveUtcNow(long nowUtcUnixSeconds) =>
+            nowUtcUnixSeconds > 0L ? nowUtcUnixSeconds : utcNowProvider();
     }
 }

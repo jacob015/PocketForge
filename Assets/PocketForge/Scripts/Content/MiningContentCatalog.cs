@@ -16,6 +16,7 @@ namespace PocketForge.Content
         [SerializeField] private ResearchNodeDefinition[] researchNodes = Array.Empty<ResearchNodeDefinition>();
         [SerializeField] private EquipmentDefinition[] equipment = Array.Empty<EquipmentDefinition>();
         [SerializeField] private AchievementDefinition[] achievements = Array.Empty<AchievementDefinition>();
+        [SerializeField] private MissionDefinition[] missions = Array.Empty<MissionDefinition>();
         [Header("Collection")]
         [SerializeField, Min(0f)] private float collectionDiscoveryPowerBonus = 0.01f;
         [SerializeField] private int[] collectionMilestones = { 25, 100, 500 };
@@ -46,6 +47,8 @@ namespace PocketForge.Content
             EquipmentDefinition.CreateRuntimeDefaults();
         private static readonly AchievementDefinition[] RuntimeDefaultAchievements =
             AchievementDefinition.CreateRuntimeDefaults();
+        private static readonly MissionDefinition[] RuntimeDefaultMissions =
+            MissionDefinition.CreateRuntimeDefaults();
 
         public int MaxOfflineRewardSeconds => maxOfflineRewardSeconds;
         public int RewardedAdRewardMultiplier => rewardedAdRewardMultiplier;
@@ -180,6 +183,17 @@ namespace PocketForge.Content
                 .FirstOrDefault(candidate => candidate.AchievementId == achievementId);
         }
 
+        public IReadOnlyList<MissionDefinition> GetMissions()
+        {
+            var configured = missions
+                .Where(candidate => candidate != null &&
+                                    !string.IsNullOrWhiteSpace(candidate.MissionId))
+                .GroupBy(candidate => candidate.MissionId, StringComparer.Ordinal)
+                .Select(group => group.First())
+                .ToArray();
+            return configured.Length > 0 ? configured : RuntimeDefaultMissions;
+        }
+
         public static MiningContentCatalog CreateRuntimeDefault()
         {
             var catalog = CreateInstance<MiningContentCatalog>();
@@ -195,6 +209,7 @@ namespace PocketForge.Content
             catalog.researchNodes = ResearchNodeDefinition.CreateRuntimeDefaults();
             catalog.equipment = EquipmentDefinition.CreateRuntimeDefaults();
             catalog.achievements = AchievementDefinition.CreateRuntimeDefaults();
+            catalog.missions = MissionDefinition.CreateRuntimeDefaults();
             return catalog;
         }
 

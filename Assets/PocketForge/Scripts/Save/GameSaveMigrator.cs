@@ -2,7 +2,7 @@ namespace PocketForge.Save
 {
     public static class GameSaveMigrator
     {
-        public const int CurrentVersion = 10;
+        public const int CurrentVersion = 11;
 
         public static GameSaveData Normalize(GameSaveData data)
         {
@@ -18,6 +18,14 @@ namespace PocketForge.Save
             data.equipmentRewardSequence = System.Math.Max(0, data.equipmentRewardSequence);
             data.oreCollection = NormalizeOreCollection(data.oreCollection);
             data.achievementClaims = NormalizeAchievementClaims(data.achievementClaims);
+            data.dailyMissions = NormalizeMissionPeriod(data.dailyMissions);
+            data.weeklyMissions = NormalizeMissionPeriod(data.weeklyMissions);
+            data.lastObservedMissionUnixSeconds = System.Math.Max(
+                0L,
+                data.lastObservedMissionUnixSeconds);
+            data.bossesDefeated = System.Math.Max(
+                System.Math.Max(0L, data.bossesDefeated),
+                data.highestCompletedChapter);
             data.stage = System.Math.Max(1, data.stage);
             data.furthestStage = System.Math.Max(data.stage, data.furthestStage);
             data.highestCompletedChapter = System.Math.Max(0, data.highestCompletedChapter);
@@ -32,6 +40,32 @@ namespace PocketForge.Save
             data.lastSavedUnixSeconds = System.Math.Max(0, data.lastSavedUnixSeconds);
             data.version = CurrentVersion;
             return data;
+        }
+
+        private static MissionPeriodData NormalizeMissionPeriod(MissionPeriodData period)
+        {
+            period ??= new MissionPeriodData();
+            period.periodKey ??= string.Empty;
+            period.baseline ??= new MissionProgressSnapshotData();
+            period.baseline.oresMined = System.Math.Max(0L, period.baseline.oresMined);
+            period.baseline.facilityUpgrades = System.Math.Max(0L, period.baseline.facilityUpgrades);
+            period.baseline.researchCompleted = System.Math.Max(0L, period.baseline.researchCompleted);
+            period.baseline.bossesDefeated = System.Math.Max(0L, period.baseline.bossesDefeated);
+            period.baseline.equipmentAcquired = System.Math.Max(0L, period.baseline.equipmentAcquired);
+
+            var uniqueClaims = new System.Collections.Generic.HashSet<string>(
+                System.StringComparer.Ordinal);
+            foreach (var missionId in period.claimedMissionIds ?? System.Array.Empty<string>())
+            {
+                if (!string.IsNullOrWhiteSpace(missionId))
+                {
+                    uniqueClaims.Add(missionId);
+                }
+            }
+
+            period.claimedMissionIds = new string[uniqueClaims.Count];
+            uniqueClaims.CopyTo(period.claimedMissionIds);
+            return period;
         }
 
         private static ResearchProgressData[] NormalizeResearchProgress(
