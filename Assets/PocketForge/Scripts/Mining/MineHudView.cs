@@ -848,9 +848,10 @@ namespace PocketForge.Mining
                 row.Surface,
                 finalSkin.Task13Sliced("UiTask13HorizontalPanelClean"),
                 Color.white);
+            // Gold pill is the shared primary-action surface across every modal.
             ApplyBorderedSprite(
                 row.PurchaseButton.image,
-                finalSkin.Task13Sliced("ButtonEquipmentEquipRuntime"),
+                finalSkin.Task13Sliced("ButtonAchievementClaimRuntime"),
                 Color.white);
             DisableOutline(row.PurchaseButton);
         }
@@ -1404,7 +1405,7 @@ namespace PocketForge.Mining
                 new Vector2(0.5f, 0.5f),
                 new Vector2(0.5f, 0.5f),
                 new Vector2(0f, 20f),
-                new Vector2(920f, 1200f),
+                new Vector2(920f, 1040f),
                 new Color(0.035f, 0.075f, 0.15f, 0.99f));
             researchTitleSurface = CreatePanel(
                 "ResearchTitleSurface",

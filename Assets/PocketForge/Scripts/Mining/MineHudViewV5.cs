@@ -40,6 +40,7 @@ namespace PocketForge.Mining
         private Button bossChallengeButton;
         private Button researchShortcutButton;
         private readonly List<Image> recommendationBadges = new();
+        private readonly List<Text> upgradeEffectTexts = new();
         private readonly Dictionary<ProgressionFeature, Image> navigationLocks = new();
         private readonly Dictionary<ProgressionFeature, Button> navigationButtons = new();
         private readonly List<Image> navigationIcons = new();
@@ -171,42 +172,47 @@ namespace PocketForge.Mining
                 TextAnchor.MiddleLeft);
             chapterStatusText.gameObject.SetActive(false);
 
+            // 265 wide makes the panel art draw 145 tall, matching the chapter panel's
+            // drawn height so both tops and bottoms line up; x keeps the outer margin
+            // symmetric with the chapter panel's left margin.
             powerPanel = CreatePanel(
                 "PowerComparisonPanel",
                 hudRoot,
                 new Vector2(0.5f, 1f),
                 new Vector2(0.5f, 1f),
-                new Vector2(333f, -394f),
-                new Vector2(306f, 188f),
+                new Vector2(353f, -394f),
+                new Vector2(265f, 188f),
                 Color.white);
             powerPanel.GetComponent<Shadow>().enabled = false;
             powerPanel.raycastTarget = false;
+            // Offsets and boxes scale with the panel (265/306) so the text keeps clearing
+            // the strength icon baked into the left of the panel art.
             powerText = CreateText(
                 "PowerValue",
                 powerPanel.transform,
                 new Vector2(0.5f, 0.5f),
                 new Vector2(0.5f, 0.5f),
-                new Vector2(28f, 8f),
-                new Vector2(220f, 72f),
-                43,
+                new Vector2(24f, 7f),
+                new Vector2(190f, 62f),
+                38,
                 TextAnchor.MiddleCenter);
             powerLabelText = CreateText(
                 "PowerLabel",
                 powerPanel.transform,
                 new Vector2(0.5f, 0.5f),
                 new Vector2(0.5f, 0.5f),
-                new Vector2(38f, 58f),
-                new Vector2(196f, 30f),
-                19,
+                new Vector2(33f, 50f),
+                new Vector2(170f, 26f),
+                17,
                 TextAnchor.MiddleCenter);
             recommendedPowerText = CreateText(
                 "RecommendedPower",
                 powerPanel.transform,
                 new Vector2(0.5f, 0.5f),
                 new Vector2(0.5f, 0.5f),
-                new Vector2(18f, -50f),
-                new Vector2(236f, 34f),
-                18,
+                new Vector2(16f, -43f),
+                new Vector2(204f, 29f),
+                16,
                 TextAnchor.MiddleCenter);
             recommendedPowerText.color = new Color(1f, 0.76f, 0.3f);
 
@@ -502,6 +508,21 @@ namespace PocketForge.Mining
                 button.transform.Find($"LevelPip{index}").gameObject.SetActive(false);
             }
 
+            // The card art bakes a recessed pill between the level and cost rows; it is
+            // filled with this facility's current contribution instead of left empty.
+            var effect = CreateText(
+                "UpgradeEffect",
+                button.transform,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0f, -82f),
+                new Vector2(152f, 26f),
+                17,
+                TextAnchor.MiddleCenter);
+            effect.color = new Color(0.55f, 0.92f, 1f);
+            effect.raycastTarget = false;
+            upgradeEffectTexts.Add(effect);
+
             var badge = CreateSimpleImage(
                 "RecommendationBadge",
                 button.transform,
@@ -694,6 +715,16 @@ namespace PocketForge.Mining
             for (var index = 0; index < recommendationBadges.Count; index++)
             {
                 recommendationBadges[index].gameObject.SetActive(index == recommendation);
+            }
+
+            if (upgradeEffectTexts.Count >= 3)
+            {
+                upgradeEffectTexts[0].text =
+                    $"{LanguageService.Get("tap")} {CompactNumberFormatter.Format(power.TapDamage)}";
+                upgradeEffectTexts[1].text =
+                    $"{LanguageService.Get("auto")} {CompactNumberFormatter.Format(power.DrillPower)}";
+                upgradeEffectTexts[2].text =
+                    $"{LanguageService.Get("reward")} \u00D7{power.RobotMultiplier:0.00}";
             }
 
             UpdateNavigationState(service, player.minerLevel);

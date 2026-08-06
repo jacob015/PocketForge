@@ -670,9 +670,10 @@ namespace PocketForge.Mining
                 equipmentNextButton.image,
                 finalSkin.Task13Sliced("ButtonEquipmentUnequipRuntime"),
                 Color.white);
+            // Gold pill is the shared primary-action surface across every modal.
             ApplyBorderedSprite(
                 equipmentPrimaryButton.image,
-                finalSkin.Task13Sliced("ButtonEquipmentEquipRuntime"),
+                finalSkin.Task13Sliced("ButtonAchievementClaimRuntime"),
                 Color.white);
             ApplyBorderedSprite(
                 equipmentFuseButton.image,

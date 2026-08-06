@@ -446,7 +446,7 @@ namespace PocketForge.Mining
             var parts = new List<string>();
             if (definition.RewardCredits > 0) parts.Add($"{CompactNumberFormatter.Format(definition.RewardCredits)} C");
             if (definition.RewardGems > 0) parts.Add($"{CompactNumberFormatter.Format(definition.RewardGems)} \u25C6");
-            if (definition.RewardBlueprintCores > 0) parts.Add($"{CompactNumberFormatter.Format(definition.RewardBlueprintCores)} CORE");
+            if (definition.RewardBlueprintCores > 0) parts.Add($"{CompactNumberFormatter.Format(definition.RewardBlueprintCores)} {LanguageService.Get("blueprint_core_short")}");
             return string.Join(" + ", parts);
         }
 
@@ -461,7 +461,7 @@ namespace PocketForge.Mining
             return type switch
             {
                 EventRewardType.Gems => $"{CompactNumberFormatter.Format(amount)} \u25C6",
-                EventRewardType.BlueprintCores => $"{CompactNumberFormatter.Format(amount)} CORE",
+                EventRewardType.BlueprintCores => $"{CompactNumberFormatter.Format(amount)} {LanguageService.Get("blueprint_core_short")}",
                 _ => $"{CompactNumberFormatter.Format(amount)} C"
             };
         }

@@ -100,7 +100,7 @@ namespace PocketForge.Tests.Editor
             AssertRect("SettingsButton", new Vector2(403f, -189f), new Vector2(84f, 84f));
             AssertRect("RewardedAdButton", new Vector2(308f, -190f), new Vector2(100f, 62f));
             AssertRect("ChapterInformationPanel", new Vector2(-168f, -394f), new Vector2(636f, 188f));
-            AssertRect("PowerComparisonPanel", new Vector2(333f, -394f), new Vector2(306f, 188f));
+            AssertRect("PowerComparisonPanel", new Vector2(353f, -394f), new Vector2(265f, 188f));
             AssertRect("ProgressBackground", new Vector2(0f, 1014f), new Vector2(560f, 86f));
             AssertRect("MineButton", new Vector2(0f, 843f), new Vector2(450f, 186f));
             AssertRect("BossChallengeButton", new Vector2(0f, 650f), new Vector2(322f, 90f));
@@ -125,6 +125,70 @@ namespace PocketForge.Tests.Editor
             AssertMissing("feature_shop");
             AssertRect("SettingsCard", new Vector2(0f, 53f), new Vector2(900f, 1344f));
             AssertRect("CloseSettingsButton", new Vector2(0f, 66f), new Vector2(326f, 88f));
+        }
+
+        [Test]
+        public void HeaderPanels_DrawAtTheSameHeightSoTheirEdgesAlign()
+        {
+            view.SetTheme(null, null, null, null, null);
+
+            var chapter = DrawnSize("ChapterInformationPanel");
+            var power = DrawnSize("PowerComparisonPanel");
+
+            Assert.That(power.y, Is.EqualTo(chapter.y).Within(4f));
+            Assert.That(
+                FindRect("PowerComparisonPanel").anchoredPosition.y,
+                Is.EqualTo(FindRect("ChapterInformationPanel").anchoredPosition.y));
+        }
+
+        [Test]
+        public void UpgradeCards_FillTheBakedGaugePillWithTheirCurrentContribution()
+        {
+            var catalog = MiningContentCatalog.CreateRuntimeDefault();
+            try
+            {
+                var service = new MiningGameService(catalog);
+                var state = service.CreateInitialState(new GameSaveData { drillLevel = 2 }, 1f);
+
+                view.Render(state, service);
+
+                foreach (var card in new[] { "PickaxeButton", "DrillButton", "RobotButton" })
+                {
+                    var effect = FindChildRect(FindRect(card), "UpgradeEffect");
+                    var text = effect.GetComponent<Text>();
+                    Assert.That(text.text, Is.Not.Empty, card);
+                    AssertNoOverlap(
+                        effect,
+                        FindChildRect(FindRect(card), "Label"),
+                        $"{card} effect row must not enter the level row.");
+                    AssertNoOverlap(
+                        effect,
+                        FindChildRect(FindRect(card), "CostText"),
+                        $"{card} effect row must not enter the cost row.");
+                }
+            }
+            finally
+            {
+                Object.DestroyImmediate(catalog);
+            }
+        }
+
+        private Vector2 DrawnSize(string name)
+        {
+            var rect = FindRect(name);
+            var image = rect.GetComponent<Image>();
+            Assert.That(image, Is.Not.Null, name);
+            Assert.That(image.sprite, Is.Not.Null, name);
+            if (!image.preserveAspect)
+            {
+                return rect.sizeDelta;
+            }
+
+            var artAspect = image.sprite.rect.width / image.sprite.rect.height;
+            var rectAspect = rect.sizeDelta.x / Mathf.Max(1f, rect.sizeDelta.y);
+            return rectAspect < artAspect
+                ? new Vector2(rect.sizeDelta.x, rect.sizeDelta.x / artAspect)
+                : new Vector2(rect.sizeDelta.y * artAspect, rect.sizeDelta.y);
         }
 
         [Test]
@@ -857,7 +921,7 @@ namespace PocketForge.Tests.Editor
                 Assert.That(backdrop.gameObject.activeSelf, Is.True);
                 Assert.That(backdrop.GetSiblingIndex(), Is.EqualTo(view.transform.childCount - 1));
                 Assert.That(purchase.interactable, Is.True);
-                Assert.That(FindRect("ResearchCard").sizeDelta, Is.EqualTo(new Vector2(920f, 1200f)));
+                Assert.That(FindRect("ResearchCard").sizeDelta, Is.EqualTo(new Vector2(920f, 1040f)));
                 AssertNoOverlap(
                     FindChildRect(firstRow, "ResearchName"),
                     FindChildRect(firstRow, "ResearchPurchaseButton"),

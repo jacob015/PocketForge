@@ -189,7 +189,7 @@ namespace PocketForge.Mining
                 TextAnchor.MiddleCenter);
             museumNextRewardText.font = UiFontProvider.GetCasual();
 
-            closeCollectionButton = CreateCollectionButton("CloseCollection", 0f, 70f, 360f, true, 72f);
+            closeCollectionButton = CreateCollectionButton("CloseCollection", 0f, 62f, 360f, true, 88f);
             closeCollectionButton.onClick.AddListener(() => collectionPanel.SetActive(false));
             collectionPanel.SetActive(false);
         }
