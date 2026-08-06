@@ -98,7 +98,7 @@ namespace PocketForge.Tests.Editor
             AssertRect("PortraitFrame", new Vector2(-379.5f, -191.5f), new Vector2(144f, 144f));
             AssertRect("MinerRankButton", new Vector2(-231.9f, -185f), new Vector2(184f, 104f));
             AssertRect("SettingsButton", new Vector2(403f, -189f), new Vector2(84f, 84f));
-            AssertRect("RewardedAdButton", new Vector2(337f, -192f), new Vector2(48f, 48f));
+            AssertRect("RewardedAdButton", new Vector2(308f, -190f), new Vector2(100f, 62f));
             AssertRect("ChapterInformationPanel", new Vector2(-168f, -394f), new Vector2(636f, 188f));
             AssertRect("PowerComparisonPanel", new Vector2(333f, -394f), new Vector2(306f, 188f));
             AssertRect("ProgressBackground", new Vector2(0f, 1014f), new Vector2(560f, 86f));
@@ -112,7 +112,8 @@ namespace PocketForge.Tests.Editor
             AssertRect("MuseumNavigation", new Vector2(162f, -32f), new Vector2(144f, 144f));
             AssertRect("MissionsNavigation", new Vector2(455f, 1529f), new Vector2(144f, 144f));
             AssertRect("ShopNavigation", new Vector2(291f, -28f), new Vector2(144f, 144f));
-            AssertRect("ProgressFill", new Vector2(16f, 0f), new Vector2(468f, 53f));
+            AssertRect("ProgressTrack", new Vector2(-1f, 0.5f), new Vector2(449f, 54f));
+            AssertRect("ProgressFill", Vector2.zero, new Vector2(449f, 54f));
             AssertRect("MineIcon", Vector2.zero, new Vector2(78.912f, 85.248f));
             AssertMissing("MineActionText");
             AssertMissing("SelectedNavigationTab");

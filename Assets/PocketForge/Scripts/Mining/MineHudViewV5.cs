@@ -75,20 +75,26 @@ namespace PocketForge.Mining
             minerRankText.rectTransform.anchoredPosition = new Vector2(-146.3f, -86.7f);
             minerRankText.rectTransform.sizeDelta = new Vector2(142f, 42f);
             minerRankText.fontSize = 24;
-            minerExperienceText.rectTransform.anchoredPosition = Vector2.zero;
-            minerExperienceText.rectTransform.sizeDelta = new Vector2(140f, 32f);
+            // Icon sits left of the baked pill text zone; text and track share the
+            // remaining span so neither is covered by the icon or the portrait.
+            minerExperienceText.rectTransform.anchoredPosition = new Vector2(35f, -1f);
+            minerExperienceText.rectTransform.sizeDelta = new Vector2(110f, 30f);
             minerExperienceText.fontSize = 18;
+            minerExperienceText.resizeTextForBestFit = true;
+            minerExperienceText.resizeTextMinSize = 12;
+            minerExperienceText.resizeTextMaxSize = 18;
+            minerExperienceText.horizontalOverflow = HorizontalWrapMode.Wrap;
             var experienceTrack = minerExperienceProgress.transform.parent.GetComponent<RectTransform>();
-            experienceTrack.anchoredPosition = new Vector2(0f, 23f);
-            experienceTrack.sizeDelta = new Vector2(140f, 18f);
-            minerExperienceProgress.rectTransform.anchoredPosition = new Vector2(7f, 0f);
-            minerExperienceProgress.rectTransform.sizeDelta = new Vector2(MinerExperienceProgressWidth, 10f);
+            experienceTrack.anchoredPosition = new Vector2(28f, -20f);
+            experienceTrack.sizeDelta = new Vector2(96f, 8f);
+            minerExperienceProgress.rectTransform.anchoredPosition = new Vector2(4f, 0f);
+            minerExperienceProgress.rectTransform.sizeDelta = new Vector2(MinerExperienceProgressWidth, 6f);
             minerExperienceIcon = CreateSimpleImage(
                 "MinerExperienceIcon",
                 minerRankButton.transform,
                 new Vector2(0.5f, 0.5f),
                 new Vector2(0.5f, 0.5f),
-                new Vector2(-60.2f, -4.9f),
+                new Vector2(-50f, -1f),
                 new Vector2(48f, 48f),
                 Color.white);
 
@@ -116,7 +122,8 @@ namespace PocketForge.Mining
 
             ConfigureRect(settingsButton.GetComponent<RectTransform>(), new Vector2(0.5f, 1f), new Vector2(403f, -189f), new Vector2(84f, 84f));
             ConfigureRect(settingsIcon.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(74f, 74f));
-            ConfigureRect(rewardedAdButton.GetComponent<RectTransform>(), new Vector2(0.5f, 1f), new Vector2(337f, -192f), new Vector2(48f, 48f));
+            // Centered inside the fourth recessed pill baked into 01_HudPanel.
+            ConfigureRect(rewardedAdButton.GetComponent<RectTransform>(), new Vector2(0.5f, 1f), new Vector2(308f, -190f), new Vector2(100f, 62f));
             rewardedAdButton.GetComponentInChildren<Text>().gameObject.SetActive(false);
             rewardedVideoIcon.gameObject.SetActive(false);
             rewardedPlusIcon.rectTransform.anchorMin = rewardedPlusIcon.rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
@@ -225,8 +232,8 @@ namespace PocketForge.Mining
             bossWarningText.color = new Color(1f, 0.68f, 0.58f);
 
             ConfigureRect(progressBackground.rectTransform, new Vector2(0.5f, 0f), new Vector2(0f, 1014f), new Vector2(560f, 86f));
-            ConfigureRect(progressTrack.rectTransform, new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(520f, 46f));
-            ConfigureRect(oreProgress.rectTransform, new Vector2(0f, 0.5f), new Vector2(16f, 0f), new Vector2(OreProgressWidth, 53f));
+            ConfigureRect(progressTrack.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(-1f, 0.5f), new Vector2(OreProgressWidth, 54f));
+            ConfigureRect(oreProgress.rectTransform, new Vector2(0f, 0.5f), Vector2.zero, new Vector2(OreProgressWidth, 54f));
             oreProgress.rectTransform.pivot = new Vector2(0f, 0.5f);
             oreHealthLabel = CreateText(
                 "OreHealthLabel",
@@ -304,12 +311,14 @@ namespace PocketForge.Mining
                 new Vector2(204f, 36f),
                 18,
                 TextAnchor.MiddleCenter);
+            // The card art draws ~111 canvas units wide inside the 246-wide rect, so the
+            // badge is anchored to the drawn card corner instead of the rect corner.
             researchCompletionBadge = CreateSimpleImage(
                 "ResearchCompletionBadge",
                 researchShortcutButton.transform,
                 new Vector2(1f, 1f),
                 new Vector2(1f, 1f),
-                new Vector2(-27f, -27f),
+                new Vector2(-76f, -10f),
                 new Vector2(48f, 48f),
                 Color.white);
 
@@ -342,6 +351,9 @@ namespace PocketForge.Mining
                 25,
                 TextAnchor.MiddleCenter);
             bossActionText.font = UiFontProvider.GetCasual();
+            bossActionText.resizeTextForBestFit = true;
+            bossActionText.resizeTextMinSize = 16;
+            bossActionText.resizeTextMaxSize = 25;
 
             ConfigureRect(pickaxeButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(-327f, 420f), new Vector2(302f, 330f));
             ConfigureRect(drillButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(0f, 420f), new Vector2(302f, 330f));
@@ -374,12 +386,13 @@ namespace PocketForge.Mining
                 new Vector2(0f, 20f),
                 new Vector2(93.6f, 93.6f));
 
+            // Anchored to the drawn icon corners (icons are smaller than the 144 slot rect).
             researchNotificationBadge = CreateSimpleImage(
                 "ResearchNotificationBadge",
                 navigationButtons[ProgressionFeature.Research].transform,
                 new Vector2(1f, 1f),
                 new Vector2(1f, 1f),
-                new Vector2(-18f, -18f),
+                new Vector2(-38f, -20f),
                 new Vector2(38f, 38f),
                 Color.white);
             missionNotificationBadge = CreateSimpleImage(
@@ -387,7 +400,7 @@ namespace PocketForge.Mining
                 navigationButtons[ProgressionFeature.Missions].transform,
                 new Vector2(1f, 1f),
                 new Vector2(1f, 1f),
-                new Vector2(-18f, -18f),
+                new Vector2(-28f, -12f),
                 new Vector2(38f, 38f),
                 Color.white);
         }
@@ -629,10 +642,10 @@ namespace PocketForge.Mining
                     : string.Format(LanguageService.Get("boss_in_stages"), stagesUntilBoss).ToUpper();
             oreHealthLabel.text = LanguageService.Get("ore_health").ToUpper();
             oreHealthValue.text =
-                $"{CompactNumberFormatter.Format(ore.Health)} / {CompactNumberFormatter.Format(ore.Durability)}";
+                $"{CompactNumberFormatter.Format((long)Mathf.Ceil(ore.Health))} / {CompactNumberFormatter.Format((long)Mathf.Ceil(ore.Durability))}";
             oreProgress.fillAmount = Mathf.Clamp01(ore.Health / Mathf.Max(1f, ore.Durability));
             bossActionText.text =
-                $"{LanguageService.Get("boss").ToUpper()}\n{LanguageService.Get("challenge").ToUpper()}";
+                $"{LanguageService.Get("boss").ToUpper()} {LanguageService.Get("challenge").ToUpper()}";
             offlineRewardTitle.text = LanguageService.Get("offline_rewards").ToUpper();
             researchShortcutText.text = LanguageService.Get("feature_research").ToUpper();
             researchCompletionBadge.gameObject.SetActive(

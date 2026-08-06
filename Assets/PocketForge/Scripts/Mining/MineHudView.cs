@@ -18,8 +18,10 @@ namespace PocketForge.Mining
 {
     public sealed partial class MineHudView : MonoBehaviour
     {
-        private const float OreProgressWidth = 468f;
-        private const float MinerExperienceProgressWidth = 160f;
+        // Matches the recessed interior of 12_OreHealthFrame (908x110 art px drawn at
+        // 86/174 scale inside the 560x86 rect) so the fill never paints over the rim.
+        private const float OreProgressWidth = 449f;
+        private const float MinerExperienceProgressWidth = 88f;
 
         private sealed class ChapterRowView
         {
@@ -299,7 +301,7 @@ namespace PocketForge.Mining
                 LanguageService.Get("miner_rank_short"),
                 player.minerLevel);
             minerExperienceText.text =
-                $"{CompactNumberFormatter.Format(player.minerExperience)} / {CompactNumberFormatter.Format(requiredMinerExperience)} XP";
+                $"{CompactNumberFormatter.Format(player.minerExperience)} / {CompactNumberFormatter.Format(requiredMinerExperience)}";
             minerExperienceProgress.rectTransform.SetSizeWithCurrentAnchors(
                 RectTransform.Axis.Horizontal,
                 MinerExperienceProgressWidth * minerExperienceRatio);
