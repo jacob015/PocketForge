@@ -393,12 +393,13 @@ namespace PocketForge.Mining
                 new Vector2(44f, 44f),
                 Color.white);
             row.EquippedBadge.raycastTarget = false;
+            // Inset so the wide diamond strip stays inside the card's drawn border.
             row.MergeBadge = CreateSimpleImage(
                 "MergeBadge",
                 row.Button.transform,
                 new Vector2(1f, 1f),
                 new Vector2(1f, 1f),
-                new Vector2(-30f, -74f),
+                new Vector2(-40f, -76f),
                 new Vector2(42f, 42f),
                 Color.white);
             row.MergeBadge.raycastTarget = false;

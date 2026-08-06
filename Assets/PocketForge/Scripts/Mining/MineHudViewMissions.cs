@@ -145,7 +145,9 @@ namespace PocketForge.Mining
                 TextAnchor.MiddleRight);
             ConfigureMissionText(missionsRefreshText, 16, 22);
 
-            var rowY = new[] { 330f, 80f, -170f, -420f };
+            // 200 pitch keeps ~26 canvas units between the ~174-tall drawn row surfaces
+            // instead of spreading four rows across the whole card.
+            var rowY = new[] { 330f, 130f, -70f, -270f };
             for (var index = 0; index < rowY.Length; index++)
             {
                 missionRows.Add(CreateMissionRow(index, rowY[index]));
@@ -156,7 +158,7 @@ namespace PocketForge.Mining
                 missionsCard.transform,
                 new Vector2(0.5f, 0f),
                 new Vector2(0.5f, 0f),
-                new Vector2(0f, 208f),
+                new Vector2(0f, 387f),
                 new Vector2(824f, 156f),
                 Color.white);
             missionCompletionIcon = CreateSimpleImage(
@@ -470,8 +472,9 @@ namespace PocketForge.Mining
             {
                 MissionRewardType.Equipment => LanguageService.Get("equipment_drop"),
                 MissionRewardType.Gems => $"{CompactNumberFormatter.Format(amount)} \u25C6",
+                // Non-breaking spaces keep the amount and reward name on one wrapped line.
                 MissionRewardType.BlueprintCores =>
-                    $"{CompactNumberFormatter.Format(amount)} {LanguageService.Get("blueprint_core")}",
+                    $"{CompactNumberFormatter.Format(amount)} {LanguageService.Get("blueprint_core").Replace(' ', ' ')}",
                 _ => $"{CompactNumberFormatter.Format(amount)} C"
             };
         }
