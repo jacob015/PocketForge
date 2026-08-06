@@ -402,8 +402,7 @@ namespace PocketForge.Progression
                 ? MissionRewardType.BlueprintCores
                 : MissionRewardType.Equipment;
 
-        private static long GetCompletionRewardAmount(MissionPeriod period) =>
-            period == MissionPeriod.Daily ? 2L : 1L;
+        private static long GetCompletionRewardAmount(MissionPeriod period) => 1L;
 
         private static long SaturatingAdd(long left, long right)
         {

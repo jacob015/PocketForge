@@ -64,17 +64,17 @@ namespace PocketForge.Content
             return new[]
             {
                 Create("mine_ores", "achievement_mine_ores", AchievementMetric.TotalOresMined,
-                    AchievementTierDefinition.Create(10, AchievementRewardType.Credits, 100),
-                    AchievementTierDefinition.Create(100, AchievementRewardType.Credits, 500),
-                    AchievementTierDefinition.Create(1000, AchievementRewardType.Credits, 2000)),
+                    AchievementTierDefinition.Create(10, AchievementRewardType.Credits, 75),
+                    AchievementTierDefinition.Create(100, AchievementRewardType.Credits, 300),
+                    AchievementTierDefinition.Create(1000, AchievementRewardType.Credits, 1500)),
                 Create("clear_chapters", "achievement_clear_chapters", AchievementMetric.HighestCompletedChapter,
                     AchievementTierDefinition.Create(1, AchievementRewardType.Gems, 1),
                     AchievementTierDefinition.Create(2, AchievementRewardType.Gems, 2),
                     AchievementTierDefinition.Create(3, AchievementRewardType.Gems, 3)),
                 Create("upgrade_facilities", "achievement_upgrade_facilities", AchievementMetric.FacilityLevelTotal,
-                    AchievementTierDefinition.Create(5, AchievementRewardType.Credits, 150),
-                    AchievementTierDefinition.Create(20, AchievementRewardType.Credits, 750),
-                    AchievementTierDefinition.Create(50, AchievementRewardType.Credits, 3000)),
+                    AchievementTierDefinition.Create(5, AchievementRewardType.Credits, 100),
+                    AchievementTierDefinition.Create(20, AchievementRewardType.Credits, 500),
+                    AchievementTierDefinition.Create(50, AchievementRewardType.Credits, 2000)),
                 Create("raise_miner", "achievement_raise_miner", AchievementMetric.MinerLevel,
                     AchievementTierDefinition.Create(3, AchievementRewardType.Gems, 1),
                     AchievementTierDefinition.Create(5, AchievementRewardType.Gems, 1),
@@ -84,9 +84,9 @@ namespace PocketForge.Content
                     AchievementTierDefinition.Create(4, AchievementRewardType.BlueprintCores, 2),
                     AchievementTierDefinition.Create(8, AchievementRewardType.BlueprintCores, 3)),
                 Create("collect_equipment", "achievement_collect_equipment", AchievementMetric.EquipmentAcquired,
-                    AchievementTierDefinition.Create(1, AchievementRewardType.Credits, 250),
-                    AchievementTierDefinition.Create(4, AchievementRewardType.Credits, 1000),
-                    AchievementTierDefinition.Create(12, AchievementRewardType.Credits, 5000))
+                    AchievementTierDefinition.Create(1, AchievementRewardType.Credits, 150),
+                    AchievementTierDefinition.Create(4, AchievementRewardType.Credits, 600),
+                    AchievementTierDefinition.Create(12, AchievementRewardType.Credits, 2500))
             };
         }
 

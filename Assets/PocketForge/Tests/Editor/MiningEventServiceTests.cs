@@ -41,8 +41,8 @@ namespace PocketForge.Tests.Editor
             board = service.GetBoard(data, now, true);
             Assert.That(board.EarnedTokens, Is.EqualTo(30));
             Assert.That(board.TokenBalance, Is.EqualTo(10));
-            Assert.That(data.credits, Is.EqualTo(500));
-            Assert.That(data.blueprintCores, Is.EqualTo(4));
+            Assert.That(data.credits, Is.EqualTo(250));
+            Assert.That(data.blueprintCores, Is.EqualTo(1));
         }
 
         [Test]

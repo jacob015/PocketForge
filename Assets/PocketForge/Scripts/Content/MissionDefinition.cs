@@ -50,21 +50,21 @@ namespace PocketForge.Content
             return new[]
             {
                 Create("daily_mine", "mission_mine_ores", MissionPeriod.Daily,
-                    MissionMetric.OresMined, 20, MissionRewardType.Credits, 120),
+                    MissionMetric.OresMined, 20, MissionRewardType.Credits, 100),
                 Create("daily_upgrade", "mission_upgrade_facilities", MissionPeriod.Daily,
-                    MissionMetric.FacilityUpgrades, 1, MissionRewardType.BlueprintCores, 1),
+                    MissionMetric.FacilityUpgrades, 1, MissionRewardType.Credits, 75),
                 Create("daily_research", "mission_complete_research", MissionPeriod.Daily,
-                    MissionMetric.ResearchCompleted, 1, MissionRewardType.Credits, 150),
+                    MissionMetric.ResearchCompleted, 1, MissionRewardType.Credits, 125),
                 Create("daily_boss", "mission_defeat_bosses", MissionPeriod.Daily,
                     MissionMetric.BossesDefeated, 1, MissionRewardType.Gems, 1),
                 Create("weekly_mine", "mission_mine_ores", MissionPeriod.Weekly,
-                    MissionMetric.OresMined, 300, MissionRewardType.Credits, 750),
+                    MissionMetric.OresMined, 300, MissionRewardType.Credits, 600),
                 Create("weekly_upgrade", "mission_upgrade_facilities", MissionPeriod.Weekly,
-                    MissionMetric.FacilityUpgrades, 8, MissionRewardType.BlueprintCores, 3),
+                    MissionMetric.FacilityUpgrades, 8, MissionRewardType.BlueprintCores, 2),
                 Create("weekly_boss", "mission_defeat_bosses", MissionPeriod.Weekly,
-                    MissionMetric.BossesDefeated, 3, MissionRewardType.Gems, 5),
+                    MissionMetric.BossesDefeated, 3, MissionRewardType.Gems, 3),
                 Create("weekly_equipment", "mission_collect_equipment", MissionPeriod.Weekly,
-                    MissionMetric.EquipmentAcquired, 2, MissionRewardType.Credits, 1000)
+                    MissionMetric.EquipmentAcquired, 2, MissionRewardType.Credits, 800)
             };
         }
 

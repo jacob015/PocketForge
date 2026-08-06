@@ -147,9 +147,9 @@ namespace PocketForge.Tests.Editor
             service.DeliverStarterPackEntitlement(true);
 
             Assert.IsTrue(data.starterPackPurchased);
-            Assert.That(data.credits, Is.EqualTo(10000));
-            Assert.That(data.gems, Is.EqualTo(50));
-            Assert.That(data.blueprintCores, Is.EqualTo(10));
+            Assert.That(data.credits, Is.EqualTo(2000));
+            Assert.That(data.gems, Is.EqualTo(20));
+            Assert.That(data.blueprintCores, Is.EqualTo(6));
             Assert.That(saveCount, Is.EqualTo(1));
             Assert.That(service.StarterConfirmCount, Is.EqualTo(1));
         }

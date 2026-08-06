@@ -75,13 +75,13 @@ namespace PocketForge.Content
                     oresPerToken = 5,
                     rewardTiers = new[]
                     {
-                        EventRewardTierDefinition.Create("crystal_rush_10", 10, EventRewardType.Credits, 500),
-                        EventRewardTierDefinition.Create("crystal_rush_30", 30, EventRewardType.BlueprintCores, 3),
+                        EventRewardTierDefinition.Create("crystal_rush_10", 10, EventRewardType.Credits, 250),
+                        EventRewardTierDefinition.Create("crystal_rush_30", 30, EventRewardType.BlueprintCores, 2),
                         EventRewardTierDefinition.Create("crystal_rush_60", 60, EventRewardType.Gems, 3)
                     },
                     exchangeCostTokens = 20,
                     exchangeRewardType = EventRewardType.BlueprintCores,
-                    exchangeRewardAmount = 4,
+                    exchangeRewardAmount = 1,
                     exchangeLimit = 2
                 }
             };

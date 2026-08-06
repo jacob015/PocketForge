@@ -34,8 +34,8 @@ namespace PocketForge.Tests.Editor
                 Is.EqualTo(ShopActionStatus.DailyLimitReached));
             Assert.That(service.ClaimDaily(data, "daily_supply", firstDay + 600, true).Status,
                 Is.EqualTo(ShopActionStatus.Success));
-            Assert.That(data.credits, Is.EqualTo(1000));
-            Assert.That(data.blueprintCores, Is.EqualTo(2));
+            Assert.That(data.credits, Is.EqualTo(250));
+            Assert.That(data.blueprintCores, Is.Zero);
         }
 
         [Test]
@@ -66,7 +66,7 @@ namespace PocketForge.Tests.Editor
             Assert.That(service.PurchaseWithGems(data, "gem_credit_crate", now, true).Status,
                 Is.EqualTo(ShopActionStatus.Success));
             Assert.That(data.gems, Is.Zero);
-            Assert.That(data.credits, Is.EqualTo(8000));
+            Assert.That(data.credits, Is.EqualTo(1200));
             Assert.That(service.PurchaseWithGems(data, "gem_credit_crate", now, true).Status,
                 Is.EqualTo(ShopActionStatus.InsufficientGems));
         }
@@ -78,9 +78,9 @@ namespace PocketForge.Tests.Editor
 
             Assert.That(service.GrantStarterPack(data).Status, Is.EqualTo(ShopActionStatus.Success));
             Assert.That(service.GrantStarterPack(data).Status, Is.EqualTo(ShopActionStatus.AlreadyOwned));
-            Assert.That(data.credits, Is.EqualTo(10000));
-            Assert.That(data.gems, Is.EqualTo(50));
-            Assert.That(data.blueprintCores, Is.EqualTo(10));
+            Assert.That(data.credits, Is.EqualTo(2000));
+            Assert.That(data.gems, Is.EqualTo(20));
+            Assert.That(data.blueprintCores, Is.EqualTo(6));
         }
     }
 }

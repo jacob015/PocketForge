@@ -51,9 +51,9 @@ namespace PocketForge.Tests.Editor
             var duplicate = service.Claim(player, "daily_mine", now, true);
 
             Assert.That(first.Status, Is.EqualTo(MissionClaimStatus.Success));
-            Assert.That(first.RewardAmount, Is.EqualTo(120));
+            Assert.That(first.RewardAmount, Is.EqualTo(100));
             Assert.That(duplicate.Status, Is.EqualTo(MissionClaimStatus.AlreadyClaimed));
-            Assert.That(player.credits, Is.EqualTo(120));
+            Assert.That(player.credits, Is.EqualTo(100));
             Assert.That(player.dailyMissions.claimedMissionIds, Is.EquivalentTo(new[] { "daily_mine" }));
         }
 
@@ -110,7 +110,7 @@ namespace PocketForge.Tests.Editor
 
             Assert.That(completion.Status, Is.EqualTo(MissionClaimStatus.Success));
             Assert.That(completion.RewardType, Is.EqualTo(MissionRewardType.BlueprintCores));
-            Assert.That(player.blueprintCores, Is.EqualTo(3));
+            Assert.That(player.blueprintCores, Is.EqualTo(1));
             Assert.That(duplicate.Status, Is.EqualTo(MissionClaimStatus.CompletionAlreadyClaimed));
         }
 

@@ -1,3 +1,4 @@
+using System;
 using PocketForge.Content;
 using PocketForge.Mining;
 using PocketForge.Save;
@@ -20,6 +21,8 @@ namespace PocketForge.Economy
             int oresMined,
             int bossFailures,
             int upgradePurchases,
+            long totalCreditsEarned,
+            long totalCreditsSpent,
             GameSaveData finalPlayer,
             MiningPowerSnapshot finalPower,
             float bossRecommendedPower)
@@ -31,6 +34,8 @@ namespace PocketForge.Economy
             OresMined = oresMined;
             BossFailures = bossFailures;
             UpgradePurchases = upgradePurchases;
+            TotalCreditsEarned = totalCreditsEarned;
+            TotalCreditsSpent = totalCreditsSpent;
             FinalPlayer = finalPlayer;
             FinalPower = finalPower;
             BossRecommendedPower = bossRecommendedPower;
@@ -43,6 +48,8 @@ namespace PocketForge.Economy
         public int OresMined { get; }
         public int BossFailures { get; }
         public int UpgradePurchases { get; }
+        public long TotalCreditsEarned { get; }
+        public long TotalCreditsSpent { get; }
         public GameSaveData FinalPlayer { get; }
         public MiningPowerSnapshot FinalPower { get; }
         public float BossRecommendedPower { get; }
@@ -75,11 +82,14 @@ namespace PocketForge.Economy
             var oresMined = 0;
             var bossFailures = 0;
             var upgradePurchases = 0;
+            var totalCreditsEarned = 0L;
+            var totalCreditsSpent = 0L;
             var bossRecommendedPower = 0f;
 
             while (elapsed < maximumSeconds)
             {
-                upgradePurchases += PurchaseEfficientUpgrades(state, mode, elapsed, ref firstUpgradeSeconds);
+                upgradePurchases += PurchaseEfficientUpgrades(
+                    state, mode, elapsed, ref firstUpgradeSeconds, ref totalCreditsSpent);
                 RetryBossWhenReady(state, mode);
 
                 if (state.Ore.IsBoss)
@@ -94,7 +104,9 @@ namespace PocketForge.Economy
 
                 if (mode == BalanceSimulationMode.Active && state.Ore.CanTap)
                 {
+                    var creditsBeforeMine = state.Player.credits;
                     var mineResult = gameService.Mine(state, 1f);
+                    totalCreditsEarned += Math.Max(0L, state.Player.credits - creditsBeforeMine);
                     RecordResult(mineResult, ref oresMined, ref bossFailures);
                     if (mineResult.ChapterCompleted)
                     {
@@ -106,13 +118,17 @@ namespace PocketForge.Economy
                             oresMined,
                             bossFailures,
                             upgradePurchases,
+                            totalCreditsEarned,
+                            totalCreditsSpent,
                             state,
                             bossRecommendedPower);
                     }
                 }
 
+                var creditsBeforeTick = state.Player.credits;
                 var tickResult = gameService.Tick(state, SimulationStepSeconds, 1f);
                 elapsed += SimulationStepSeconds;
+                totalCreditsEarned += Math.Max(0L, state.Player.credits - creditsBeforeTick);
                 RecordResult(tickResult, ref oresMined, ref bossFailures);
                 if (tickResult.ChapterCompleted)
                 {
@@ -124,6 +140,8 @@ namespace PocketForge.Economy
                         oresMined,
                         bossFailures,
                         upgradePurchases,
+                        totalCreditsEarned,
+                        totalCreditsSpent,
                         state,
                         bossRecommendedPower);
                 }
@@ -137,6 +155,8 @@ namespace PocketForge.Economy
                 oresMined,
                 bossFailures,
                 upgradePurchases,
+                totalCreditsEarned,
+                totalCreditsSpent,
                 state,
                 bossRecommendedPower);
         }
@@ -145,17 +165,20 @@ namespace PocketForge.Economy
             MiningGameState state,
             BalanceSimulationMode mode,
             float elapsed,
-            ref float firstUpgradeSeconds)
+            ref float firstUpgradeSeconds,
+            ref long totalCreditsSpent)
         {
             var purchases = 0;
             while (TrySelectUpgrade(state, mode, out var type))
             {
+                var creditsBeforePurchase = state.Player.credits;
                 var result = gameService.TryUpgrade(state, type);
                 if (!result.PurchaseSucceeded)
                 {
                     break;
                 }
 
+                totalCreditsSpent += Math.Max(0L, creditsBeforePurchase - state.Player.credits);
                 purchases++;
                 if (firstUpgradeSeconds < 0f)
                 {
@@ -227,6 +250,8 @@ namespace PocketForge.Economy
             int oresMined,
             int bossFailures,
             int upgradePurchases,
+            long totalCreditsEarned,
+            long totalCreditsSpent,
             MiningGameState state,
             float bossRecommendedPower)
         {
@@ -238,6 +263,8 @@ namespace PocketForge.Economy
                 oresMined,
                 bossFailures,
                 upgradePurchases,
+                totalCreditsEarned,
+                totalCreditsSpent,
                 state.Player,
                 gameService.GetMiningPower(state),
                 bossRecommendedPower);

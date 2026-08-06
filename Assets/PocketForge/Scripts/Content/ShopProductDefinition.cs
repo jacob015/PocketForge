@@ -41,17 +41,17 @@ namespace PocketForge.Content
             return new[]
             {
                 Create("daily_supply", "shop_daily_supply", "shop_daily_supply_desc",
-                    ShopProductKind.DailyFree, 500, 0, 1, 0, 1),
+                    ShopProductKind.DailyFree, 125, 0, 0, 0, 1),
                 Create("rewarded_supply", "shop_rewarded_supply", "shop_rewarded_supply_desc",
-                    ShopProductKind.RewardedAd, 1000, 0, 0, 0, 3),
+                    ShopProductKind.RewardedAd, 200, 0, 0, 0, 3),
                 Create("gem_credit_crate", "shop_credit_crate", "shop_credit_crate_desc",
-                    ShopProductKind.GemExchange, 5000, 0, 0, 5, 0),
+                    ShopProductKind.GemExchange, 600, 0, 0, 5, 0),
                 Create("gem_core_crate", "shop_core_crate", "shop_core_crate_desc",
-                    ShopProductKind.GemExchange, 0, 0, 5, 10, 0),
+                    ShopProductKind.GemExchange, 0, 0, 3, 10, 0),
                 Create("remove_ads", "remove_ads", "shop_remove_ads_desc",
                     ShopProductKind.Iap, 0, 0, 0, 0, 0, "remove_ads"),
                 Create("starter_pack", "shop_starter_pack", "shop_starter_pack_desc",
-                    ShopProductKind.Iap, 10000, 50, 10, 0, 0, "starter_pack")
+                    ShopProductKind.Iap, 2000, 20, 6, 0, 0, "starter_pack")
             };
         }
 

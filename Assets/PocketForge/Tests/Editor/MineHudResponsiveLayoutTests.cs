@@ -979,7 +979,7 @@ namespace PocketForge.Tests.Editor
 
                 claim.onClick.Invoke();
 
-                Assert.That(state.Player.credits, Is.EqualTo(100));
+                Assert.That(state.Player.credits, Is.EqualTo(75));
                 Assert.That(state.Player.achievementClaims, Has.Length.EqualTo(1));
                 Assert.That(state.Player.achievementClaims[0].claimedTiers, Is.EqualTo(1));
             }
@@ -1077,7 +1077,7 @@ namespace PocketForge.Tests.Editor
 
                 FindChildRect(FindRect("CommerceRow0"), "CommerceAction")
                     .GetComponent<Button>().onClick.Invoke();
-                Assert.That(state.Player.credits, Is.EqualTo(500));
+                Assert.That(state.Player.credits, Is.EqualTo(125));
 
                 FindRect("EventTab").GetComponent<Button>().onClick.Invoke();
                 for (var index = 0; index < 4; index++)

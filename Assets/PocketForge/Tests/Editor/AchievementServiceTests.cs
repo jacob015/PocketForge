@@ -33,7 +33,7 @@ namespace PocketForge.Tests.Editor
             Assert.That(first.Status, Is.EqualTo(AchievementClaimStatus.Success));
             Assert.That(second.Status, Is.EqualTo(AchievementClaimStatus.Success));
             Assert.That(third.Status, Is.EqualTo(AchievementClaimStatus.RequirementNotMet));
-            Assert.That(player.credits, Is.EqualTo(600));
+            Assert.That(player.credits, Is.EqualTo(375));
             Assert.That(player.achievementClaims[0].claimedTiers, Is.EqualTo(2));
             Object.DestroyImmediate(catalog);
         }
