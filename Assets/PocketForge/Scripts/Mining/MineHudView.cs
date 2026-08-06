@@ -18,6 +18,10 @@ namespace PocketForge.Mining
 {
     public sealed partial class MineHudView : MonoBehaviour
     {
+        // Smallest font any visible label may resolve to on the 1080-wide reference
+        // canvas; below this the text stops being comfortably readable on a phone.
+        public const int MinimumReadableFontSize = 18;
+
         // Matches the recessed interior of 12_OreHealthFrame (908x110 art px drawn at
         // 86/174 scale inside the 560x86 rect) so the fill never paints over the rim.
         private const float OreProgressWidth = 449f;
@@ -823,6 +827,24 @@ namespace PocketForge.Mining
             DisableOutline(closeChapterSelectionButton);
             DisableOutline(closeResearchButton);
             DisableOutline(closeResearchCornerButton);
+        }
+
+        /// <summary>
+        /// Currency art ranges from a near-square coin (aspect 0.98) to a very flat
+        /// blueprint core (aspect 1.77), so a shared square box renders the flat ones at
+        /// little over half the visual weight. Sizing every icon to the same drawn area
+        /// keeps them reading at equal strength while preserving each one's aspect.
+        /// </summary>
+        private static void SizeCurrencyIcon(Image icon, float visualSize)
+        {
+            if (icon == null || icon.sprite == null)
+            {
+                return;
+            }
+
+            var aspect = icon.sprite.rect.width / Mathf.Max(1f, icon.sprite.rect.height);
+            var height = visualSize / Mathf.Sqrt(aspect);
+            icon.rectTransform.sizeDelta = new Vector2(height * aspect, height);
         }
 
         private void ApplyChapterRowSkin(ChapterRowView row)

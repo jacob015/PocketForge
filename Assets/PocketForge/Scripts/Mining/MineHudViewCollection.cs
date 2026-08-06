@@ -402,13 +402,15 @@ namespace PocketForge.Mining
                     new Vector2(64f, 64f),
                     Color.white);
                 row.RewardSlot.raycastTarget = false;
+                // Centered rather than stretched so the shared currency sizing rule can
+                // give this icon an explicit box.
                 row.RewardIcon = CreateSimpleImage(
                     "RewardIcon",
                     row.RewardSlot.transform,
+                    new Vector2(0.5f, 0.5f),
+                    new Vector2(0.5f, 0.5f),
                     Vector2.zero,
-                    Vector2.one,
-                    Vector2.zero,
-                    new Vector2(-14f, -14f),
+                    new Vector2(50f, 50f),
                     Color.white);
                 row.RewardIcon.raycastTarget = false;
                 row.Reward = CreateText(
@@ -671,6 +673,7 @@ namespace PocketForge.Mining
                 row.RewardIcon.sprite = GetAchievementRewardSprite(tier.RewardType);
                 row.RewardIcon.type = Image.Type.Simple;
                 row.RewardIcon.preserveAspect = true;
+                SizeCurrencyIcon(row.RewardIcon, 50f);
                 ApplyBorderedSprite(
                     row.ClaimButton.image,
                     finalSkin?.Task13Sliced(

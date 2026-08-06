@@ -173,6 +173,118 @@ namespace PocketForge.Tests.Editor
             }
         }
 
+        [Test]
+        public void EveryVisibleLabel_StaysAtOrAboveTheMinimumReadableSize()
+        {
+            var catalog = MiningContentCatalog.CreateRuntimeDefault();
+            var previous = LanguageService.Current;
+            try
+            {
+                var service = new MiningGameService(catalog);
+                var state = service.CreateInitialState(CreateFullyUnlockedPlayer(), 1f);
+                var presenter = new MineHudPresenter(view, service, state);
+                presenter.Render();
+                view.SetTheme(null, null, null, null, null);
+
+                // Every modal is opened so its labels count as visible for this sweep.
+                foreach (var entry in new[]
+                         {
+                             "EquipmentNavigation", "ResearchNavigation",
+                             "MuseumNavigation", "MissionsNavigation", "ShopNavigation"
+                         })
+                {
+                    FindRect(entry).GetComponent<Button>().onClick.Invoke();
+                }
+
+                foreach (SupportedLanguage language in Enum.GetValues(typeof(SupportedLanguage)))
+                {
+                    LanguageService.SetLanguage(language);
+                    view.Render(state, service);
+                    Canvas.ForceUpdateCanvases();
+
+                    foreach (var label in view.GetComponentsInChildren<Text>(true))
+                    {
+                        if (!label.gameObject.activeInHierarchy ||
+                            string.IsNullOrWhiteSpace(label.text))
+                        {
+                            continue;
+                        }
+
+                        var resolved = label.resizeTextForBestFit
+                            ? label.cachedTextGenerator.fontSizeUsedForBestFit
+                            : label.fontSize;
+                        if (resolved <= 0)
+                        {
+                            continue;
+                        }
+
+                        Assert.That(
+                            resolved,
+                            Is.GreaterThanOrEqualTo(MineHudView.MinimumReadableFontSize),
+                            $"{language} {label.transform.parent.name}/{label.name} resolved to {resolved}.");
+                    }
+                }
+            }
+            finally
+            {
+                LanguageService.SetLanguage(previous);
+                Object.DestroyImmediate(catalog);
+            }
+        }
+
+        [Test]
+        public void WeeklyMissionRewardIcons_ShareOneDrawnAreaDespiteDifferentAspects()
+        {
+            var catalog = MiningContentCatalog.CreateRuntimeDefault();
+            try
+            {
+                var service = new MiningGameService(catalog);
+                var state = service.CreateInitialState(CreateFullyUnlockedPlayer(), 1f);
+                var presenter = new MineHudPresenter(view, service, state);
+                presenter.Render();
+                view.SetTheme(null, null, null, null, null);
+
+                FindRect("MissionsNavigation").GetComponent<Button>().onClick.Invoke();
+                FindRect("WeeklyMissionsTab").GetComponent<Button>().onClick.Invoke();
+
+                var areas = new System.Collections.Generic.List<float>();
+                var aspects = new System.Collections.Generic.List<float>();
+                for (var index = 0; index < 4; index++)
+                {
+                    var icon = FindChildRect(FindRect($"MissionRow{index}"), "MissionRewardIcon");
+                    var size = icon.sizeDelta;
+                    areas.Add(size.x * size.y);
+                    aspects.Add(size.x / size.y);
+                }
+
+                Assert.That(areas.Max() - areas.Min(), Is.LessThan(2f), "Reward icons must share one drawn area.");
+                Assert.That(
+                    aspects.Max() - aspects.Min(),
+                    Is.GreaterThan(0.2f),
+                    "This board must mix icon aspects, otherwise the rule is untested.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(catalog);
+            }
+        }
+
+        private static GameSaveData CreateFullyUnlockedPlayer()
+        {
+            return new GameSaveData
+            {
+                minerLevel = 7,
+                highestRewardedMinerLevel = 7,
+                highestCompletedChapter = 2,
+                pickaxeLevel = 4,
+                drillLevel = 3,
+                robotLevel = 2,
+                credits = 5000,
+                gems = 30,
+                blueprintCores = 6
+            };
+        }
+
         private Vector2 DrawnSize(string name)
         {
             var rect = FindRect(name);

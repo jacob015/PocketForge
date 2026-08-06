@@ -380,7 +380,7 @@ namespace PocketForge.Mining
                 Vector2.one,
                 Vector2.zero,
                 new Vector2(-8f, -8f),
-                17,
+                MinimumReadableFontSize,
                 TextAnchor.MiddleCenter);
             row.Count.font = UiFontProvider.GetCasual();
 

@@ -430,6 +430,7 @@ namespace PocketForge.Mining
                 row.RewardIcon.sprite = GetMissionRewardSprite(state.Definition.RewardType);
                 row.RewardIcon.type = Image.Type.Simple;
                 row.RewardIcon.preserveAspect = true;
+                SizeCurrencyIcon(row.RewardIcon, 54f);
                 row.Reward.text = state.Definition.RewardType == MissionRewardType.Equipment
                     ? "x1"
                     : CompactNumberFormatter.Format(state.Definition.RewardAmount);
@@ -448,6 +449,7 @@ namespace PocketForge.Mining
             missionCompletionIcon.sprite = GetMissionRewardSprite(board.CompletionRewardType);
             missionCompletionIcon.type = Image.Type.Simple;
             missionCompletionIcon.preserveAspect = true;
+            SizeCurrencyIcon(missionCompletionIcon, 96f);
             missionCompletionText.text = string.Format(
                 LanguageService.Get("mission_completion_reward"),
                 board.Missions.Count,

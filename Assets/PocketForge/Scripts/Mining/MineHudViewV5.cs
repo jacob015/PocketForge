@@ -23,6 +23,7 @@ namespace PocketForge.Mining
         private Text bossActionText;
         private Text offlineRewardTitle;
         private Text researchShortcutText;
+        private Text researchShortcutValue;
         private Image portraitFrame;
         private Image portraitImage;
         private Image minerExperienceIcon;
@@ -202,8 +203,8 @@ namespace PocketForge.Mining
                 new Vector2(0.5f, 0.5f),
                 new Vector2(0.5f, 0.5f),
                 new Vector2(33f, 50f),
-                new Vector2(170f, 26f),
-                17,
+                new Vector2(170f, 28f),
+                MinimumReadableFontSize,
                 TextAnchor.MiddleCenter);
             recommendedPowerText = CreateText(
                 "RecommendedPower",
@@ -211,8 +212,8 @@ namespace PocketForge.Mining
                 new Vector2(0.5f, 0.5f),
                 new Vector2(0.5f, 0.5f),
                 new Vector2(16f, -43f),
-                new Vector2(204f, 29f),
-                16,
+                new Vector2(204f, 32f),
+                MinimumReadableFontSize,
                 TextAnchor.MiddleCenter);
             recommendedPowerText.color = new Color(1f, 0.76f, 0.3f);
 
@@ -300,13 +301,15 @@ namespace PocketForge.Mining
             researchShortcutSurface = researchShortcutButton.image;
             researchShortcutButton.GetComponentInChildren<Text>().gameObject.SetActive(false);
             researchShortcutButton.onClick.AddListener(ShowMinerRankSummary);
+            // Mirrors the offline card's title / icon / value stack so the two shortcut
+            // cards flanking the mine button read as a matched pair.
             researchShortcutIcon = CreateSimpleImage(
                 "ResearchShortcutIcon",
                 researchShortcutButton.transform,
                 new Vector2(0.5f, 0.5f),
                 new Vector2(0.5f, 0.5f),
-                new Vector2(0f, 0f),
-                new Vector2(116f, 116f),
+                new Vector2(0f, 8f),
+                new Vector2(112f, 92f),
                 Color.white);
             researchShortcutText = CreateText(
                 "ResearchShortcutText",
@@ -315,8 +318,18 @@ namespace PocketForge.Mining
                 new Vector2(0.5f, 0.5f),
                 new Vector2(0f, 70f),
                 new Vector2(204f, 36f),
-                18,
+                MinimumReadableFontSize,
                 TextAnchor.MiddleCenter);
+            researchShortcutValue = CreateText(
+                "ResearchShortcutValue",
+                researchShortcutButton.transform,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0f, -56f),
+                new Vector2(202f, 50f),
+                MinimumReadableFontSize,
+                TextAnchor.MiddleCenter);
+            researchShortcutValue.color = new Color(0.55f, 0.92f, 1f);
             // The card art draws ~111 canvas units wide inside the 246-wide rect, so the
             // badge is anchored to the drawn card corner instead of the rect corner.
             researchCompletionBadge = CreateSimpleImage(
@@ -517,7 +530,7 @@ namespace PocketForge.Mining
                 new Vector2(0.5f, 0.5f),
                 new Vector2(0f, -82f),
                 new Vector2(152f, 26f),
-                17,
+                MinimumReadableFontSize,
                 TextAnchor.MiddleCenter);
             effect.color = new Color(0.55f, 0.92f, 1f);
             effect.raycastTarget = false;
@@ -669,6 +682,8 @@ namespace PocketForge.Mining
                 $"{LanguageService.Get("boss").ToUpper()} {LanguageService.Get("challenge").ToUpper()}";
             offlineRewardTitle.text = LanguageService.Get("offline_rewards").ToUpper();
             researchShortcutText.text = LanguageService.Get("feature_research").ToUpper();
+            researchShortcutValue.text =
+                $"+{(service.GetResearchPowerMultiplier(state) - 1f) * 100f:0.#}%";
             researchCompletionBadge.gameObject.SetActive(
                 service.IsFeatureUnlocked(player.minerLevel, ProgressionFeature.Research));
             researchNotificationBadge.gameObject.SetActive(
