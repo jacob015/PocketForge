@@ -30,6 +30,7 @@ MonoBehaviour:
     firstClearGems: 5
     firstClearBlueprintCores: 3
     repeatClearBlueprintCores: 1
+    rewardMultiplier: 1
     bossDurabilityMultiplier: 2
     bossRewardMultiplier: 5
     bossVisualScaleMultiplier: 1.2
@@ -42,7 +43,8 @@ MonoBehaviour:
     firstClearGems: 10
     firstClearBlueprintCores: 6
     repeatClearBlueprintCores: 2
-    bossDurabilityMultiplier: 3.5
+    rewardMultiplier: 1.5
+    bossDurabilityMultiplier: 1.65
     bossRewardMultiplier: 6
     bossVisualScaleMultiplier: 1.25
     bossTimeLimitSeconds: 30
@@ -54,14 +56,15 @@ MonoBehaviour:
     firstClearGems: 15
     firstClearBlueprintCores: 9
     repeatClearBlueprintCores: 3
-    bossDurabilityMultiplier: 4
+    rewardMultiplier: 4
+    bossDurabilityMultiplier: 1.85
     bossRewardMultiplier: 7
     bossVisualScaleMultiplier: 1.3
     bossTimeLimitSeconds: 30
   researchNodes:
   - nodeId: core_output
     nameLocalizationKey: research_core_output
-    prerequisiteNodeId:
+    prerequisiteNodeId: 
     prerequisiteLevel: 0
     maxLevel: 5
     baseCost: 1
@@ -85,14 +88,17 @@ MonoBehaviour:
     powerBonusPerLevel: 0.1
   equipment: []
   achievements: []
+  missions: []
+  shopProducts: []
+  miningEvents: []
   collectionDiscoveryPowerBonus: 0.01
-  collectionMilestones:
-  - 25
-  - 100
-  - 500
+  collectionMilestones: 1900000064000000f4010000
   collectionMilestonePowerBonus: 0.01
   maxOfflineRewardSeconds: 14400
   rewardedAdRewardMultiplier: 5
+  interstitialOreBreakInterval: 5
+  interstitialCooldownSeconds: 240
+  interstitialGraceSeconds: 600
   baseAutoPowerPerSecond: 1.5
   baseTapDamage: 0.08
   baseTapAssistSeconds: 0.05

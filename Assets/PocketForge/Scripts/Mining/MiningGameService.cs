@@ -549,7 +549,11 @@ namespace PocketForge.Mining
         {
             var definition = catalog.GetOreForStage(stage);
             var multiplier = isRare ? definition.RareRewardMultiplier : definition.NormalRewardMultiplier;
-            var reward = System.Math.Ceiling(stage * (double)multiplier * GetRewardMultiplier(robotLevel));
+            var reward = System.Math.Ceiling(
+                stage *
+                (double)multiplier *
+                catalog.GetChapterForStage(stage).RewardMultiplier *
+                GetRewardMultiplier(robotLevel));
             return reward >= long.MaxValue ? long.MaxValue : System.Math.Max(1L, (long)reward);
         }
 

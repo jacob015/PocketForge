@@ -25,6 +25,10 @@ namespace PocketForge.Content
         [SerializeField, Min(0f)] private float collectionMilestonePowerBonus = 0.01f;
         [SerializeField, Min(60)] private int maxOfflineRewardSeconds = 14400;
         [SerializeField, Min(1)] private int rewardedAdRewardMultiplier = 5;
+        [Header("Interstitial Frequency")]
+        [SerializeField, Min(1)] private int interstitialOreBreakInterval = 5;
+        [SerializeField, Min(0f)] private float interstitialCooldownSeconds = 240f;
+        [SerializeField, Min(0f)] private float interstitialGraceSeconds = 600f;
         [SerializeField, Min(0.01f)] private float baseAutoPowerPerSecond = 0.5f;
         [SerializeField, Min(0.01f)] private float baseTapDamage = 1f;
         [SerializeField, Min(0.001f)] private float baseTapAssistSeconds = 0.05f;
@@ -58,6 +62,9 @@ namespace PocketForge.Content
 
         public int MaxOfflineRewardSeconds => maxOfflineRewardSeconds;
         public int RewardedAdRewardMultiplier => rewardedAdRewardMultiplier;
+        public int InterstitialOreBreakInterval => Mathf.Max(1, interstitialOreBreakInterval);
+        public float InterstitialCooldownSeconds => Mathf.Max(0f, interstitialCooldownSeconds);
+        public float InterstitialGraceSeconds => Mathf.Max(0f, interstitialGraceSeconds);
         public float BaseAutoPowerPerSecond => baseAutoPowerPerSecond;
         public float BaseTapDamage => baseTapDamage;
         public float BaseTapAssistSeconds => baseTapAssistSeconds;

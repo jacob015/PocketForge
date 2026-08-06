@@ -14,6 +14,10 @@ namespace PocketForge.Content
         [SerializeField, Min(0)] private int firstClearGems = 5;
         [SerializeField, Min(0)] private int firstClearBlueprintCores;
         [SerializeField, Min(0)] private int repeatClearBlueprintCores;
+        // Ore payouts only grow linearly with stage while upgrade costs grow
+        // geometrically, so each chapter needs its own payout step to keep the
+        // credit income in step with the cost curve.
+        [SerializeField, Min(1f)] private float rewardMultiplier = 1f;
         [SerializeField, Min(1f)] private float bossDurabilityMultiplier = 3f;
         [SerializeField, Min(1)] private int bossRewardMultiplier = 5;
         [SerializeField, Min(1f)] private float bossVisualScaleMultiplier = 1.2f;
@@ -29,6 +33,7 @@ namespace PocketForge.Content
             firstClearBlueprintCores > 0 ? firstClearBlueprintCores : chapterNumber * 3;
         public int RepeatClearBlueprintCores =>
             repeatClearBlueprintCores > 0 ? repeatClearBlueprintCores : chapterNumber;
+        public float RewardMultiplier => Mathf.Max(1f, rewardMultiplier);
         public float BossDurabilityMultiplier => bossDurabilityMultiplier;
         public int BossRewardMultiplier => bossRewardMultiplier;
         public float BossVisualScaleMultiplier => bossVisualScaleMultiplier;

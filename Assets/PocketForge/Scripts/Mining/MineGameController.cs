@@ -74,7 +74,10 @@ namespace PocketForge.Mining
                 gameService,
                 gameState,
                 new GoogleMobileAdsService(),
-                new InterstitialAdPolicy(5, 180f));
+                new InterstitialAdPolicy(
+                    catalog.InterstitialOreBreakInterval,
+                    catalog.InterstitialCooldownSeconds,
+                    catalog.InterstitialGraceSeconds));
             hudPresenter.OreBroken += adCoordinator.RecordOreBroken;
             hudPresenter.RewardedShopRequested += adCoordinator.RequestShopReward;
             adCoordinator.SaveRequested += SaveGame;

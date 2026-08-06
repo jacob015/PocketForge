@@ -72,8 +72,8 @@ namespace PocketForge.Tests.Editor
             var chapterThree = gameService.CreateInitialState(new GameSaveData { stage = 30 }, 1f);
 
             Assert.That(gameService.GetBossRecommendedPower(chapterOne), Is.EqualTo(4f).Within(0.01f));
-            Assert.That(gameService.GetBossRecommendedPower(chapterTwo), Is.EqualTo(15.167f).Within(0.01f));
-            Assert.That(gameService.GetBossRecommendedPower(chapterThree), Is.EqualTo(26.667f).Within(0.01f));
+            Assert.That(gameService.GetBossRecommendedPower(chapterTwo), Is.EqualTo(11f).Within(0.01f));
+            Assert.That(gameService.GetBossRecommendedPower(chapterThree), Is.EqualTo(20.967f).Within(0.01f));
         }
 
         [Test]

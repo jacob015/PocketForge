@@ -20,6 +20,18 @@ namespace PocketForge.Tests.Editor
         }
 
         [Test]
+        public void GracePeriod_KeepsTheFirstSessionFreeOfInterstitials()
+        {
+            var policy = new InterstitialAdPolicy(1, 0f, 600f);
+
+            policy.Tick(599f);
+            Assert.IsFalse(policy.RegisterOreBreak(), "No interstitial may fire inside the grace window.");
+
+            policy.Tick(2f);
+            Assert.IsTrue(policy.RegisterOreBreak(), "The gate must open once the grace window passes.");
+        }
+
+        [Test]
         public void MarkShown_ResetsBothGates()
         {
             var policy = new InterstitialAdPolicy(1, 10f);

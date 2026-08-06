@@ -15,7 +15,7 @@ MonoBehaviour:
   contentId: crystal
   startStage: 10
   baseDurability: 60
-  durabilityPerStage: 7
+  durabilityPerStage: 14
   rareChance: 0.08
   normalRewardMultiplier: 3
   rareRewardMultiplier: 7

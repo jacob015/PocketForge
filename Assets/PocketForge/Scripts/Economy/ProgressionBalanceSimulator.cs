@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using PocketForge.Content;
 using PocketForge.Mining;
 using PocketForge.Save;
@@ -9,6 +10,42 @@ namespace PocketForge.Economy
     {
         Idle,
         Active
+    }
+
+    /// <summary>
+    /// One chapter's slice of a run, so the growth curve can be compared chapter to
+    /// chapter instead of only as a single total.
+    /// </summary>
+    public readonly struct ChapterProgressResult
+    {
+        public ChapterProgressResult(
+            int chapterNumber,
+            float durationSeconds,
+            float completedAtSeconds,
+            int bossFailures,
+            int oresMined,
+            long creditsEarned,
+            float bossRecommendedPower,
+            float powerAtClear)
+        {
+            ChapterNumber = chapterNumber;
+            DurationSeconds = durationSeconds;
+            CompletedAtSeconds = completedAtSeconds;
+            BossFailures = bossFailures;
+            OresMined = oresMined;
+            CreditsEarned = creditsEarned;
+            BossRecommendedPower = bossRecommendedPower;
+            PowerAtClear = powerAtClear;
+        }
+
+        public int ChapterNumber { get; }
+        public float DurationSeconds { get; }
+        public float CompletedAtSeconds { get; }
+        public int BossFailures { get; }
+        public int OresMined { get; }
+        public long CreditsEarned { get; }
+        public float BossRecommendedPower { get; }
+        public float PowerAtClear { get; }
     }
 
     public readonly struct ProgressionBalanceResult
@@ -25,7 +62,8 @@ namespace PocketForge.Economy
             long totalCreditsSpent,
             GameSaveData finalPlayer,
             MiningPowerSnapshot finalPower,
-            float bossRecommendedPower)
+            float bossRecommendedPower,
+            IReadOnlyList<ChapterProgressResult> chapters)
         {
             Completed = completed;
             ElapsedSeconds = elapsedSeconds;
@@ -39,6 +77,7 @@ namespace PocketForge.Economy
             FinalPlayer = finalPlayer;
             FinalPower = finalPower;
             BossRecommendedPower = bossRecommendedPower;
+            Chapters = chapters ?? Array.Empty<ChapterProgressResult>();
         }
 
         public bool Completed { get; }
@@ -53,6 +92,7 @@ namespace PocketForge.Economy
         public GameSaveData FinalPlayer { get; }
         public MiningPowerSnapshot FinalPower { get; }
         public float BossRecommendedPower { get; }
+        public IReadOnlyList<ChapterProgressResult> Chapters { get; }
     }
 
     /// <summary>
@@ -73,8 +113,19 @@ namespace PocketForge.Economy
 
         public ProgressionBalanceResult SimulateFirstChapter(
             BalanceSimulationMode mode,
+            float maximumSeconds = 1800f) =>
+            SimulateChapters(mode, 1, maximumSeconds);
+
+        /// <summary>
+        /// Runs a fresh save from stage 1 until <paramref name="throughChapter"/> is
+        /// cleared, recording each chapter separately.
+        /// </summary>
+        public ProgressionBalanceResult SimulateChapters(
+            BalanceSimulationMode mode,
+            int throughChapter,
             float maximumSeconds = 1800f)
         {
+            throughChapter = Math.Max(1, throughChapter);
             var state = gameService.CreateInitialState(new GameSaveData(), 1f);
             var elapsed = 0f;
             var firstUpgradeSeconds = -1f;
@@ -85,6 +136,13 @@ namespace PocketForge.Economy
             var totalCreditsEarned = 0L;
             var totalCreditsSpent = 0L;
             var bossRecommendedPower = 0f;
+
+            var chapters = new List<ChapterProgressResult>();
+            var chapterStartSeconds = 0f;
+            var chapterStartCredits = 0L;
+            var chapterStartOres = 0;
+            var chapterBossFailures = 0;
+            var chapterRecommendedPower = 0f;
 
             while (elapsed < maximumSeconds)
             {
@@ -100,37 +158,47 @@ namespace PocketForge.Economy
                     }
 
                     bossRecommendedPower = gameService.GetBossRecommendedPower(state);
+                    chapterRecommendedPower = bossRecommendedPower;
                 }
+
+                var clearedChapter = state.Ore.Chapter.ChapterNumber;
+                var chapterCompleted = false;
 
                 if (mode == BalanceSimulationMode.Active && state.Ore.CanTap)
                 {
                     var creditsBeforeMine = state.Player.credits;
                     var mineResult = gameService.Mine(state, 1f);
                     totalCreditsEarned += Math.Max(0L, state.Player.credits - creditsBeforeMine);
-                    RecordResult(mineResult, ref oresMined, ref bossFailures);
-                    if (mineResult.ChapterCompleted)
-                    {
-                        return CreateResult(
-                            true,
-                            elapsed,
-                            firstUpgradeSeconds,
-                            firstBossSeconds,
-                            oresMined,
-                            bossFailures,
-                            upgradePurchases,
-                            totalCreditsEarned,
-                            totalCreditsSpent,
-                            state,
-                            bossRecommendedPower);
-                    }
+                    RecordResult(mineResult, ref oresMined, ref bossFailures, ref chapterBossFailures);
+                    chapterCompleted = mineResult.ChapterCompleted;
                 }
 
-                var creditsBeforeTick = state.Player.credits;
-                var tickResult = gameService.Tick(state, SimulationStepSeconds, 1f);
-                elapsed += SimulationStepSeconds;
-                totalCreditsEarned += Math.Max(0L, state.Player.credits - creditsBeforeTick);
-                RecordResult(tickResult, ref oresMined, ref bossFailures);
-                if (tickResult.ChapterCompleted)
+                if (!chapterCompleted)
+                {
+                    var creditsBeforeTick = state.Player.credits;
+                    var tickResult = gameService.Tick(state, SimulationStepSeconds, 1f);
+                    elapsed += SimulationStepSeconds;
+                    totalCreditsEarned += Math.Max(0L, state.Player.credits - creditsBeforeTick);
+                    RecordResult(tickResult, ref oresMined, ref bossFailures, ref chapterBossFailures);
+                    chapterCompleted = tickResult.ChapterCompleted;
+                }
+
+                if (!chapterCompleted)
+                {
+                    continue;
+                }
+
+                chapters.Add(new ChapterProgressResult(
+                    clearedChapter,
+                    elapsed - chapterStartSeconds,
+                    elapsed,
+                    chapterBossFailures,
+                    oresMined - chapterStartOres,
+                    totalCreditsEarned - chapterStartCredits,
+                    chapterRecommendedPower,
+                    GetRelevantPower(gameService.GetMiningPower(state), mode)));
+
+                if (clearedChapter >= throughChapter)
                 {
                     return CreateResult(
                         true,
@@ -143,8 +211,15 @@ namespace PocketForge.Economy
                         totalCreditsEarned,
                         totalCreditsSpent,
                         state,
-                        bossRecommendedPower);
+                        bossRecommendedPower,
+                        chapters);
                 }
+
+                chapterStartSeconds = elapsed;
+                chapterStartCredits = totalCreditsEarned;
+                chapterStartOres = oresMined;
+                chapterBossFailures = 0;
+                chapterRecommendedPower = 0f;
             }
 
             return CreateResult(
@@ -158,7 +233,8 @@ namespace PocketForge.Economy
                 totalCreditsEarned,
                 totalCreditsSpent,
                 state,
-                bossRecommendedPower);
+                bossRecommendedPower,
+                chapters);
         }
 
         private int PurchaseEfficientUpgrades(
@@ -239,7 +315,7 @@ namespace PocketForge.Economy
                 return;
             }
 
-            gameService.SelectChapter(state, 1, 1f);
+            gameService.SelectChapter(state, state.Ore.Chapter.ChapterNumber, 1f);
         }
 
         private ProgressionBalanceResult CreateResult(
@@ -253,7 +329,8 @@ namespace PocketForge.Economy
             long totalCreditsEarned,
             long totalCreditsSpent,
             MiningGameState state,
-            float bossRecommendedPower)
+            float bossRecommendedPower,
+            IReadOnlyList<ChapterProgressResult> chapters)
         {
             return new ProgressionBalanceResult(
                 completed,
@@ -267,13 +344,15 @@ namespace PocketForge.Economy
                 totalCreditsSpent,
                 state.Player,
                 gameService.GetMiningPower(state),
-                bossRecommendedPower);
+                bossRecommendedPower,
+                chapters);
         }
 
         private static void RecordResult(
             MiningGameResult result,
             ref int oresMined,
-            ref int bossFailures)
+            ref int bossFailures,
+            ref int chapterBossFailures)
         {
             if (result.OreBroken)
             {
@@ -283,6 +362,7 @@ namespace PocketForge.Economy
             if (result.BossFailed)
             {
                 bossFailures++;
+                chapterBossFailures++;
             }
         }
 
