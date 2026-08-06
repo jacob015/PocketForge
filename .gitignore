@@ -38,3 +38,6 @@
 *.aar
 *.gradle
 /ExportedObj/
+
+# Local and CI build output
+/Builds/
