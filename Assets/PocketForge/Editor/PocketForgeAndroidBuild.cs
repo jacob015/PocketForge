@@ -76,8 +76,24 @@ namespace PocketForge.EditorTools
         private static void ApplyPublicPlayerSettings()
         {
             PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, ApplicationIdentifier);
-            PlayerSettings.bundleVersion = VersionName;
-            PlayerSettings.Android.bundleVersionCode = VersionCode;
+            PlayerSettings.bundleVersion = ResolveVersionName();
+            PlayerSettings.Android.bundleVersionCode = ResolveVersionCode();
+        }
+
+        /// <summary>
+        /// Play rejects an upload whose versionCode was already used, so CI feeds its
+        /// build number in. Local builds keep the checked-in value.
+        /// </summary>
+        private static int ResolveVersionCode()
+        {
+            string raw = Environment.GetEnvironmentVariable("POCKETFORGE_VERSION_CODE");
+            return int.TryParse(raw, out int parsed) && parsed > 0 ? parsed : VersionCode;
+        }
+
+        private static string ResolveVersionName()
+        {
+            string raw = Environment.GetEnvironmentVariable("POCKETFORGE_VERSION_NAME");
+            return string.IsNullOrWhiteSpace(raw) ? VersionName : raw.Trim();
         }
 
         private static void ApplySigningFromEnvironment()
