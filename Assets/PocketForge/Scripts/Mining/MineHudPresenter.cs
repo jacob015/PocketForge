@@ -156,7 +156,7 @@ namespace PocketForge.Mining
             var rewardSymbol = result.RewardType switch
             {
                 AchievementRewardType.Gems => "\u25C6",
-                AchievementRewardType.BlueprintCores => "CORE",
+                AchievementRewardType.BlueprintCores => LanguageService.Get("blueprint_core_short"),
                 _ => "C"
             };
             view.ShowFeedback(
@@ -198,7 +198,7 @@ namespace PocketForge.Mining
             var rewardSymbol = result.RewardType switch
             {
                 MissionRewardType.Gems => "\u25C6",
-                MissionRewardType.BlueprintCores => "CORE",
+                MissionRewardType.BlueprintCores => LanguageService.Get("blueprint_core_short"),
                 MissionRewardType.Equipment => LanguageService.Get("equipment_drop"),
                 _ => "C"
             };
@@ -284,7 +284,7 @@ namespace PocketForge.Mining
             var symbol = result.RewardType switch
             {
                 EventRewardType.Gems => "\u25C6",
-                EventRewardType.BlueprintCores => "CORE",
+                EventRewardType.BlueprintCores => LanguageService.Get("blueprint_core_short"),
                 _ => "C"
             };
             view.ShowFeedback(

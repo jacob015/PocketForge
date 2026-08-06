@@ -423,10 +423,17 @@ namespace PocketForge.Tests.Editor
         }
 
         [Test]
-        public void V5AssetSet_ContainsAllThirtyEightProductionSprites()
+        public void V5AssetSet_ContainsEveryProductionSprite()
         {
             for (var index = 1; index <= 38; index++)
             {
+                // 29_SelectedNavigationTab was retired with the selected-tab indicator
+                // itself, which AssertMissing("SelectedNavigationTab") already pins.
+                if (index == 29)
+                {
+                    continue;
+                }
+
                 var prefix = index.ToString("00") + "_";
                 var matches = Resources.LoadAll<Texture2D>("PocketForge/UI/V5")
                     .Where(texture => texture.name.StartsWith(prefix))
@@ -461,30 +468,28 @@ namespace PocketForge.Tests.Editor
         public void Task13GasShotAssets_AreCompleteAndUseMeasuredRuntimeClassifications()
         {
             var textures = Resources.LoadAll<Texture2D>("PocketForge/UI/Task13");
+
+            // Only the surfaces the runtime actually draws are required. The pre-rework
+            // originals they replaced (…CardBase, …ComparisonTray, …SummaryCard) were
+            // dropped from Resources so they stop shipping; ResourceBudgetTests keeps
+            // that pruning honest.
             var required = new[]
             {
                 "UiEquipmentModalBody",
                 "UiEquipmentSlotCardBase",
-                "UiEquipmentInventoryCardBase",
                 "UiEquipmentInventoryCardClean",
-                "UiEquipmentComparisonTray",
                 "UiTask13HorizontalPanelClean",
                 "UiCollectionModalBody",
-                "UiMuseumSummaryCard",
-                "UiMuseumExhibitCardBase",
                 "UiMuseumExhibitCardClean",
-                "UiMuseumNextRewardStrip",
                 "UiAchievementSummaryCard",
                 "UiAchievementRowBase",
                 "UiAchievementProgressTrack",
                 "UiAchievementProgressFill",
-                "ButtonAchievementClaim",
                 "ButtonAchievementClaimRuntime",
                 "BadgeAchievementComplete",
                 "IconAchievementEquipment"
             };
 
-            Assert.That(textures, Has.Length.GreaterThanOrEqualTo(67));
             foreach (var assetName in required)
             {
                 Assert.That(
