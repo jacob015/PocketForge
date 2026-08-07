@@ -320,8 +320,11 @@ namespace PocketForge.Mining
         {
             text.font = UiFontProvider.GetCasual();
             text.resizeTextForBestFit = true;
-            text.resizeTextMinSize = minimumSize;
-            text.resizeTextMaxSize = maximumSize;
+            text.resizeTextMaxSize = Mathf.Max(maximumSize, MinimumReadableFontSize);
+            text.resizeTextMinSize = Mathf.Clamp(
+                minimumSize,
+                MinimumReadableFontSize,
+                text.resizeTextMaxSize);
         }
 
         private static void ConfigureMissionButtonLabel(Button button)
@@ -330,7 +333,7 @@ namespace PocketForge.Mining
             label.font = UiFontProvider.GetCasual();
             label.fontSize = 24;
             label.resizeTextForBestFit = true;
-            label.resizeTextMinSize = 16;
+            label.resizeTextMinSize = MinimumReadableFontSize;
             label.resizeTextMaxSize = 24;
         }
 

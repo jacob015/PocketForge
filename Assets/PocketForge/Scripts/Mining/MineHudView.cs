@@ -1316,7 +1316,7 @@ namespace PocketForge.Mining
                 TextAnchor.MiddleCenter);
             row.Status.font = UiFontProvider.GetCasual();
             row.Status.resizeTextForBestFit = true;
-            row.Status.resizeTextMinSize = 15;
+            row.Status.resizeTextMinSize = MinimumReadableFontSize;
             row.Status.resizeTextMaxSize = 22;
             row.ActionButton = CreateButton(
                 "ChapterActionButton",
@@ -1468,6 +1468,10 @@ namespace PocketForge.Mining
                 29,
                 TextAnchor.MiddleCenter);
             researchCores.color = new Color(1f, 0.78f, 0.28f);
+            // "Blueprint Cores 0" overruns the box in English without best-fit.
+            researchCores.resizeTextForBestFit = true;
+            researchCores.resizeTextMaxSize = 29;
+            researchCores.resizeTextMinSize = MinimumReadableFontSize;
 
             researchRowsRoot = CreateRect(
                 "ResearchRows",

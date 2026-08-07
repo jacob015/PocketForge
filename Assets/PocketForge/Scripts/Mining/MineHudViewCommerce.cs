@@ -191,7 +191,8 @@ namespace PocketForge.Mining
             row.Value = CreateText(
                 "CommerceValue", row.Surface.transform,
                 new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
-                new Vector2(130f, 0f), new Vector2(120f, 70f), 22, TextAnchor.MiddleCenter);
+                // Tall enough for the three-line starter pack reward at the readable size.
+                new Vector2(130f, 0f), new Vector2(120f, 100f), 22, TextAnchor.MiddleCenter);
             ConfigureCommerceText(row.Value, 15, 22);
             row.Action = CreateButton(
                 "CommerceAction", row.Surface.transform,
@@ -447,7 +448,9 @@ namespace PocketForge.Mining
             if (definition.RewardCredits > 0) parts.Add($"{CompactNumberFormatter.Format(definition.RewardCredits)} C");
             if (definition.RewardGems > 0) parts.Add($"{CompactNumberFormatter.Format(definition.RewardGems)} \u25C6");
             if (definition.RewardBlueprintCores > 0) parts.Add($"{CompactNumberFormatter.Format(definition.RewardBlueprintCores)} {LanguageService.Get("blueprint_core_short")}");
-            return string.Join(" + ", parts);
+            // One reward per line. Joining with " + " makes the three-currency starter
+            // pack far too wide for the narrow value column at the readable font size.
+            return string.Join("\n", parts);
         }
 
         private static string FormatCommerceRefresh(long refreshAtUnixSeconds)
@@ -533,8 +536,11 @@ namespace PocketForge.Mining
         {
             text.font = UiFontProvider.GetCasual();
             text.resizeTextForBestFit = true;
-            text.resizeTextMinSize = minimumSize;
-            text.resizeTextMaxSize = maximumSize;
+            text.resizeTextMaxSize = Mathf.Max(maximumSize, MinimumReadableFontSize);
+            text.resizeTextMinSize = Mathf.Clamp(
+                minimumSize,
+                MinimumReadableFontSize,
+                text.resizeTextMaxSize);
         }
 
         private static void ConfigureCommerceButton(Button button)
@@ -543,7 +549,7 @@ namespace PocketForge.Mining
             label.font = UiFontProvider.GetCasual();
             label.fontSize = 22;
             label.resizeTextForBestFit = true;
-            label.resizeTextMinSize = 14;
+            label.resizeTextMinSize = MinimumReadableFontSize;
             label.resizeTextMaxSize = 22;
         }
     }

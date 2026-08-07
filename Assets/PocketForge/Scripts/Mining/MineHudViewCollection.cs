@@ -215,7 +215,7 @@ namespace PocketForge.Mining
             label.font = UiFontProvider.GetCasual();
             label.fontSize = 23;
             label.resizeTextForBestFit = true;
-            label.resizeTextMinSize = 16;
+            label.resizeTextMinSize = MinimumReadableFontSize;
             label.resizeTextMaxSize = 23;
             return button;
         }
@@ -434,7 +434,7 @@ namespace PocketForge.Mining
                 label.font = UiFontProvider.GetCasual();
                 label.fontSize = 21;
                 label.resizeTextForBestFit = true;
-                label.resizeTextMinSize = 14;
+                label.resizeTextMinSize = MinimumReadableFontSize;
                 label.resizeTextMaxSize = 21;
                 row.ClaimButton.onClick.AddListener(() =>
                 {

@@ -255,7 +255,7 @@ namespace PocketForge.Mining
             {
                 text.font = UiFontProvider.GetCasual();
                 text.resizeTextForBestFit = true;
-                text.resizeTextMinSize = 16;
+                text.resizeTextMinSize = MinimumReadableFontSize;
                 text.resizeTextMaxSize = 22;
             }
 
@@ -300,7 +300,7 @@ namespace PocketForge.Mining
                 TextAnchor.MiddleCenter);
             label.font = UiFontProvider.GetCasual();
             label.resizeTextForBestFit = true;
-            label.resizeTextMinSize = 14;
+            label.resizeTextMinSize = MinimumReadableFontSize;
             label.resizeTextMaxSize = 19;
             var captured = slot;
             button.onClick.AddListener(() => equipmentUnequipAction?.Invoke(captured));
@@ -351,7 +351,7 @@ namespace PocketForge.Mining
                 TextAnchor.MiddleCenter);
             row.Name.font = UiFontProvider.GetCasual();
             row.Name.resizeTextForBestFit = true;
-            row.Name.resizeTextMinSize = 15;
+            row.Name.resizeTextMinSize = MinimumReadableFontSize;
             row.Name.resizeTextMaxSize = 22;
             row.Details = CreateText(
                 "ItemDetails",
@@ -436,7 +436,7 @@ namespace PocketForge.Mining
             label.font = UiFontProvider.GetCasual();
             label.fontSize = 23;
             label.resizeTextForBestFit = true;
-            label.resizeTextMinSize = 15;
+            label.resizeTextMinSize = MinimumReadableFontSize;
             label.resizeTextMaxSize = 23;
             return button;
         }

@@ -77,6 +77,11 @@ namespace PocketForge.Mining
             minerRankText.rectTransform.anchoredPosition = new Vector2(-146.3f, -86.7f);
             minerRankText.rectTransform.sizeDelta = new Vector2(142f, 42f);
             minerRankText.fontSize = 24;
+            // Without best-fit the longer English label ("MINER Lv. 63") is cut off
+            // rather than shrunk.
+            minerRankText.resizeTextForBestFit = true;
+            minerRankText.resizeTextMaxSize = 24;
+            minerRankText.resizeTextMinSize = MinimumReadableFontSize;
             // Icon sits left of the baked pill text zone; text and track share the
             // remaining span so neither is covered by the icon or the portrait.
             minerExperienceText.rectTransform.anchoredPosition = new Vector2(35f, -1f);
@@ -373,7 +378,7 @@ namespace PocketForge.Mining
                 TextAnchor.MiddleCenter);
             bossActionText.font = UiFontProvider.GetCasual();
             bossActionText.resizeTextForBestFit = true;
-            bossActionText.resizeTextMinSize = 16;
+            bossActionText.resizeTextMinSize = MinimumReadableFontSize;
             bossActionText.resizeTextMaxSize = 25;
 
             ConfigureRect(pickaxeButton.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(-327f, 420f), new Vector2(302f, 330f));
@@ -837,8 +842,11 @@ namespace PocketForge.Mining
             text.fontSize = fontSize;
             text.alignment = alignment;
             text.resizeTextForBestFit = true;
-            text.resizeTextMinSize = Mathf.Max(12, fontSize - 8);
-            text.resizeTextMaxSize = fontSize;
+            text.resizeTextMaxSize = Mathf.Max(fontSize, MinimumReadableFontSize);
+            text.resizeTextMinSize = Mathf.Clamp(
+                fontSize - 8,
+                MinimumReadableFontSize,
+                text.resizeTextMaxSize);
         }
     }
 }
