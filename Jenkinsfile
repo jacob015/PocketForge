@@ -129,7 +129,16 @@ pipeline {
             steps {
                 script {
                     def aab = "Builds/ci/PocketForge-${env.BUILD_NUMBER}.aab"
-                    def bytes = fileExists(aab) ? new File("${env.WORKSPACE}/${aab}").length() : 0
+                    if (!fileExists(aab)) {
+                        error("Expected the AAB at ${aab} but the build stage produced nothing.")
+                    }
+
+                    // Reading the size through a bat + readFile keeps this inside the
+                    // Groovy sandbox; new File() on the controller is rejected.
+                    bat """
+                        for %%I in ("${aab.replace('/', '\\\\')}") do @echo %%~zI> Builds\\ci\\size.txt
+                    """
+                    def bytes = readFile('Builds/ci/size.txt').trim() as Long
                     def mib = bytes / 1048576.0
                     // The download budget the project committed to; exceeding it is a
                     // warning rather than a failure so the artifact is still inspectable.
