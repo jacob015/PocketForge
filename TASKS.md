@@ -4,9 +4,37 @@
 
 ## 현재 작업
 
+### Task 17 — Jenkins 빌드 파이프라인
+
+상태: 완주 · 운영 개선 진행 중
+
+완료 내용:
+
+- 저장소의 선언형 `Jenkinsfile`로 Prepare → Compile → EditMode tests → Signed AAB → Report size 5단계 구성
+- `PocketForgeCi.AssertScriptsCompiled` 진입점으로 stale 어셈블리(컴파일 실패 시 옛 DLL로 위양성 통과) 차단
+- 키스토어와 비밀번호를 Jenkins Credentials로만 주입, 저장소에는 비밀정보 없음
+- `versionCode`를 `BUILD_NUMBER`로 주입, AAB 용량 50MiB 초과 시 `UNSTABLE` 게이트
+- Jenkins 2.568.2를 WAR로 8081 포트에 기동(8080은 Unity MCP 브리지가 점유)
+
+파이프라인이 검출한 결함:
+
+- 빌드 #2: 로컬 213/213 초록불 상태에서 XP 라벨의 BestFit 하한(12)이 기준(18) 위반임을 검출
+- 빌드 #3: 같은 종류의 라벨 68개를 전수 발견 → 공통 헬퍼에서 하한을 강제하도록 구조 개선
+- 덤으로 영어 문자열 잘림 2건(`MINER Lv. 63`, `Blueprint Cores 0`) 발견·수정
+
+측정된 개선:
+
+| 항목 | 이전 | 이후 |
+|---|---:|---:|
+| Unity 임포트(Compile 단계) | 150초 | 22초 (−85%) |
+| AAB 용량 | 55.14 MiB | 52.02 MiB (−5.7%) |
+
+- 빌드 #5가 5단계 완주, 전체 5분 3초, `jarsigner -verify` = `jar verified`
+- 상세 배경·트러블슈팅·개선 기록은 `CI.md`
+
 ### Task 16 — 최적화와 QA
 
-상태: 1차 완료 · 실기기 빌드 검증 대기
+상태: 완료 (용량 실측 반영) · 실기기 측정 대기
 
 측정 먼저:
 
@@ -32,11 +60,11 @@
 - 신규 `ResourceBudgetTests` 3종: 코드가 이름으로 부르지 않는 Resources 텍스처 금지, 모든 Resources 텍스처의 명시적 ASTC_6x6 Android 포맷, 압축 환산 9MB 예산 상한
 - 신규 `SaveCompatibilityTests` 14종: 저장 버전 1~12 각각이 `{"version":N}`만 남은 최악의 구버전 상태에서도 플레이 가능한 상태로 로드되는지, 음수·과대값 손상 저장의 정규화, `Normalize` 멱등성
 - 자산 삭제 후 장비·박물관 1440×3088 캡처와 스프라이트 누락 0건을 확인
-- **미검증**: 실제 AAB 용량 절감은 추정치다. 기본 검증 정책상 Android 빌드를 실행하지 않았으므로 서명 AAB 재빌드로 확인이 필요하다.
+- **실측 완료**: Jenkins 빌드 #5에서 서명 AAB를 생성해 확인했다. 55.14 MiB → 52.02 MiB로 3.12 MiB(−5.7%) 줄었다. 추정치 약 4MB보다 작은데, AAB가 이미 압축된 컨테이너라 ASTC 전환 효과가 그대로 반영되지 않은 것으로 보인다.
 
 남은 항목:
 
-- 서명 Release AAB 재빌드로 실제 용량(직전 57.82MB 대비) 확인
+- 50MiB 목표까지 2.02MiB 추가 감축
 - 실기기 프레임·발열·메모리 측정은 실기기 검증 승인 후 진행
 
 ### Task 14-3 — 중장기 성장과 세션 밸런싱
@@ -401,8 +429,8 @@ P3 검증:
 
 ## 다음 작업
 
-1. Task 16 잔여: 서명 AAB 재빌드로 실제 용량 확인, 실기기 프레임·발열 측정
-2. Jenkins Android AAB 빌드 자동화
+1. Task 17 운영 개선: SCM을 GitHub 원격으로 전환, 용량·시간 추이 시각화, `main` 자동 트리거와 알림
+2. Task 16 잔여: 50MiB 목표까지 2.02MiB 감축, 실기기 프레임·발열 측정
 3. Google Play 비공개 테스트와 업데이트 검증
 4. 출시 자료와 포트폴리오 문서 정리
 
