@@ -59,6 +59,20 @@ Play는 이미 사용한 `versionCode`의 업로드를 거부한다. `PocketForg
 `POCKETFORGE_VERSION_CODE`를 읽도록 되어 있고 파이프라인이 `BUILD_NUMBER`를 넣으므로
 빌드마다 값이 자동으로 올라간다. 환경변수가 없으면 체크인된 기본값을 쓰므로 로컬 빌드는 그대로다.
 
+## 로컬 Jenkins 실행 (개발 PC)
+
+서비스로 설치하지 않고 WAR로 띄운다. 관리자 권한이 필요 없고 되돌리기가 쉽다.
+
+```bat
+"C:\Program Files\Eclipse Adoptium\jdk-21.0.12.8-hotspot\bin\java.exe" -jar E:\Jenkins\jenkins.war --httpPort=8081
+```
+
+- **포트 8081을 쓴다.** 기본값 8080은 Unity MCP 브리지가 이미 점유하고 있어 그대로 쓰면 에디터 제어 연결이 끊긴다.
+- **Java 21이 필요하다.** Jenkins LTS는 Java 17을 더 이상 지원하지 않으므로 Unity 동봉 JDK(17)로는 기동하지 않는다. Temurin 21을 별도 설치했다.
+- Unity의 Android 빌드는 Preferences에 지정된 자체 JDK를 쓰므로 시스템 JDK 21과 무관하다.
+- `JENKINS_HOME`은 기본값 `C:\Users\<user>\.jenkins`다. 제거하려면 이 폴더와 `jenkins.war`만 지우면 된다.
+- 중지: 실행 중인 `java.exe` 프로세스를 종료한다. WAR 실행은 서비스가 아니므로 재부팅 후 자동으로 뜨지 않는다.
+
 ## 노드 요구사항
 
 - Windows 에이전트, Unity `6000.5.4f1` + Android Build Support
