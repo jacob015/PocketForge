@@ -73,6 +73,26 @@ Play는 이미 사용한 `versionCode`의 업로드를 거부한다. `PocketForg
 - `JENKINS_HOME`은 기본값 `C:\Users\<user>\.jenkins`다. 제거하려면 이 폴더와 `jenkins.war`만 지우면 된다.
 - 중지: 실행 중인 `java.exe` 프로세스를 종료한다. WAR 실행은 서비스가 아니므로 재부팅 후 자동으로 뜨지 않는다.
 
+### 로컬 저장소를 SCM으로 쓸 때
+
+빌드 #1은 체크아웃 단계에서 실패했다.
+
+```
+ERROR: Checkout of Git remote 'E:\Unity Projects\DrillProject' aborted because it
+references a local directory, which may be insecure.
+```
+
+Git 플러그인은 로컬 디렉터리를 원격으로 지정하는 것을 기본 차단한다. 공용 Jenkins에서는 잡 설정에
+임의 경로를 넣어 서버 파일을 읽어낼 수 있기 때문이다. 1인 로컬 인스턴스에서는 해당 위험이 없으므로
+기동 옵션으로 허용한다.
+
+```bat
+java -Dhudson.plugins.git.GitSCM.ALLOW_LOCAL_CHECKOUT=true -jar jenkins.war --httpPort=8081
+```
+
+원격 저장소(GitHub)를 SCM으로 쓰면 이 옵션은 필요 없다. 실제 원격을 쓰는 편이 CI 본래 목적에
+가까우므로, 커밋을 푸시하기 시작하면 잡의 `url`을 원격 주소로 바꾸고 이 옵션을 제거한다.
+
 ### 플러그인 설치가 실패할 때
 
 Jenkins 업데이트 센터에서 NUnit 플러그인을 받을 때 TLS 핸드셰이크가 리셋되는 경우가 있다.
@@ -122,3 +142,4 @@ Caused: java.io.IOException: Failed to download from
 | 2026-08-07 | Jenkins를 8081로 기동 | 기본 8080을 Unity MCP 브리지가 점유해 충돌 |
 | 2026-08-07 | Temurin JDK 21 도입 | Jenkins LTS가 Java 17 지원을 중단, Unity 동봉 JDK로는 기동 불가 |
 | 2026-08-07 | NUnit 플러그인 수동 설치 절차 문서화 | 업데이트 센터 다운로드가 TLS 리셋으로 반복 실패 |
+| 2026-08-07 | `ALLOW_LOCAL_CHECKOUT=true`로 기동 | 빌드 #1이 로컬 경로 SCM 차단으로 체크아웃 실패 |
