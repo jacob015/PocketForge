@@ -150,9 +150,13 @@ Caused: java.io.IOException: Failed to download from
 ## 현재 상태와 남은 작업
 
 - 파이프라인 정의, CI 진입점, 버전 주입은 저장소에 반영됐다.
-- 진입점의 판정 로직은 에디터에서 검증했다(카나리 타입 해석, 테스트 타입 45개 확인).
-- **미검증**: Jenkins 설치와 실제 파이프라인 실행. 개발 PC의 Unity 에디터가 프로젝트를
-  점유하고 있어 배치모드 실행을 확인하지 못했다. Jenkins 설치는 시스템 변경이므로 승인 후 진행한다.
+- Jenkins 2.568.2를 WAR로 기동하고 `PocketForge` 잡을 등록했다.
+- 빌드 #2에서 체크아웃 → Compile(Unity 임포트 약 2.5분) → EditMode 테스트 213개 실행까지
+  도달했고, 파이프라인이 실제 결함 1건을 검출했다.
+- **미검증**: 서명 AAB 스테이지. 일반 Pipeline 잡은 `BRANCH_NAME`이 없어 `branch 'main'` 조건이
+  걸리지 않으므로 아직 실행되지 않았다. 키스토어 자격증명 3종 등록 후 `BUILD_ANDROID` 파라미터로
+  확인해야 한다.
+- **미측정**: 빌드 시간 baseline. Library 캐시 재사용 전후 비교가 다음 개선 과제다.
 
 ## 개선 기록
 
