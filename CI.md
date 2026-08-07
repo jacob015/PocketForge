@@ -73,6 +73,28 @@ Play는 이미 사용한 `versionCode`의 업로드를 거부한다. `PocketForg
 - `JENKINS_HOME`은 기본값 `C:\Users\<user>\.jenkins`다. 제거하려면 이 폴더와 `jenkins.war`만 지우면 된다.
 - 중지: 실행 중인 `java.exe` 프로세스를 종료한다. WAR 실행은 서비스가 아니므로 재부팅 후 자동으로 뜨지 않는다.
 
+### 플러그인 설치가 실패할 때
+
+Jenkins 업데이트 센터에서 NUnit 플러그인을 받을 때 TLS 핸드셰이크가 리셋되는 경우가 있다.
+
+```
+java.net.SocketException: Connection reset
+Caused: java.io.IOException: Failed to download from
+  https://updates.jenkins.io/download/plugins/nunit/... → https://get.jenkins.io/plugins/nunit/...
+```
+
+같은 URL을 `curl`로 받으면 200이 떨어지므로 네트워크 문제가 아니라 Jenkins의 Java HTTP 클라이언트가
+미러 리다이렉트 체인에서 막히는 것이다. 우회 절차는 다음과 같다.
+
+1. `curl -sL -o nunit.hpi <플러그인 URL>`로 직접 받는다.
+2. 의존성을 먼저 확인한다. `unzip -p nunit.hpi META-INF/MANIFEST.MF`의 `Plugin-Dependencies`와
+   `Jenkins-Version`을 읽고, 이미 설치된 플러그인·Jenkins 버전이 이를 만족하는지 본다.
+   (NUnit 648은 `junit`, `commons-lang3-api`, `structs`를 요구하고 Jenkins 2.528.3 이상이 필요하다.)
+3. `%JENKINS_HOME%\plugins\nunit.jpi`로 복사한다.
+4. Jenkins를 재기동한다. 로드에 성공하면 `plugins\nunit\` 폴더로 압축이 풀린다.
+
+의존성 확인을 건너뛰고 파일만 넣으면 기동 시 조용히 로드에 실패하므로 2번을 생략하지 않는다.
+
 ## 노드 요구사항
 
 - Windows 에이전트, Unity `6000.5.4f1` + Android Build Support
@@ -97,3 +119,6 @@ Play는 이미 사용한 `versionCode`의 업로드를 거부한다. `PocketForg
 | 2026-08-06 | 컴파일 검증을 테스트와 분리하고 stale 어셈블리 카나리 추가 | 로컬에서 두 번 발생한 위양성 초록불 |
 | 2026-08-06 | `versionCode`를 `BUILD_NUMBER`로 주입 | 수동 증가 시 Play 업로드 거부 위험 |
 | 2026-08-06 | AAB 용량을 측정해 50MiB 초과 시 UNSTABLE | 직전 수동 빌드 57.82MB로 목표 초과 |
+| 2026-08-07 | Jenkins를 8081로 기동 | 기본 8080을 Unity MCP 브리지가 점유해 충돌 |
+| 2026-08-07 | Temurin JDK 21 도입 | Jenkins LTS가 Java 17 지원을 중단, Unity 동봉 JDK로는 기동 불가 |
+| 2026-08-07 | NUnit 플러그인 수동 설치 절차 문서화 | 업데이트 센터 다운로드가 TLS 리셋으로 반복 실패 |
