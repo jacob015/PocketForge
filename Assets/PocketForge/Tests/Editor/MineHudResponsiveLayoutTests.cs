@@ -210,8 +210,15 @@ namespace PocketForge.Tests.Editor
                             continue;
                         }
 
+                        // With a graphics device the generator reports the size actually
+                        // rasterised. Under -nographics (CI) no glyphs are generated and
+                        // that value is meaningless, so fall back to the smallest size the
+                        // label is *configured* to allow — the invariant that holds
+                        // regardless of environment.
                         var resolved = label.resizeTextForBestFit
-                            ? label.cachedTextGenerator.fontSizeUsedForBestFit
+                            ? (HasGraphicsDevice
+                                ? label.cachedTextGenerator.fontSizeUsedForBestFit
+                                : label.resizeTextMinSize)
                             : label.fontSize;
                         if (resolved <= 0)
                         {
@@ -284,6 +291,9 @@ namespace PocketForge.Tests.Editor
                 blueprintCores = 6
             };
         }
+
+        private static bool HasGraphicsDevice =>
+            SystemInfo.graphicsDeviceType != UnityEngine.Rendering.GraphicsDeviceType.Null;
 
         private Vector2 DrawnSize(string name)
         {

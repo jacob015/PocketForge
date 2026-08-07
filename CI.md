@@ -73,6 +73,30 @@ Play는 이미 사용한 `versionCode`의 업로드를 거부한다. `PocketForg
 - `JENKINS_HOME`은 기본값 `C:\Users\<user>\.jenkins`다. 제거하려면 이 폴더와 `jenkins.war`만 지우면 된다.
 - 중지: 실행 중인 `java.exe` 프로세스를 종료한다. WAR 실행은 서비스가 아니므로 재부팅 후 자동으로 뜨지 않는다.
 
+### 파이프라인이 처음으로 잡아낸 결함
+
+빌드 #2는 체크아웃과 컴파일을 통과하고 테스트에서 종료 코드 2로 실패했다. 213개 중 212개 통과,
+1개 실패다. **로컬 에디터에서는 213개 전부 통과하던 상태였다.**
+
+```
+Korean MinerRankButton/MinerExperience resolved to 10.
+  Expected: greater than or equal to 18
+  But was:  10
+```
+
+원인은 두 가지였고, 둘 다 실재하는 문제였다.
+
+1. **실제 결함**: XP 라벨의 `resizeTextMinSize`가 12로, Task 15 P3에서 정한 가독성 하한 18보다
+   낮았다. 에디터에서는 문자열이 짧아 마침 18 이상으로 렌더돼 통과했을 뿐, 설정상으로는 12까지
+   줄어들 수 있는 상태였다. 하한을 `MinimumReadableFontSize`로 올려 해결했고,
+   `398 / 935` 기준 preferredWidth 73.5 < 박스 폭 110으로 잘리지 않음을 확인했다.
+2. **테스트의 환경 의존성**: CI는 `-nographics`로 실행하므로 글리프가 생성되지 않고
+   `fontSizeUsedForBestFit`가 의미 없는 값(설정 최솟값보다도 작은 10)을 돌려준다. 그래픽 장치가
+   있으면 실제 렌더 크기를, 없으면 라벨이 허용하는 최소 설정값을 검사하도록 바꿨다. 후자는 환경과
+   무관하게 성립하는 불변식이다.
+
+로컬에서 초록불이던 상태에서 파이프라인이 잠재 결함을 드러낸 첫 사례다.
+
 ### 로컬 저장소를 SCM으로 쓸 때
 
 빌드 #1은 체크아웃 단계에서 실패했다.
@@ -143,3 +167,4 @@ Caused: java.io.IOException: Failed to download from
 | 2026-08-07 | Temurin JDK 21 도입 | Jenkins LTS가 Java 17 지원을 중단, Unity 동봉 JDK로는 기동 불가 |
 | 2026-08-07 | NUnit 플러그인 수동 설치 절차 문서화 | 업데이트 센터 다운로드가 TLS 리셋으로 반복 실패 |
 | 2026-08-07 | `ALLOW_LOCAL_CHECKOUT=true`로 기동 | 빌드 #1이 로컬 경로 SCM 차단으로 체크아웃 실패 |
+| 2026-08-07 | XP 라벨 BestFit 최솟값 12→18, 폰트 검사를 환경 인지형으로 변경 | 빌드 #2가 로컬 초록불 상태의 잠재 결함을 검출 |

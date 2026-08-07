@@ -83,7 +83,9 @@ namespace PocketForge.Mining
             minerExperienceText.rectTransform.sizeDelta = new Vector2(110f, 30f);
             minerExperienceText.fontSize = 18;
             minerExperienceText.resizeTextForBestFit = true;
-            minerExperienceText.resizeTextMinSize = 12;
+            // Must not shrink below the shared readability floor; the compact XP string
+            // ("440 / 620") fits the 110 wide box at that size.
+            minerExperienceText.resizeTextMinSize = MinimumReadableFontSize;
             minerExperienceText.resizeTextMaxSize = 18;
             minerExperienceText.horizontalOverflow = HorizontalWrapMode.Wrap;
             var experienceTrack = minerExperienceProgress.transform.parent.GetComponent<RectTransform>();
