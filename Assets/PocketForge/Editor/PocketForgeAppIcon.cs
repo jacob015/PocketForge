@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEngine;
@@ -39,39 +38,34 @@ namespace PocketForge.EditorTools
         {
             var foreground = Load(AdaptiveForeground);
             var background = Load(AdaptiveBackground);
-
-            // Adaptive takes two layers, background first; the launcher masks them
-            // together. The single-layer kinds use the pre-composed art.
-            var layersByKind = new Dictionary<string, Texture2D[]>
-            {
-                ["Adaptive"] = new[] { background, foreground },
-                ["Round"] = new[] { Load(Round) },
-                ["Legacy"] = new[] { Load(Legacy) }
-            };
+            var round = Load(Round);
+            var legacy = Load(Legacy);
 
             var applied = new List<string>();
-            foreach (var kind in PlayerSettings.GetSupportedIconKinds(NamedBuildTarget.Android))
+            var kinds = PlayerSettings.GetSupportedIconKinds(NamedBuildTarget.Android);
+            foreach (var kind in kinds)
             {
-                if (!layersByKind.TryGetValue(kind.ToString(), out var layers))
-                {
-                    continue;
-                }
-
                 var icons = PlayerSettings.GetPlatformIcons(NamedBuildTarget.Android, kind);
                 if (icons == null || icons.Length == 0)
                 {
                     continue;
                 }
 
+                var name = kind.ToString();
                 foreach (var icon in icons)
                 {
-                    // Unity downscales each density slot from the source, so one layer
-                    // set covers every slot of the kind.
-                    icon.SetTextures(layers.Take(Math.Max(icon.maxLayerCount, 1)).ToArray());
+                    // Matching kinds by name missed everything but Legacy, so the layer
+                    // count decides instead: anything wanting two layers is the adaptive
+                    // pair, background first. Only the round variant still needs its name,
+                    // and it falls back to the same square art when the name differs.
+                    Texture2D[] layers = icon.maxLayerCount >= 2
+                        ? new[] { background, foreground }
+                        : new[] { name.IndexOf("Round", StringComparison.OrdinalIgnoreCase) >= 0 ? round : legacy };
+                    icon.SetTextures(layers);
                 }
 
                 PlayerSettings.SetPlatformIcons(NamedBuildTarget.Android, kind, icons);
-                applied.Add($"{kind}({icons.Length})");
+                applied.Add($"{name}[{icons.Length} slots, {icons[0].maxLayerCount} layers]");
             }
 
             if (applied.Count == 0)
@@ -80,7 +74,9 @@ namespace PocketForge.EditorTools
                     "No Android icon kinds were assigned; the Android platform module may be missing.");
             }
 
-            Debug.Log($"Pocket Forge Android icon kinds assigned: {string.Join(", ", applied)}.");
+            Debug.Log(
+                $"Pocket Forge Android icon kinds supported: {kinds.Length}. " +
+                $"Assigned: {string.Join(" | ", applied)}.");
         }
 
         private static Texture2D Load(string path)
