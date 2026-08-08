@@ -314,6 +314,37 @@ namespace PocketForge.Tests.Editor
         }
 
         [Test]
+        public void PowerPanel_NeverRepeatsItsOwnCaption()
+        {
+            var catalog = MiningContentCatalog.CreateRuntimeDefault();
+            try
+            {
+                var service = new MiningGameService(catalog);
+                var caption = FindRect("PowerLabel").GetComponent<Text>();
+                var recommendation = FindRect("RecommendedPower").GetComponent<Text>();
+
+                // Stage 2 of chapter 1: no boss in range, which is the very first screen
+                // a new player sees.
+                view.Render(service.CreateInitialState(new GameSaveData { stage = 2 }, 1f), service);
+                Assert.That(
+                    recommendation.text,
+                    Is.Empty,
+                    "With no boss recommendation the row must stay blank, not echo the caption.");
+
+                view.Render(service.CreateInitialState(new GameSaveData { stage = 10 }, 1f), service);
+                Assert.That(recommendation.text, Is.Not.Empty, "The boss stage must show a recommendation.");
+                Assert.That(
+                    recommendation.text,
+                    Is.Not.EqualTo(caption.text),
+                    "The recommendation must never render the same word as the caption above it.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(catalog);
+            }
+        }
+
+        [Test]
         public void MiningFeedback_UsesTextOnlyCasualPresentation()
         {
             var surface = FindRect("ActionFeedbackSurface").GetComponent<Image>();

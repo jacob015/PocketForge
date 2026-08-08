@@ -673,9 +673,12 @@ namespace PocketForge.Mining
             mineNameText.text = LanguageService.Get(GetMineNameKey(ore.Chapter.ContentId)).ToUpper();
             powerText.text = CompactNumberFormatter.Format(power.ActivePowerPerSecond);
             powerLabelText.text = LanguageService.Get("power").ToUpper();
+            // Before a boss is in range there is no recommendation to show. Falling back
+            // to the "power" label repeated the caption directly above the value, which
+            // is what a new player sees on their very first screen.
             recommendedPowerText.text = requiredPower > 0f
                 ? $"{LanguageService.Get("recommended").ToUpper()} {CompactNumberFormatter.Format(requiredPower)}"
-                : LanguageService.Get("power").ToUpper();
+                : string.Empty;
             bossWarningText.text = ore.IsBoss
                 ? $"{LanguageService.Get("boss").ToUpper()}\n{FormatTime(ore.BossTimeRemaining)}"
                 : bossReady
