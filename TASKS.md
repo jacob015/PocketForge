@@ -53,14 +53,23 @@
    - `docs/privacy-policy.html` (한국어·영어 병기). 게시 URL 확정과 GitHub Pages 활성화는 사용자 승인 대기
    - 문구는 추정이 아니라 실측 근거로 작성했다: Unity Analytics·충돌·성능 리포팅이 모두 `m_Enabled: 0`, 자체 코드에 네트워크 호출 0건, 저장은 `PlayerPrefs` 로컬 전용, 권한 목록은 설치된 APK를 `dumpsys package`로 읽어 확인
    - 실측 권한: `INTERNET`, `ACCESS_NETWORK_STATE`, `AD_ID`, `ACCESS_ADSERVICES_{AD_ID,TOPICS,ATTRIBUTION}`, `com.android.vending.BILLING`, `VIBRATE`, `WAKE_LOCK`, `FOREGROUND_SERVICE`
-3. Play Console 등록정보 — 데이터 보안 양식 답변(위 근거 기준): 수집·공유하는 데이터는 광고 SDK의 기기·광고 ID뿐이며 개발자 수집 항목 없음, 데이터 전송 암호화 O, 삭제 요청 경로는 앱 삭제
+3. **Play Console 등록정보 — 초안 완료 (2026-08-08)**
+   - `docs/store-listing.md`: 앱 이름·간단한 설명·자세한 설명(한/영), 데이터 보안 양식 답변, 콘텐츠 등급 예상 답변, 필요한 그래픽 자산과 남은 차단 요소
+   - 데이터 보안 답변은 수정사항 78의 실측 근거를 그대로 사용
 4. 내부 테스트 업로드
 5. Task 16 용량 잔여 감축, 실제 광고 ID 교체
 
-출시 전 필수 확인 (미해결):
+사용자 결정 사항 (2026-08-08):
 
-- **UMP(User Messaging Platform) 동의 미구현** — 코드에 `ConsentInformation`/`ConsentForm` 사용처가 없다. Google의 EU 사용자 동의 정책상 EEA·영국 사용자에게 광고를 게재하려면 Google 인증 CMP가 필요하므로, 해당 지역 배포 전에 구현하거나 배포 국가를 제한해야 한다. 외부 SDK 추가는 승인 대상이라 미착수.
+- 개인정보처리방침은 **GitHub Pages**에 게시한다. 저장소가 PUBLIC이라 무료로 가능하며 파일은 `docs/`에 준비돼 있다. 활성화는 계정 설정 변경이므로 사용자가 직접 수행한다.
+- 방침의 문의 이메일은 **개인 Gmail 대신 별도 주소로 교체**한다. 주소 확정 전까지 Pages를 켜지 않는다. 저장소가 PUBLIC이라 렌더링된 페이지가 색인되면 되돌리기 어렵다.
+- **배포 국가를 대한민국으로 제한**한다. UMP 미구현 상태에서 EEA·영국을 포함할 수 없으므로, 비공개 테스트 단계에서는 국가 제한으로 대응하고 정식 출시 시 재검토한다.
+
+출시 전 미해결:
+
+- **UMP(User Messaging Platform) 동의 미구현** — `ConsentInformation`/`ConsentForm` 사용처가 없다. 위 결정에 따라 배포 국가 제한으로 우회하며, EEA·영국 배포 시 구현이 필요하다. 외부 SDK 추가는 승인 대상.
 - 광고 단위 ID가 아직 Google 공식 테스트 ID(`ca-app-pub-3940256099942544/...`)다. 실 ID 교체 없이 출시하면 수익이 발생하지 않는다.
+- 앱 아이콘 512×512, 피처 그래픽 1024×500 미준비. 스크린샷은 기기 캡처 5장이 있으나 1440×3120(2.167:1)이 Play 종횡비 상한을 넘을 가능성이 높아 재구성이 필요하다.
 
 ### Task 16 — 최적화와 QA
 
