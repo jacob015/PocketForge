@@ -1219,16 +1219,15 @@ namespace PocketForge.Tests.Editor
             try
             {
                 var service = new MiningGameService(catalog);
-                var partial = service.CreateInitialState(new GameSaveData
+                // The runtime default catalog leaves `ores` empty, so the museum has a
+                // single fallback ore here. Start from nothing discovered rather than
+                // "one of several", which would already be a full museum.
+                var incomplete = service.CreateInitialState(new GameSaveData
                 {
                     minerLevel = 3,
-                    highestRewardedMinerLevel = 3,
-                    oreCollection = new[]
-                    {
-                        new OreCollectionData { contentId = "copper", minedCount = 10 }
-                    }
+                    highestRewardedMinerLevel = 3
                 }, 1f);
-                var presenter = new MineHudPresenter(view, service, partial);
+                var presenter = new MineHudPresenter(view, service, incomplete);
                 presenter.Render();
                 view.SetTheme(null, null, null, null, null);
                 FindRect("MuseumNavigation").GetComponent<Button>().onClick.Invoke();
@@ -1241,7 +1240,7 @@ namespace PocketForge.Tests.Editor
                 // count the museum actually rendered.
                 var oreCount = catalog.GetOreDefinitions().Count;
                 var total = oreCount.ToString();
-                Assert.That(progress.text, Is.EqualTo($"1 / {oreCount}"));
+                Assert.That(progress.text, Is.EqualTo($"0 / {oreCount}"));
                 Assert.That(icon.sprite, Is.Not.Null);
                 Assert.That(
                     icon.sprite.texture.name,
