@@ -1237,10 +1237,16 @@ namespace PocketForge.Tests.Editor
                     FindRect("MuseumNextRewardSurface"), "MuseumNextRewardProgress").GetComponent<Text>();
                 var icon = FindChildRect(
                     FindRect("MuseumNextRewardSurface"), "MuseumNextRewardIcon").GetComponent<Image>();
-                var total = progress.text.Split('/')[1].Trim();
-                Assert.That(progress.text, Does.StartWith("1 "));
+                // Spelled out rather than parsed from the label so a mismatch reports the
+                // count the museum actually rendered.
+                var oreCount = catalog.GetOreDefinitions().Count;
+                var total = oreCount.ToString();
+                Assert.That(progress.text, Is.EqualTo($"1 / {oreCount}"));
                 Assert.That(icon.sprite, Is.Not.Null);
-                Assert.That(icon.sprite.texture.name, Is.EqualTo("IconMuseumMysteryMineral"));
+                Assert.That(
+                    icon.sprite.texture.name,
+                    Is.EqualTo("IconMuseumMysteryMineral"),
+                    $"progress label reads \"{progress.text}\"");
 
                 var complete = service.CreateInitialState(new GameSaveData
                 {
@@ -1258,7 +1264,7 @@ namespace PocketForge.Tests.Editor
                 Assert.That(
                     icon.sprite.texture.name,
                     Is.Not.EqualTo("IconMuseumMysteryMineral"),
-                    "A full museum still advertises the unknown-mineral icon beside its own \"n / n\" count.");
+                    $"A full museum still advertises the unknown-mineral icon beside \"{progress.text}\".");
             }
             finally
             {
