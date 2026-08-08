@@ -558,6 +558,12 @@ namespace PocketForge.Mining
                 }
             }
             museumNextRewardText.text = $"{discoveredCount} / {states.Count}";
+            // The mystery mineral stands for what is still missing, so leaving it up
+            // next to a full "4 / 4" contradicts the count it sits beside.
+            museumNextRewardIcon.sprite = finalSkin?.Task13Simple(
+                discoveredCount >= states.Count
+                    ? "IconMuseumTab"
+                    : "IconMuseumMysteryMineral");
             collectionSummary.text = string.Format(
                 LanguageService.Get("museum_summary"),
                 multiplierBonus);
@@ -759,7 +765,6 @@ namespace PocketForge.Mining
                 museumNextRewardSurface,
                 finalSkin.Task13Sliced("UiTask13HorizontalPanelClean"),
                 Color.white);
-            museumNextRewardIcon.sprite = finalSkin.Task13Simple("IconMuseumMysteryMineral");
             museumNextRewardIcon.type = Image.Type.Simple;
             museumNextRewardIcon.preserveAspect = true;
             ApplyBorderedSprite(

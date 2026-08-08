@@ -1213,6 +1213,59 @@ namespace PocketForge.Tests.Editor
         }
 
         [Test]
+        public void MuseumProgressIcon_StopsShowingTheMysteryMineralOnceEveryOreIsFound()
+        {
+            var catalog = MiningContentCatalog.CreateRuntimeDefault();
+            try
+            {
+                var service = new MiningGameService(catalog);
+                var partial = service.CreateInitialState(new GameSaveData
+                {
+                    minerLevel = 3,
+                    highestRewardedMinerLevel = 3,
+                    oreCollection = new[]
+                    {
+                        new OreCollectionData { contentId = "copper", minedCount = 10 }
+                    }
+                }, 1f);
+                var presenter = new MineHudPresenter(view, service, partial);
+                presenter.Render();
+                view.SetTheme(null, null, null, null, null);
+                FindRect("MuseumNavigation").GetComponent<Button>().onClick.Invoke();
+
+                var progress = FindChildRect(
+                    FindRect("MuseumNextRewardSurface"), "MuseumNextRewardProgress").GetComponent<Text>();
+                var icon = FindChildRect(
+                    FindRect("MuseumNextRewardSurface"), "MuseumNextRewardIcon").GetComponent<Image>();
+                var total = progress.text.Split('/')[1].Trim();
+                Assert.That(progress.text, Does.StartWith("1 "));
+                var mystery = icon.sprite;
+                Assert.That(mystery, Is.Not.Null);
+
+                var complete = service.CreateInitialState(new GameSaveData
+                {
+                    minerLevel = 3,
+                    highestRewardedMinerLevel = 3,
+                    oreCollection = catalog.GetOreDefinitions()
+                        .Select(ore => new OreCollectionData { contentId = ore.ContentId, minedCount = 10 })
+                        .ToArray()
+                }, 1f);
+                new MineHudPresenter(view, service, complete).Render();
+                FindRect("MuseumNavigation").GetComponent<Button>().onClick.Invoke();
+
+                Assert.That(progress.text, Is.EqualTo($"{total} / {total}"));
+                Assert.That(
+                    icon.sprite,
+                    Is.Not.EqualTo(mystery),
+                    "A full museum still advertises the unknown-mineral icon beside its own \"n / n\" count.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(catalog);
+            }
+        }
+
+        [Test]
         public void MissionsNavigation_UsesFourSharedRowsAndFixedActionColumns()
         {
             var now = new DateTimeOffset(2026, 8, 3, 12, 0, 0, TimeSpan.Zero)
