@@ -176,11 +176,50 @@ pipeline {
     }
 
     post {
+        // A pipeline nobody looks at catches nothing, and polling means builds start
+        // without anyone watching. Notifications only fire on a change of state so a
+        // long green run stays quiet and a first failure is loud.
         failure {
-            echo "Pipeline failed at stage: ${env.STAGE_NAME}"
+            script {
+                notify('FAILED', "failed at stage ${env.STAGE_NAME}")
+            }
+        }
+        unstable {
+            script {
+                notify('UNSTABLE', 'tests or the size budget reported a problem')
+            }
+        }
+        fixed {
+            script {
+                notify('FIXED', 'back to green')
+            }
         }
         cleanup {
             bat 'if exist "%ARTIFACTS%\\build.log" del "%ARTIFACTS%\\build.log"'
         }
+    }
+}
+
+// Sends to whichever channel is configured on the node. Both are optional so the
+// pipeline still runs on a machine that has neither set up.
+void notify(String state, String detail) {
+    String subject = "PocketForge #${env.BUILD_NUMBER} ${state}"
+    String body = "${subject}\n${detail}\n${env.BUILD_URL}"
+    echo body
+
+    String hook = env.POCKETFORGE_NOTIFY_WEBHOOK
+    if (hook?.trim()) {
+        // Slack and Discord both accept a bare {"text": ...} payload. The JSON is
+        // assembled by hand because the Groovy sandbox rejects JsonOutput, the same
+        // way it rejects new File().
+        String escaped = body.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n')
+        writeFile file: 'Builds/ci/notify.json', text: "{\"text\":\"${escaped}\"}"
+        bat(script: "curl -s -X POST -H \"Content-Type: application/json\" --data @Builds\\ci\\notify.json \"${hook}\"",
+            returnStatus: true)
+    }
+
+    String to = env.POCKETFORGE_NOTIFY_EMAIL
+    if (to?.trim()) {
+        mail to: to, subject: subject, body: body
     }
 }
