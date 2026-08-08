@@ -45,9 +45,13 @@ pipeline {
     stages {
         stage('Prepare') {
             steps {
+                // Old AABs survive in the reused workspace and would be archived again
+                // under the current build, so every stale output goes first.
                 bat """
                     if not exist "%ARTIFACTS%" mkdir "%ARTIFACTS%"
                     if exist "%ARTIFACTS%\\editmode-results.xml" del "%ARTIFACTS%\\editmode-results.xml"
+                    if exist "%ARTIFACTS%\\*.aab" del /q "%ARTIFACTS%\\*.aab"
+                    if exist "%ARTIFACTS%\\size.csv" del "%ARTIFACTS%\\size.csv"
                 """
                 script {
                     if (!env.UNITY_EDITOR?.trim()) {
