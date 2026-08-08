@@ -1897,8 +1897,11 @@ namespace PocketForge.Mining
             var busy = iapState is IapState.Initializing or IapState.Purchasing or IapState.Restoring;
             removeAdsButton.interactable = !adsRemoved && iapState is IapState.Ready or IapState.Cancelled;
             restorePurchasesButton.interactable = !busy;
+            // Ownership is already stated on the button itself, so the status line is
+            // reserved for transient and error states and would otherwise print the same
+            // words twice.
             iapStatusText.gameObject.SetActive(
-                adsRemoved || iapState is IapState.Initializing or IapState.Purchasing or IapState.Restoring or IapState.Deferred or IapState.Failed);
+                iapState is IapState.Initializing or IapState.Purchasing or IapState.Restoring or IapState.Deferred or IapState.Failed);
             iapStatusText.text = adsRemoved
                 ? LanguageService.Get("iap_purchased").ToUpper()
                 : LanguageService.Get(iapState switch
