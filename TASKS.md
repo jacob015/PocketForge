@@ -73,7 +73,10 @@
 출시 전 미해결:
 
 - **UMP(User Messaging Platform) 동의 미구현** — `ConsentInformation`/`ConsentForm` 사용처가 없다. 위 결정에 따라 배포 국가 제한으로 우회하며, EEA·영국 배포 시 구현이 필요하다. 외부 SDK 추가는 승인 대상.
-- 광고 단위 ID가 아직 Google 공식 테스트 ID(`ca-app-pub-3940256099942544/...`)다. 실 ID 교체 없이 출시하면 수익이 발생하지 않는다.
+- **실 광고 ID 교체 완료 (2026-08-09)** — 앱 ID `ca-app-pub-9102736521930389~3693750260`, 보상형 `/6758897305`, 전면 `/3318345744`. iOS는 배포 대상이 아니라 테스트 ID 유지.
+  - 신규 `ReleaseAdIdentifierTests` 3종: 앱 ID와 광고 단위가 Google 테스트 퍼블리셔가 아닌지, 보상형·전면이 서로 다른 단위인지 검사. 두 placement가 같은 단위를 가리키는 실수는 광고가 재생되므로 스모크 테스트로 걸러지지 않는다. 상수가 `UNITY_ANDROID` 뒤에 있어 테스트 실행 시 정의되지 않을 수 있으므로 소스 텍스트로 검사한다.
+  - **미조치**: AdMob 테스트 기기 등록. 실 단위로 본인 기기에서 반복 클릭하면 무효 트래픽으로 계정이 정지될 수 있다.
+- **개인정보처리방침 게시 완료 (2026-08-09)** — `https://jacob015.github.io/PocketForge/privacy-policy.html` 200 OK 확인.
 - **인게임 런처 아이콘은 여전히 미설정** — `ProjectSettings.asset`의 `m_Icons`가 전부 비어 있어 현재 빌드는 Unity 기본 아이콘으로 나간다. Player Settings 지정은 Unity 에디터가 필요하다. Adaptive icon 전경·배경 레이어도 미제작.
 
 ### Task 16 — 최적화와 QA

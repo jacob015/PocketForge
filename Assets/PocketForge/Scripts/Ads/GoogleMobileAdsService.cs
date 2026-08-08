@@ -9,8 +9,11 @@ namespace PocketForge.Ads
     public sealed class GoogleMobileAdsService : IAdsService
     {
 #if UNITY_ANDROID
-        private const string RewardedAdUnitId = "ca-app-pub-3940256099942544/5224354917";
-        private const string InterstitialAdUnitId = "ca-app-pub-3940256099942544/1033173712";
+        // Live units for com.jacob015.pocketforge. Register the test device in AdMob
+        // before exercising these by hand; repeated self-clicks on live units are
+        // invalid traffic. iOS is not a release target, so it stays on test units.
+        private const string RewardedAdUnitId = "ca-app-pub-9102736521930389/6758897305";
+        private const string InterstitialAdUnitId = "ca-app-pub-9102736521930389/3318345744";
 #elif UNITY_IPHONE
         private const string RewardedAdUnitId = "ca-app-pub-3940256099942544/1712485313";
         private const string InterstitialAdUnitId = "ca-app-pub-3940256099942544/4411468910";
