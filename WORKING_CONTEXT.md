@@ -890,3 +890,14 @@
 - 확인된 정상 동작: FATAL·AndroidRuntime 오류 0건(유일한 Unity 오류는 기존에 확인된 Play Asset Delivery 클래스 탐색 로그로 무해). Task 13 텍스처 세트가 장비·박물관 모달에서 정상 렌더링되어 ASTC 재임포트 위험이 해소됐다. Task 14-1 강화 비용 6/18/35, Task 14-3 챕터 1 최초 클리어 보상(+290 Credits, +5 Gem, 설계도 코어 3개 = 챕터×3), 챕터 2 보스 권장 전투력 11이 조정값과 일치했다. 폰트 하한 규칙이 적용된 라벨이 실기기에서 모두 판독 가능했다.
 - 실기기에서만 드러난 결함 3건: (1) 전투력 패널이 보스 권장치가 없는 구간에서 캡션("전투력")을 값 위아래로 두 번 출력했다. 신규 플레이어의 첫 화면과 챕터 진입 직후가 정확히 이 구간이다. (2) IAP 상태 줄이 버튼에 이미 적힌 소유 상태를 한 번 더 출력했다. 상태 줄을 전이·오류 상태 전용으로 한정했다. (3) 박물관 진행 행의 아이콘이 스킨 적용 시점에 한 번만 배정돼, 도감을 전부 채워도 미발견 아이콘이 "4 / 4" 옆에 남았다. 배정을 `RenderMuseum`으로 옮겨 옆의 수치를 따라가게 했다.
 - 검증 방식: 세 결함 모두 회귀 테스트를 함께 추가하고 푸시했다. 폴링 트리거가 감지해 CI가 자동 검증했다.
+
+## 수정사항 78
+
+- 기록 시각: 2026-08-08 23:30:00
+- 작업 요청 요약: 스토어 업로드 준비 2단계. 개인정보처리방침을 작성한다.
+- 수집 항목 확정 근거: 템플릿을 채우지 않고 실제 동작을 확인해 작성했다. (1) `ProjectSettings/UnityConnectSettings.asset`에서 Unity Analytics·충돌 보고·성능 리포팅이 모두 `m_Enabled: 0`임을 확인했다. (2) `Assets/PocketForge/Scripts` 전체에 `UnityWebRequest`·`HttpClient`·`Socket` 사용처가 0건이다. (3) `SaveService`는 `PlayerPrefs`만 사용한다. (4) 권한은 선언 파일을 읽는 대신 기기에 설치된 APK를 `adb shell dumpsys package`로 조회해 병합 결과를 확인했다. AdMob이 자체 매니페스트로 병합하는 `AD_ID`와 Privacy Sandbox 권한 3종은 저장소 어디에도 문자열로 존재하지 않아 코드 검색만으로는 알 수 없었다.
+- 실측 권한 목록: `INTERNET`, `ACCESS_NETWORK_STATE`, `com.google.android.gms.permission.AD_ID`, `ACCESS_ADSERVICES_AD_ID`, `ACCESS_ADSERVICES_TOPICS`, `ACCESS_ADSERVICES_ATTRIBUTION`, `com.android.vending.BILLING`, `VIBRATE`, `WAKE_LOCK`, `FOREGROUND_SERVICE`. 위치·카메라·마이크·연락처·저장소 권한은 없다.
+- 작성한 내용: `docs/privacy-policy.html`에 한국어·영어를 병기했다. 개발자 직접 수집 0건, 기기 로컬 저장 항목, AdMob·Google Play 결제가 수집하는 항목, 권한별 용도표, 아동 관련 고지, 광고 ID 재설정·데이터 삭제 경로를 포함했다. 375px 뷰포트에서 가로 스크롤 0을 확인했다.
+- 발견한 출시 차단 요소 2건: (1) UMP 동의가 미구현이다. `ConsentInformation`·`ConsentForm` 사용처가 없어 EEA·영국 배포 시 Google EU 사용자 동의 정책을 만족하지 못한다. 외부 SDK 추가는 승인 대상이라 착수하지 않고 기록만 했다. (2) 광고 단위 ID가 여전히 Google 공식 테스트 ID다.
+- 미검증: 게시 URL과 GitHub Pages 활성화는 계정 설정 변경이라 사용자 승인 전까지 수행하지 않았다. 문서에 기재한 문의 이메일이 공개된다는 점도 사용자 확인이 필요하다.
+- 남은 작업: 방침 게시, Play Console 등록정보와 데이터 보안 양식 작성, 내부 테스트 업로드.

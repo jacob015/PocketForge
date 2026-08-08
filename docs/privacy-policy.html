@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pocket Forge 개인정보처리방침 / Privacy Policy</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    margin: 0 auto; padding: 2rem 1.25rem 4rem; max-width: 46rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif;
+    line-height: 1.7; color: #1c2230; background: #fff;
+  }
+  @media (prefers-color-scheme: dark) { body { color: #e6e9f0; background: #14171f; } }
+  h1 { font-size: 1.6rem; margin-bottom: .25rem; }
+  h2 { font-size: 1.2rem; margin-top: 2.5rem; border-bottom: 1px solid rgba(128,140,170,.35); padding-bottom: .3rem; }
+  h3 { font-size: 1rem; margin-top: 1.75rem; }
+  .meta { color: #6b7488; font-size: .9rem; margin-top: 0; }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: .95rem; }
+  th, td { text-align: left; padding: .5rem .6rem; border: 1px solid rgba(128,140,170,.35); vertical-align: top; }
+  th { background: rgba(128,140,170,.12); }
+  code { font-size: .9em; background: rgba(128,140,170,.15); padding: .1rem .3rem; border-radius: 3px; }
+  .wrap { overflow-x: auto; }
+  hr { margin: 3.5rem 0; border: 0; border-top: 1px solid rgba(128,140,170,.35); }
+  a { color: #2f6fd0; }
+  @media (prefers-color-scheme: dark) { a { color: #7fb0ff; } }
+</style>
+</head>
+<body>
+
+<h1>Pocket Forge 개인정보처리방침</h1>
+<p class="meta">시행일: 2026년 8월 8일 · 최종 수정: 2026년 8월 8일</p>
+
+<p>본 방침은 모바일 게임 <strong>Pocket Forge</strong>(Android 패키지 <code>com.jacob015.pocketforge</code>, 이하 "본 게임")에 적용됩니다. 개발자는 개인 개발자 jacob015입니다.</p>
+
+<h2>1. 요약</h2>
+<p>본 게임은 <strong>회원가입이 없고, 자체 서버가 없으며, 개발자가 운영하는 서버로 이용자 정보를 전송하지 않습니다.</strong> 게임 진행 데이터는 이용자의 기기 안에만 저장됩니다. 다만 광고 게재와 인앱 결제를 위해 Google이 제공하는 SDK를 사용하며, 이 과정에서 Google이 일부 정보를 수집합니다.</p>
+
+<h2>2. 개발자가 직접 수집하는 정보</h2>
+<p><strong>없습니다.</strong> 본 게임은 이름, 이메일, 전화번호, 위치, 연락처, 사진 등 어떠한 개인정보도 수집하거나 요구하지 않습니다.</p>
+
+<h2>3. 기기에 저장되는 정보</h2>
+<p>게임 진행 상태는 Android의 <code>PlayerPrefs</code>(앱 전용 저장 영역)에 JSON 형식으로 저장되며, 기기를 벗어나지 않습니다. 저장 항목은 다음과 같습니다.</p>
+<ul>
+  <li>재화(Credits, Gem, 설계도 코어) 보유량</li>
+  <li>진행도(스테이지, 완료한 챕터, 광부 레벨·경험치)</li>
+  <li>시설·연구·장비 강화 상태, 도감·업적·미션 진행도</li>
+  <li>광고 제거 상품 보유 여부, 마지막 저장 시각(오프라인 보상 계산용)</li>
+</ul>
+<p>이 데이터는 특정 개인을 식별하지 않으며, <strong>앱을 삭제하면 함께 삭제됩니다.</strong></p>
+
+<h2>4. 제3자 서비스가 수집하는 정보</h2>
+
+<h3>4-1. Google AdMob (광고)</h3>
+<p>본 게임은 보상형 광고와 전면 광고를 게재하기 위해 Google Mobile Ads SDK를 사용합니다. Google은 광고 게재·측정·부정행위 방지를 위해 다음과 같은 정보를 수집·처리할 수 있습니다.</p>
+<ul>
+  <li>광고 ID(Android Advertising ID)</li>
+  <li>IP 주소, 기기 및 운영체제 정보</li>
+  <li>광고 노출·클릭 등 상호작용 기록</li>
+</ul>
+<p>이를 위해 앱은 <code>com.google.android.gms.permission.AD_ID</code> 및 Android Privacy Sandbox 관련 권한(<code>ACCESS_ADSERVICES_AD_ID</code>, <code>ACCESS_ADSERVICES_TOPICS</code>, <code>ACCESS_ADSERVICES_ATTRIBUTION</code>)을 선언합니다.</p>
+<p>자세한 내용은 <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener">Google의 파트너 사이트·앱 데이터 이용 방침</a>을 참고하십시오.</p>
+
+<h3>4-2. Google Play 결제 (인앱 결제)</h3>
+<p>본 게임은 Unity IAP를 통해 Google Play 결제를 사용합니다. 결제 처리는 전적으로 Google Play가 수행하며, <strong>개발자와 본 게임은 카드번호 등 결제수단 정보에 접근하지 않습니다.</strong> 본 게임은 구매 권한 복원을 위해 Google Play가 제공하는 구매 내역(영수증·구매 토큰)만을 조회하며, 이는 <code>com.android.vending.BILLING</code> 권한을 통해 처리됩니다.</p>
+
+<h3>4-3. 분석 도구</h3>
+<p>본 게임은 <strong>Unity Analytics, 충돌 보고, 성능 리포팅을 모두 비활성화</strong>한 상태로 배포됩니다. 개발자에게 전송되는 이용 통계나 충돌 로그는 없습니다.</p>
+
+<h2>5. 앱이 선언하는 권한</h2>
+<div class="wrap">
+<table>
+  <tr><th>권한</th><th>용도</th></tr>
+  <tr><td><code>INTERNET</code>, <code>ACCESS_NETWORK_STATE</code></td><td>광고 로드, 결제 통신</td></tr>
+  <tr><td><code>AD_ID</code>, <code>ACCESS_ADSERVICES_*</code></td><td>광고 게재·측정 (Google AdMob)</td></tr>
+  <tr><td><code>com.android.vending.BILLING</code></td><td>인앱 결제 (Google Play)</td></tr>
+  <tr><td><code>VIBRATE</code></td><td>채굴 피드백 진동</td></tr>
+  <tr><td><code>WAKE_LOCK</code>, <code>FOREGROUND_SERVICE</code></td><td>광고 재생 중 화면 유지 (SDK 요구사항)</td></tr>
+</table>
+</div>
+<p>위치, 카메라, 마이크, 연락처, 저장소 접근 권한은 요구하지 않습니다.</p>
+
+<h2>6. 아동 관련 사항</h2>
+<p>본 게임은 만 13세 미만(대한민국 기준 만 14세 미만) 아동을 대상으로 하지 않으며, 아동으로부터 고의로 개인정보를 수집하지 않습니다. Google Play의 "가족" 프로그램 대상 앱이 아닙니다.</p>
+
+<h2>7. 이용자의 권리와 선택</h2>
+<ul>
+  <li><strong>광고 개인 최적화 해제</strong>: Android <em>설정 &gt; Google &gt; 광고</em>에서 광고 ID를 재설정하거나 삭제할 수 있습니다.</li>
+  <li><strong>게임 데이터 삭제</strong>: 앱을 삭제하거나 <em>설정 &gt; 애플리케이션 &gt; Pocket Forge &gt; 저장공간 &gt; 데이터 삭제</em>를 실행하면 기기에 저장된 모든 진행 데이터가 삭제됩니다.</li>
+  <li><strong>광고 제거</strong>: 인앱 상품 구매 시 강제 전면 광고가 표시되지 않습니다. 이용자가 직접 선택하는 보상형 광고는 유지됩니다.</li>
+  <li>개발자가 보유한 이용자 개인정보가 없으므로, 개발자에게 별도의 열람·정정·삭제를 요청할 대상 정보는 존재하지 않습니다. 제3자가 수집한 정보에 대해서는 해당 사업자의 방침을 따릅니다.</li>
+</ul>
+
+<h2>8. 방침 변경</h2>
+<p>본 방침이 변경되는 경우 이 페이지에 갱신된 내용과 시행일을 게시합니다. 중요한 변경은 앱 업데이트 설명을 통해서도 안내합니다.</p>
+
+<h2>9. 문의</h2>
+<p>개인정보 처리에 관한 문의: <a href="mailto:a01072637705@gmail.com">a01072637705@gmail.com</a></p>
+
+<hr>
+
+<h1>Pocket Forge Privacy Policy</h1>
+<p class="meta">Effective: August 8, 2026 · Last updated: August 8, 2026</p>
+
+<p>This policy applies to the mobile game <strong>Pocket Forge</strong> (Android package <code>com.jacob015.pocketforge</code>), published by independent developer jacob015.</p>
+
+<h2>1. Summary</h2>
+<p>Pocket Forge has <strong>no accounts, no developer-operated servers, and sends no user information to the developer.</strong> Your progress is stored only on your device. Google SDKs are used to serve ads and process purchases, and Google collects some information in that process.</p>
+
+<h2>2. Information the developer collects</h2>
+<p><strong>None.</strong> The game does not collect or request your name, email, phone number, location, contacts, or photos.</p>
+
+<h2>3. Information stored on your device</h2>
+<p>Game progress is written as JSON to Android <code>PlayerPrefs</code> (the app's private storage) and never leaves the device. It contains currency balances, stage and chapter progress, miner level and experience, facility/research/equipment levels, collection, achievement and mission progress, whether the ad-removal product is owned, and the last save timestamp used to compute offline rewards. None of this identifies you, and <strong>it is deleted when you uninstall the app.</strong></p>
+
+<h2>4. Information collected by third parties</h2>
+
+<h3>4-1. Google AdMob</h3>
+<p>The game shows rewarded and interstitial ads through the Google Mobile Ads SDK. Google may collect and process your advertising ID, IP address, device and OS information, and ad interaction events for ad delivery, measurement, and fraud prevention. The app therefore declares <code>com.google.android.gms.permission.AD_ID</code> and the Android Privacy Sandbox permissions <code>ACCESS_ADSERVICES_AD_ID</code>, <code>ACCESS_ADSERVICES_TOPICS</code>, and <code>ACCESS_ADSERVICES_ATTRIBUTION</code>. See <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener">How Google uses information from sites or apps that use our services</a>.</p>
+
+<h3>4-2. Google Play Billing</h3>
+<p>In-app purchases are handled through Unity IAP over Google Play Billing. Payment processing is performed entirely by Google Play; <strong>neither the developer nor the game has access to your card or payment method details.</strong> The game queries only your existing purchase records (receipts and purchase tokens) to restore entitlements, via the <code>com.android.vending.BILLING</code> permission.</p>
+
+<h3>4-3. Analytics</h3>
+<p>Unity Analytics, crash reporting, and performance reporting are <strong>all disabled</strong> in shipped builds. No usage statistics or crash logs are sent to the developer.</p>
+
+<h2>5. Permissions</h2>
+<div class="wrap">
+<table>
+  <tr><th>Permission</th><th>Purpose</th></tr>
+  <tr><td><code>INTERNET</code>, <code>ACCESS_NETWORK_STATE</code></td><td>Loading ads, billing communication</td></tr>
+  <tr><td><code>AD_ID</code>, <code>ACCESS_ADSERVICES_*</code></td><td>Ad delivery and measurement (Google AdMob)</td></tr>
+  <tr><td><code>com.android.vending.BILLING</code></td><td>In-app purchases (Google Play)</td></tr>
+  <tr><td><code>VIBRATE</code></td><td>Mining feedback haptics</td></tr>
+  <tr><td><code>WAKE_LOCK</code>, <code>FOREGROUND_SERVICE</code></td><td>Keeping the screen active during ad playback (SDK requirement)</td></tr>
+</table>
+</div>
+<p>The app does not request location, camera, microphone, contacts, or external storage access.</p>
+
+<h2>6. Children</h2>
+<p>Pocket Forge is not directed to children under 13 and does not knowingly collect personal information from them. It is not enrolled in Google Play's Families program.</p>
+
+<h2>7. Your choices</h2>
+<ul>
+  <li><strong>Opt out of ad personalization</strong>: reset or delete your advertising ID under Android <em>Settings &gt; Google &gt; Ads</em>.</li>
+  <li><strong>Delete game data</strong>: uninstall the app, or use <em>Settings &gt; Apps &gt; Pocket Forge &gt; Storage &gt; Clear data</em>.</li>
+  <li><strong>Remove ads</strong>: purchasing the ad-removal product stops forced interstitial ads. Optional rewarded ads remain available by your choice.</li>
+  <li>Because the developer holds no personal information about you, there is no developer-held data to access, correct, or delete. For information collected by third parties, their own policies apply.</li>
+</ul>
+
+<h2>8. Changes</h2>
+<p>Changes to this policy will be posted on this page with an updated effective date. Significant changes will also be noted in the app's update description.</p>
+
+<h2>9. Contact</h2>
+<p>Questions about privacy: <a href="mailto:a01072637705@gmail.com">a01072637705@gmail.com</a></p>
+
+</body>
+</html>

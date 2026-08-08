@@ -49,10 +49,18 @@
    - 밸런싱 실측 일치: 강화 비용 6/18/35, 챕터 1 최초 클리어 +290/+5/코어 3, 챕터 2 보스 권장 전투력 11
    - 실기기에서만 드러난 중복 라벨 3건 발견·수정: 전투력 패널 캡션 중복, IAP 상태 줄 중복, 박물관 진행 아이콘이 완성 후에도 미발견 아이콘 유지
    - 캡처: `Review/device/*.png`
-2. 개인정보처리방침 작성
-3. Play Console 등록정보
+2. **개인정보처리방침 작성 — 초안 완료 (2026-08-08)**
+   - `docs/privacy-policy.html` (한국어·영어 병기). 게시 URL 확정과 GitHub Pages 활성화는 사용자 승인 대기
+   - 문구는 추정이 아니라 실측 근거로 작성했다: Unity Analytics·충돌·성능 리포팅이 모두 `m_Enabled: 0`, 자체 코드에 네트워크 호출 0건, 저장은 `PlayerPrefs` 로컬 전용, 권한 목록은 설치된 APK를 `dumpsys package`로 읽어 확인
+   - 실측 권한: `INTERNET`, `ACCESS_NETWORK_STATE`, `AD_ID`, `ACCESS_ADSERVICES_{AD_ID,TOPICS,ATTRIBUTION}`, `com.android.vending.BILLING`, `VIBRATE`, `WAKE_LOCK`, `FOREGROUND_SERVICE`
+3. Play Console 등록정보 — 데이터 보안 양식 답변(위 근거 기준): 수집·공유하는 데이터는 광고 SDK의 기기·광고 ID뿐이며 개발자 수집 항목 없음, 데이터 전송 암호화 O, 삭제 요청 경로는 앱 삭제
 4. 내부 테스트 업로드
 5. Task 16 용량 잔여 감축, 실제 광고 ID 교체
+
+출시 전 필수 확인 (미해결):
+
+- **UMP(User Messaging Platform) 동의 미구현** — 코드에 `ConsentInformation`/`ConsentForm` 사용처가 없다. Google의 EU 사용자 동의 정책상 EEA·영국 사용자에게 광고를 게재하려면 Google 인증 CMP가 필요하므로, 해당 지역 배포 전에 구현하거나 배포 국가를 제한해야 한다. 외부 SDK 추가는 승인 대상이라 미착수.
+- 광고 단위 ID가 아직 Google 공식 테스트 ID(`ca-app-pub-3940256099942544/...`)다. 실 ID 교체 없이 출시하면 수익이 발생하지 않는다.
 
 ### Task 16 — 최적화와 QA
 
