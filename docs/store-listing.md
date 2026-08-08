@@ -97,10 +97,16 @@ Crack your first ore now.
 
 근거는 `WORKING_CONTEXT.md` 수정사항 78 (측정 결과). 개인정보처리방침은 `docs/privacy-policy.html`.
 
+목적·임시 처리 항목은 추측하지 않고 Google 공식 안내를 확인했다:
+[Google Play data disclosure (AdMob Unity)](https://developers.google.com/admob/unity/privacy/play-data-disclosure),
+[Provide information for Google Play's Data safety section](https://support.google.com/googleplay/android-developer/answer/10787469).
+
 | 항목 | 답변 |
 |---|---|
 | 데이터를 수집·공유합니까? | 예 (제3자 광고 SDK 한정) |
-| 기기 또는 기타 ID | **수집·공유함** — 광고 목적. AdMob이 광고 ID를 수집 |
+| 기기 또는 기타 ID | **수집됨 + 공유됨**. 목적 3개 전부: 광고 또는 마케팅 · 분석 · 부정 행위 방지·보안 및 규정 준수. AdMob이 광고 ID와 앱 세트 ID를 자동 수집한다 |
+| 위 데이터가 임시로 처리됩니까? | **아니요**. Play의 임시 처리는 메모리에만 두고 실시간 요청 처리에 필요한 시간 이상 보관하지 않는 경우다. 광고 ID는 개인 최적화·빈도 제한·전환 측정에 쓰이며 그 이상 보관된다. 임시 처리로 신고하면 등록정보에 표시되지 않으므로 잘못된 신고가 된다 |
+| 위 데이터 수집이 필수입니까? | **필수**. 앱 내에서 사용자가 끌 수 없다. 기기 설정의 광고 ID 재설정은 OS 수준이라 Play의 "사용자 선택 가능"에 해당하지 않는다 |
 | 앱 활동(앱 상호작용) | **공유함** — 광고 노출·클릭 측정 목적 |
 | 대략적 위치 | 수집 안 함 (IP 기반 처리는 AdMob 측 광고 게재 목적) |
 | 개인정보(이름·이메일 등) | 수집 안 함 |
@@ -109,7 +115,6 @@ Crack your first ore now.
 | 앱 성능(충돌·진단) | 수집 안 함 — Unity 충돌·성능 리포팅 비활성 |
 | 전송 중 데이터 암호화 | 예 |
 | 데이터 삭제 요청 경로 | 앱 삭제 또는 앱 데이터 삭제 (기기 로컬 저장만 존재) |
-| 데이터 수집이 선택사항입니까? | 아니요 (광고 게재에 필요) |
 
 ## 5. 콘텐츠 등급 설문 예상 답변
 
