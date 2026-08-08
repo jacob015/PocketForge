@@ -22,6 +22,12 @@ pipeline {
         disableConcurrentBuilds()
     }
 
+    // Polling stands in for a webhook because this controller is not reachable from
+    // GitHub. It only fetches refs; a build starts solely when main actually moved.
+    triggers {
+        pollSCM('H/10 * * * *')
+    }
+
     parameters {
         booleanParam(
             name: 'BUILD_ANDROID',
@@ -146,8 +152,20 @@ pipeline {
                         unstable("AAB is ${String.format('%.2f', mib)} MiB, over the 50 MiB budget.")
                     }
                     echo "AAB size: ${String.format('%.2f', mib)} MiB"
-                    writeFile file: 'Builds/ci/size.csv', text: "${env.BUILD_NUMBER},${bytes}\n"
+                    // Header + single row per build; the Plot plugin reads this format
+                    // and renders the size trend across builds.
+                    writeFile(
+                        file: 'Builds/ci/size.csv',
+                        text: "AAB MiB\n${String.format('%.2f', mib)}\n")
                 }
+                plot(
+                    csvFileName: 'plot-aab-size.csv',
+                    group: 'Build output',
+                    title: 'AAB size (MiB)',
+                    style: 'line',
+                    numBuilds: '30',
+                    yaxis: 'MiB',
+                    csvSeries: [[file: 'Builds/ci/size.csv', inclusionFlag: 'OFF', displayTableFlag: false]])
                 archiveArtifacts artifacts: 'Builds/ci/*.aab,Builds/ci/size.csv', fingerprint: true
             }
         }
