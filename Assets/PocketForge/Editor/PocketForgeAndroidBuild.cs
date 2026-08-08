@@ -78,6 +78,9 @@ namespace PocketForge.EditorTools
             PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, ApplicationIdentifier);
             PlayerSettings.bundleVersion = ResolveVersionName();
             PlayerSettings.Android.bundleVersionCode = ResolveVersionCode();
+            // Re-applied on every build so a fresh CI workspace, which has never had the
+            // editor UI opened against it, still produces the real launcher icon.
+            PocketForgeAppIcon.Apply();
         }
 
         /// <summary>
