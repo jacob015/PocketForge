@@ -12,6 +12,11 @@
 //   UNITY_EDITOR   full path to Unity.exe (for example
 //                  C:\Program Files\Unity\Hub\Editor\6000.5.4f1\Editor\Unity.exe)
 
+// Set by the packaging stage and read in post. A build that should have produced an
+// AAB but did not is now reported instead of passing quietly, which is how these
+// stages sat skipped from build #7 to #15 while every build still said SUCCESS.
+builtAndroid = false
+
 pipeline {
     agent any
 
@@ -32,7 +37,7 @@ pipeline {
         booleanParam(
             name: 'BUILD_ANDROID',
             defaultValue: false,
-            description: 'Also produce a signed release AAB. Tests always run.')
+            description: 'Force the signed AAB even off main. This job builds main, so it already packages by default.')
     }
 
     environment {
@@ -101,12 +106,7 @@ pipeline {
         }
 
         stage('Signed AAB') {
-            when {
-                anyOf {
-                    expression { return params.BUILD_ANDROID }
-                    branch 'main'
-                }
-            }
+            when { expression { return shouldBuildAndroid() } }
             steps {
                 withCredentials([
                     file(credentialsId: 'pocketforge-keystore', variable: 'POCKETFORGE_KEYSTORE_PATH'),
@@ -130,12 +130,7 @@ pipeline {
         }
 
         stage('Report size') {
-            when {
-                anyOf {
-                    expression { return params.BUILD_ANDROID }
-                    branch 'main'
-                }
-            }
+            when { expression { return shouldBuildAndroid() } }
             steps {
                 script {
                     def aab = "Builds/ci/PocketForge-${env.BUILD_NUMBER}.aab"
@@ -176,6 +171,13 @@ pipeline {
     }
 
     post {
+        always {
+            script {
+                if (shouldBuildAndroid() && !builtAndroid) {
+                    unstable('The AAB stage did not run even though this build should package one.')
+                }
+            }
+        }
         // A pipeline nobody looks at catches nothing, and polling means builds start
         // without anyone watching. Notifications only fire on a change of state so a
         // long green run stays quiet and a first failure is loud.
@@ -198,6 +200,20 @@ pipeline {
             bat 'if exist "%ARTIFACTS%\\build.log" del "%ARTIFACTS%\\build.log"'
         }
     }
+}
+
+// `when { branch 'main' }` only evaluates in a multibranch pipeline, where
+// BRANCH_NAME is set. This is a single-branch job, so BRANCH_NAME is null and the
+// packaging stages silently stopped running when the SCM moved to the GitHub
+// remote. Fall back to GIT_BRANCH, then to packaging by default, because every
+// build of this job is main.
+boolean shouldBuildAndroid() {
+    if (params.BUILD_ANDROID) {
+        return true
+    }
+
+    String branch = env.BRANCH_NAME ?: env.GIT_BRANCH
+    return !branch?.trim() || branch.endsWith('main')
 }
 
 // Sends to whichever channel is configured on the node. Both are optional so the
