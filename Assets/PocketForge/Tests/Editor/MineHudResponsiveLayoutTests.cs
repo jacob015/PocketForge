@@ -1239,8 +1239,8 @@ namespace PocketForge.Tests.Editor
                     FindRect("MuseumNextRewardSurface"), "MuseumNextRewardIcon").GetComponent<Image>();
                 var total = progress.text.Split('/')[1].Trim();
                 Assert.That(progress.text, Does.StartWith("1 "));
-                var mystery = icon.sprite;
-                Assert.That(mystery, Is.Not.Null);
+                Assert.That(icon.sprite, Is.Not.Null);
+                Assert.That(icon.sprite.texture.name, Is.EqualTo("IconMuseumMysteryMineral"));
 
                 var complete = service.CreateInitialState(new GameSaveData
                 {
@@ -1250,13 +1250,14 @@ namespace PocketForge.Tests.Editor
                         .Select(ore => new OreCollectionData { contentId = ore.ContentId, minedCount = 10 })
                         .ToArray()
                 }, 1f);
+                // The modal is already open, so re-rendering is enough. Clicking the
+                // navigation button again would toggle it shut instead.
                 new MineHudPresenter(view, service, complete).Render();
-                FindRect("MuseumNavigation").GetComponent<Button>().onClick.Invoke();
 
                 Assert.That(progress.text, Is.EqualTo($"{total} / {total}"));
                 Assert.That(
-                    icon.sprite,
-                    Is.Not.EqualTo(mystery),
+                    icon.sprite.texture.name,
+                    Is.Not.EqualTo("IconMuseumMysteryMineral"),
                     "A full museum still advertises the unknown-mineral icon beside its own \"n / n\" count.");
             }
             finally

@@ -559,10 +559,12 @@ namespace PocketForge.Mining
             }
             museumNextRewardText.text = $"{discoveredCount} / {states.Count}";
             // The mystery mineral stands for what is still missing, so leaving it up
-            // next to a full "4 / 4" contradicts the count it sits beside.
+            // next to a full "4 / 4" contradicts the count it sits beside. The museum
+            // icon is taken by the summary panel above, so completion reuses the badge
+            // rather than showing the same building twice in one modal.
             museumNextRewardIcon.sprite = finalSkin?.Task13Simple(
                 discoveredCount >= states.Count
-                    ? "IconMuseumTab"
+                    ? "BadgeAchievementComplete"
                     : "IconMuseumMysteryMineral");
             collectionSummary.text = string.Format(
                 LanguageService.Get("museum_summary"),
