@@ -136,14 +136,28 @@ Crack your first ore now.
 
 스크린샷 종횡비 근거: Play 공식 문서의 하드 제한은 "긴 변이 짧은 변의 2배를 넘을 수 없다"이다. 9:16은 추천작 선정 자격 기준의 *권장* 값이지 필수가 아니다. 원본 기기 캡처 1440×3120은 2.167:1로 하드 제한을 넘기 때문에, 아바타 위 배경만 있는 상단 240px을 잘라 1440×2880(정확히 2.0:1)으로 맞췄다. UI는 하나도 잘리지 않았다.
 
-아직 남은 것:
+인게임 런처 아이콘 (2026-08-08 해결):
 
-- **인게임 런처 아이콘 미설정** — `ProjectSettings.asset`의 `m_Icons`가 전부 `m_Textures: []`라 현재 빌드는 Unity 기본 아이콘으로 나간다. Player Settings에서 지정해야 하며 Unity 에디터가 필요하다.
-- **Adaptive icon 레이어 미제작** — Android 8 이상의 마스킹을 고려하면 전경(중앙 66% 안전 영역)과 배경을 분리한 레이어가 필요하다. 현재 자산은 배경이 포함된 정사각 이미지다.
+`Assets/PocketForge/Art/AppIcon/`의 Adaptive 전경·배경, Round, Legacy 레이어를 `PocketForgeAppIcon`이 `PlayerSettings` API로 지정한다. 릴리스 빌드가 매번 재적용하므로 CI 워크스페이스에서도 적용된다.
+
+1차 시도는 kind를 `"Adaptive"` 문자열로 매칭했는데 실제 이름이 `"Adaptive (API 26)"`·`"Round (API 25)"`여서 Legacy만 적용됐고, 기본값에 있던 adaptive 아이콘을 오히려 제거했다. `icon.maxLayerCount`로 판정하도록 고쳤다.
+
+빌드 #17 AAB 실측 (빌드 #6 기본값 → #17):
+
+| 리소스 | 기본값 | 적용 후 |
+|---|---|---|
+| `app_icon.png` | 1종 926 B | 6종 91,936 B |
+| `app_icon_round.png` | 없음 | 6종 91,591 B |
+| `ic_launcher_foreground.png` | 1종 1,612 B | 6종 157,352 B |
+| `ic_launcher_background.png` | 1종 101 B | 6종 167,290 B |
+| `mipmap-anydpi-v26` XML | 1개 | 2개 |
+
+미검증: 기기에 설치해 런처 아이콘을 눈으로 확인하는 단계는 기기 연결이 끊겨 수행하지 못했다.
 
 ## 7. 등록 전 남은 차단 요소
 
 1. 개인정보처리방침 게시 — 파일은 `docs/privacy-policy.html`에 준비 완료. 저장소 Settings > Pages에서 `main` / `/docs` 활성화 시 `https://jacob015.github.io/PocketForge/privacy-policy.html`
 2. 광고 단위 ID가 Google 공식 테스트 ID 상태 — 실 ID 교체 전에는 수익이 발생하지 않음
-3. 인게임 런처 아이콘 설정 (Unity 에디터 필요)
-4. `bundleVersion`이 `0.1.0` — 내부 테스트 시작 버전으로 확정할지 결정 필요
+3. `bundleVersion`이 `0.1.0` — 내부 테스트 시작 버전으로 확정할지 결정 필요
+
+업로드할 AAB: 빌드 #17의 `PocketForge-17.aab` (52.11 MiB, versionCode 17). 아이콘·박물관 수정·폰트 하한·밸런싱이 모두 포함된 첫 산출물이다. 50MiB 예산 초과로 UNSTABLE 표시가 붙지만 업로드에는 지장이 없다.
