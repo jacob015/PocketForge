@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using GoogleMobileAds.Api;
 using GoogleMobileAds.Common;
+using GoogleMobileAds.Ump.Api;
 using UnityEngine;
 
 namespace PocketForge.Ads
@@ -32,6 +33,42 @@ namespace PocketForge.Ads
         public RewardedAdState RewardedState { get; private set; } = RewardedAdState.Initializing;
         public event Action<RewardedAdState> RewardedStateChanged;
 
+        public bool IsPrivacyOptionsRequired
+        {
+            get
+            {
+                try
+                {
+                    return ConsentInformation.PrivacyOptionsRequirementStatus
+                        == PrivacyOptionsRequirementStatus.Required;
+                }
+                catch (Exception exception)
+                {
+                    // Reading consent state must never take the settings screen down.
+                    Debug.LogWarning($"Consent status unavailable: {exception.GetType().Name}");
+                    return false;
+                }
+            }
+        }
+
+        public void ShowPrivacyOptions()
+        {
+            try
+            {
+                ConsentForm.ShowPrivacyOptionsForm(showError =>
+                {
+                    if (showError != null)
+                    {
+                        Debug.LogWarning($"Privacy options form failed: {showError.Message}");
+                    }
+                });
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning($"Privacy options form failed: {exception.GetType().Name}");
+            }
+        }
+
         public void Initialize()
         {
             if (initializationStarted || disposed)
@@ -41,6 +78,81 @@ namespace PocketForge.Ads
 
             initializationStarted = true;
             SetRewardedState(RewardedAdState.Initializing);
+            try
+            {
+                RequestConsentThenInitialize();
+            }
+            catch (Exception exception)
+            {
+                Debug.LogWarning($"Google Mobile Ads consent request failed: {exception.GetType().Name}");
+                initializationStarted = false;
+                SetRewardedState(RewardedAdState.Failed);
+            }
+        }
+
+        /// <summary>
+        /// Gathers consent before any ad is requested.
+        ///
+        /// Google's EU user consent policy requires a certified consent screen before
+        /// serving personalised ads in the EEA and the UK. Outside those regions the
+        /// form is not required and this resolves immediately, so the flow costs
+        /// nothing for players elsewhere.
+        /// </summary>
+        private void RequestConsentThenInitialize()
+        {
+            ConsentInformation.Update(new ConsentRequestParameters(), consentError =>
+                RunOnMainThread(() =>
+                {
+                    if (disposed)
+                    {
+                        return;
+                    }
+
+                    if (consentError != null)
+                    {
+                        // A failed update still leaves the previous session's stored
+                        // consent usable, so the decision is left to CanRequestAds.
+                        Debug.LogWarning($"Consent update failed: {consentError.Message}");
+                        InitializeAdsIfConsentAllows();
+                        return;
+                    }
+
+                    ConsentForm.LoadAndShowConsentFormIfRequired(formError =>
+                        RunOnMainThread(() =>
+                        {
+                            if (disposed)
+                            {
+                                return;
+                            }
+
+                            if (formError != null)
+                            {
+                                Debug.LogWarning($"Consent form failed: {formError.Message}");
+                            }
+
+                            InitializeAdsIfConsentAllows();
+                        }));
+                }));
+        }
+
+        private void InitializeAdsIfConsentAllows()
+        {
+            if (!ConsentInformation.CanRequestAds())
+            {
+                // Declining is a valid outcome, not an error. Reporting Failed stops the
+                // reward button sitting on "initializing" forever, and mining is
+                // unaffected because rewarded ads are optional.
+                Debug.Log("Ads were not requested: the user has not granted consent.");
+                initializationStarted = false;
+                SetRewardedState(RewardedAdState.Failed);
+                return;
+            }
+
+            InitializeMobileAds();
+        }
+
+        private void InitializeMobileAds()
+        {
             try
             {
                 MobileAds.SetRequestConfiguration(new RequestConfiguration

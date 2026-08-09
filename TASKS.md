@@ -75,7 +75,10 @@
 
 출시 전 미해결:
 
-- **UMP(User Messaging Platform) 동의 미구현** — `ConsentInformation`/`ConsentForm` 사용처가 없다. 위 결정에 따라 배포 국가 제한으로 우회하며, EEA·영국 배포 시 구현이 필요하다. 외부 SDK 추가는 승인 대상.
+- **UMP 동의 게이트 구현 완료 (2026-08-09)** — `GoogleMobileAdsService`가 광고 초기화 전에 `ConsentInformation.Update` → `ConsentForm.LoadAndShowConsentFormIfRequired` → `CanRequestAds()` 순서를 거친다. EEA·영국 밖에서는 폼이 요구되지 않아 즉시 통과하므로 한국 사용자 동작은 그대로다. 동의 갱신 실패는 직전 세션의 저장된 동의로 판단을 넘기고, 동의 거부 시 보상 버튼이 `Initializing`에 멈추지 않도록 `Failed`로 전이한다. UMP SDK는 이미 `user-messaging-platform:4.0.0`으로 의존성에 있어 패키지 추가는 없었다.
+  - 신규 `ConsentGateTests` 4종: 동의 갱신·폼 표시 호출 존재, `CanRequestAds()`가 `MobileAds.Initialize`보다 앞에 오는 순서, 동의 재설정 진입점 존재, 거부 시 `Failed` 전이. 콜백 내부라 EditMode로 구동할 수 없어 소스 텍스트로 검사한다.
+- **동의 재설정 UI 진입점 미배치** — `IAdsService.IsPrivacyOptionsRequired` / `ShowPrivacyOptions()`는 구현했으나 설정 화면에 버튼을 넣지 못했다. 설정 카드(900×1344)가 이미 가득 차 있어(복원 행 하단 −1154, 닫기 버튼 상단 −1234) 새 행을 넣으려면 카드 크기 변경이 필요하고 Safe Area·화면비 회귀 범위가 커진다. EEA 배포를 실제로 켤 때 함께 처리한다.
+- **EEA 실제 동작 미검증** — 동의 폼은 EEA 지역에서만 표시되므로 한국 기기로는 확인할 수 없다. 배포 국가를 넓히기 전에 AdMob의 디버그 지역 설정(`DebugGeography`)으로 강제 확인이 필요하다.
 - **AdMob 테스트 기기 미등록** — 실 광고 단위로 본인 기기에서 반복 클릭하면 무효 트래픽으로 계정이 정지될 수 있다. 실 단위 적용 후 기기 테스트 전에 반드시 등록한다.
 - **런처 아이콘·이름 확인 완료 (2026-08-09)** — 빌드 #22를 기기에 설치해 squircle 마스킹된 adaptive icon을 육안 확인했다. 런처 이름은 빌드 #25 AAB의 `resources.pb`에서 4개 언어 문자열을 모두 확인했다.
 - **기기 언어별 런처 이름 육안 확인 미완** — 기기를 일본어·중국어로 바꿔 표시를 확인하지는 않았다.
