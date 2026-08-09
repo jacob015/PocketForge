@@ -966,3 +966,14 @@
 - 수정한 내용: 기본값을 `Pocket Forge`로 바꾸고, `IPostGenerateGradleAndroidProject`로 Gradle 내보내기 이후 `values-ko`·`values-ja`·`values-zh-rCN`에 `app_name`을 써 넣는다. Android가 더 구체적인 리소스 한정자를 고르므로 기기 언어에 맞는 이름이 표시된다. `.androidlib`을 만들지 않은 이유는 짧은 문자열 4개를 위해 namespace와 compileSdk를 가진 Gradle 모듈을 하나 더 들고 다니게 되기 때문이다. 문자열 이스케이프는 XML뿐 아니라 Android가 서식 문자로 취급하는 작은따옴표·큰따옴표까지 처리한다. 이스케이프하지 않은 작은따옴표는 aapt가 빌드를 실패시킨다.
 - 검증: 빌드 #25의 AAB에서 `base/resources.pb`를 직접 열어 네 문자열이 모두 존재함을 확인했다(`포켓 포지`, `ポケットフォージ`, `口袋熔炉`, `Pocket Forge`). AAB는 리소스를 protobuf로 컴파일해 담으므로 파일 목록이 아니라 리소스 테이블 바이트를 검사했다. 신규 `LauncherNameLocalizationTests` 5종으로 언어 누락·XML 생성·이스케이프·리소스 경로 판정을 검사한다.
 - 미검증: 기기 언어를 일본어·중국어로 바꿔 실제 런처 표시를 눈으로 확인하지는 않았다. 한국어 기기에서의 표시도 미확인이다.
+
+## 수정사항 84
+
+- 기록 시각: 2026-08-09 16:30:00
+- 작업 요청 요약: EEA 배포를 막고 있던 UMP 동의를 구현하고, CI 가용성 문제를 해결한다.
+- **UMP 동의 게이트**: `GoogleMobileAdsService.Initialize`가 광고 초기화 전에 `ConsentInformation.Update` → `ConsentForm.LoadAndShowConsentFormIfRequired` → `CanRequestAds()`를 거치도록 바꿨다. EEA·영국 밖에서는 폼이 요구되지 않아 즉시 통과하므로 현재 대상 사용자 동작은 변하지 않는다. 동의 갱신이 실패해도 오류로 끝내지 않고 `CanRequestAds()`로 판단을 넘긴다. 네트워크 문제로 직전 세션의 저장된 동의를 버리면 안 되기 때문이다. 동의 거부는 오류가 아니라 정당한 선택이므로 보상 버튼이 `Initializing`에 멈추지 않도록 `Failed`로 전이시킨다. UMP SDK는 이미 `user-messaging-platform:4.0.0`으로 의존성에 있어 패키지 추가는 없었다.
+- 신규 `ConsentGateTests` 4종. 동의 화면이 없어도 한국에서는 광고가 그냥 로드되므로 정책 위반을 통보받기 전까지 아무 신호가 없다. 그래서 호출 존재와 `CanRequestAds()`가 `MobileAds.Initialize`보다 앞에 오는 순서를 테스트로 고정했다. 콜백 내부라 EditMode로 구동할 수 없어 소스 텍스트로 검사한다.
+- **CI 가용성 결함 발견**: 사용자가 "진전이 없는 것 같다"고 지적해 확인하니 Jenkins가 꺼져 있었다. `java.exe` 프로세스 없음, 8081 응답 없음, 마지막 폴링이 UMP 커밋 이전인 `8d032bd`. WAR를 셸에서 직접 띄운 탓에 세션이 끝나면서 함께 종료된 것이다. 이 상태에서는 푸시가 쌓여도 빌드가 돌지 않고, 앞서 붙인 실패 알림도 보낼 주체가 죽어 있어 동작하지 않는다.
+- 대응: `E:\Jenkins\start-jenkins.cmd`와 시작프로그램의 `PocketForge-Jenkins.vbs`로 로그온 시 창 없이 기동하게 했다. `schtasks`는 관리자 권한이 필요해 거부됐고 WinSW 같은 외부 바이너리 다운로드는 피했다. 로그온 전에는 뜨지 않는 한계가 있으며, 진짜 서비스로 올리려면 관리자 권한으로 `schtasks /SC ONSTART /RU SYSTEM` 등록이 필요하다.
+- **두 번째 결함**: 재기동한 Jenkins에서 빌드 #27이 `UNITY_EDITOR is not set on this node`로 실패했다. 컴파일 오류가 아니라, 파이프라인이 Jenkins를 띄운 셸의 환경변수에 의존하고 있었던 것이다. 런처가 `UNITY_EDITOR`를 직접 설정하도록 바꿔 어느 셸에서 띄우든 동일하게 동작하게 했다. Prepare 단계의 가드가 원인을 이름으로 드러낸 덕분에 Unity 실행 단계의 모호한 오류로 번지지 않았다.
+- 미검증: 동의 폼은 EEA 지역에서만 표시되므로 한국 기기로 확인할 수 없다. 배포 국가를 넓히기 전에 `DebugGeography`로 강제 확인이 필요하다. 동의 재설정 UI 진입점도 설정 카드 공간 부족으로 미배치 상태다.
