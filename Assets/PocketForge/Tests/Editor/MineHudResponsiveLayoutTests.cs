@@ -580,6 +580,47 @@ namespace PocketForge.Tests.Editor
         }
 
         [Test]
+        public void PrivacyOptionsRow_OnlyAppearsWhenConsentRequiresIt_AndGrowsTheCard()
+        {
+            var card = FindRect("SettingsCard");
+            var row = FindRect("PrivacyOptionsRow");
+            var close = FindRect("CloseSettingsButton");
+
+            // Outside the EEA no entry point is due, so the card keeps its usual size
+            // instead of leaving a gap above the close button.
+            view.SetPrivacyOptionsAvailable(false);
+            Assert.That(row.gameObject.activeSelf, Is.False);
+            Assert.That(card.sizeDelta, Is.EqualTo(new Vector2(900f, 1344f)));
+
+            view.SetPrivacyOptionsAvailable(true);
+            Assert.That(row.gameObject.activeSelf, Is.True);
+            Assert.That(card.sizeDelta.y, Is.GreaterThan(1344f),
+                "The consent row was shown without making room for it.");
+
+            // The close button is anchored to the card's bottom, so growing the card has
+            // to carry it clear of the new row rather than under it.
+            AssertNoOverlap(row, close, "The consent row sits on top of the close button.");
+            AssertNoOverlap(row, FindRect("RestorePurchasesRow"),
+                "The consent row overlaps the restore purchases row.");
+        }
+
+        [Test]
+        public void ExpandedSettingsCard_StaysOnScreenAtTheShortestSupportedAspect()
+        {
+            view.SetPrivacyOptionsAvailable(true);
+            var card = FindRect("SettingsCard");
+
+            // Reference resolution is 1080x1920 matched on width, so a 16:9 screen gives
+            // the shortest canvas the card ever has to fit inside.
+            var halfHeight = card.sizeDelta.y * 0.5f;
+            var top = card.anchoredPosition.y + halfHeight;
+            var bottom = card.anchoredPosition.y - halfHeight;
+
+            Assert.That(top, Is.LessThan(960f), $"Settings card runs off the top: {top}");
+            Assert.That(bottom, Is.GreaterThan(-960f), $"Settings card runs off the bottom: {bottom}");
+        }
+
+        [Test]
         public void FinalSettingsChrome_UsesSimpleImagesAndSmallerIcons()
         {
             view.SetTheme(null, null, null, null, null);

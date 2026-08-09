@@ -30,6 +30,7 @@ namespace PocketForge.Ads
             this.interstitialPolicy = interstitialPolicy;
 
             view.BindRewardedAd(RequestRewardedAd);
+            view.BindPrivacyOptions(adsService.ShowPrivacyOptions);
             adsService.RewardedStateChanged += HandleRewardedStateChanged;
         }
 
@@ -134,6 +135,9 @@ namespace PocketForge.Ads
         private void HandleRewardedStateChanged(RewardedAdState state)
         {
             view.SetRewardedAdState(state, gameService.GetRewardedAdCredits(gameState));
+            // Whether a consent entry point is required is only known once consent has
+            // been gathered, which is the same moment the rewarded state first moves.
+            view.SetPrivacyOptionsAvailable(adsService.IsPrivacyOptionsRequired);
         }
     }
 }

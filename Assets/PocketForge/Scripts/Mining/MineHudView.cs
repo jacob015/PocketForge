@@ -22,6 +22,11 @@ namespace PocketForge.Mining
         // canvas; below this the text stops being comfortably readable on a phone.
         public const int MinimumReadableFontSize = 18;
 
+        private const float SettingsCardWidth = 900f;
+        private const float SettingsCardHeight = 1344f;
+        // 140 more units clears the consent row without pushing the card off a 16:9 screen.
+        private const float ExpandedSettingsCardHeight = 1484f;
+
         // Matches the recessed interior of 12_OreHealthFrame (908x110 art px drawn at
         // 86/174 scale inside the 560x86 rect) so the fill never paints over the rim.
         private const float OreProgressWidth = 449f;
@@ -97,6 +102,9 @@ namespace PocketForge.Mining
         private Button restorePurchasesButton;
         private Button closeSettingsButton;
         private Image settingsCard;
+        private Image privacyOptionsRow;
+        private Image privacyOptionsIcon;
+        private Button privacyOptionsButton;
         private Image settingsTitleSurface;
         private Image musicSettingIcon;
         private Image soundSettingIcon;
@@ -254,6 +262,31 @@ namespace PocketForge.Mining
         {
             removeAdsButton.onClick.AddListener(() => purchaseRemoveAdsAction());
             restorePurchasesButton.onClick.AddListener(() => restorePurchasesAction());
+        }
+
+        public void BindPrivacyOptions(Action showPrivacyOptionsAction)
+        {
+            privacyOptionsButton.onClick.AddListener(() => showPrivacyOptionsAction());
+        }
+
+        /// <summary>
+        /// Shows the ad consent entry point, growing the card to make room. The card is
+        /// sized back down when it is not required so players outside the EEA do not see
+        /// an empty gap above the close button.
+        /// </summary>
+        public void SetPrivacyOptionsAvailable(bool required)
+        {
+            if (privacyOptionsRow == null)
+            {
+                return;
+            }
+
+            privacyOptionsRow.gameObject.SetActive(required);
+            privacyOptionsRow.GetComponentInChildren<Text>(true).text =
+                LanguageService.Get("privacy_options").ToUpper();
+            settingsCard.rectTransform.sizeDelta = new Vector2(
+                SettingsCardWidth,
+                required ? ExpandedSettingsCardHeight : SettingsCardHeight);
         }
 
         public void SetTheme(Texture upgradeIcons, Texture2D uiKit, Texture2D upgradeButton, Texture2D feedbackPanel, Texture2D hudIcons)
@@ -1673,7 +1706,7 @@ namespace PocketForge.Mining
         {
             var backdrop = CreatePanel("SettingsBackdrop", transform, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero, new Color(0.005f, 0.012f, 0.04f, 0.78f));
             settingsPanel = backdrop.gameObject;
-            settingsCard = CreatePanel("SettingsCard", settingsPanel.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 53f), new Vector2(900f, 1344f), new Color(0.035f, 0.075f, 0.15f, 0.99f));
+            settingsCard = CreatePanel("SettingsCard", settingsPanel.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 53f), new Vector2(SettingsCardWidth, SettingsCardHeight), new Color(0.035f, 0.075f, 0.15f, 0.99f));
             var card = settingsCard;
             settingsTitleSurface = CreatePanel("SettingsTitleSurface", card.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -48f), new Vector2(560f, 130f), Color.white);
             settingsTitle = CreateText("SettingsTitle", settingsTitleSurface.transform, Vector2.zero, Vector2.one, Vector2.zero, new Vector2(-38f, -14f), 46, TextAnchor.MiddleCenter);
@@ -1715,6 +1748,18 @@ namespace PocketForge.Mining
             restorePurchasesIcon = CreateSimpleImage("RestorePurchasesIcon", restoreWell.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(60f, 60f), Color.white);
             restorePurchasesButton = CreateButton("RestorePurchasesButton", restoreRow.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(66f, 0f), new Vector2(560f, 78f), new Color(0.12f, 0.2f, 0.32f));
             restorePurchasesButton.GetComponentInChildren<Text>().fontSize = 21;
+            // Google requires a way back into the ad consent screen wherever consent was
+            // gathered. It is only required in the EEA and the UK, so the row stays
+            // hidden elsewhere rather than leaving a dead control on every device.
+            privacyOptionsRow = CreatePanel("PrivacyOptionsRow", card.transform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -1222f), new Vector2(720f, 104f), new Color(0.055f, 0.12f, 0.23f, 0.98f));
+            settingsControlSurfaces.Add(privacyOptionsRow);
+            var privacyWell = CreatePanel("IconWell", privacyOptionsRow.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-308f, 0f), new Vector2(82f, 82f), Color.white);
+            settingsIconWells.Add(privacyWell);
+            privacyOptionsIcon = CreateSimpleImage("PrivacyOptionsIcon", privacyWell.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(60f, 60f), Color.white);
+            privacyOptionsButton = CreateButton("PrivacyOptionsButton", privacyOptionsRow.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(66f, 0f), new Vector2(560f, 78f), new Color(0.12f, 0.2f, 0.32f));
+            privacyOptionsButton.GetComponentInChildren<Text>().fontSize = 21;
+            privacyOptionsRow.gameObject.SetActive(false);
+
             closeSettingsButton = CreateButton("CloseSettingsButton", card.transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 66f), new Vector2(326f, 88f), new Color(0.95f, 0.47f, 0.08f));
             closeSettingsButton.GetComponentInChildren<Text>().gameObject.SetActive(false);
             closeSettingsIcon = CreateSimpleImage("CloseIcon", closeSettingsButton.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(64f, 64f), Color.white);
